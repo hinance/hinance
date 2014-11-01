@@ -26,7 +26,6 @@ pacman -S --noconfirm --needed \
     python2-dateutil python2-feedparser python2-flake8 python2-gdata \
     python2-irc python2-lxml python2-mechanize python2-pillow \
     python2-requests python2-yaml xorg-server-xvfb
-paccache -rk0
 
 #
 # AUR mirror
@@ -52,6 +51,12 @@ cd /setup/$APP/aur/python2-selenium
 patch PKGBUILD /setup/$APP/python2-selenium/PKGBUILD.patch
 makepkg -s --asroot --noconfirm
 pacman -U --noconfirm python2-selenium-2.43.0-1-x86_64.pkg.tar.xz
+
+#
+# Removing unneeded stuff.
+#
+
+paccache -rk0
 
 #
 # Checking out Weboob repo.
