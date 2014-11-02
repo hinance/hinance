@@ -40,12 +40,11 @@ subnets = get_all('subnets', {'tag:Name': tag()})
 gates = get_all('internet_gateways', {'tag:Name': tag()})
 key_pairs = get_all('key_pairs', {'key-name': tag()})
 sgroups = get_all('security_groups', {'group-name': tag()})
-irsvs = get_all('instances', {'tag:Name': tag()})
 addrs = get_all('addresses')
 
 def insts(conn):
-    return [i for r in irsvs(conn) for i in r.instances
-            if i.state != 'terminated']
+    return [i for r in get_all('instances', {'tag:Name': tag()})(conn)
+              for i in r.instances if i.state != 'terminated']
 
 def rtabs(conn):
     return [r for v in vpcs(conn) for r in conn.get_all_route_tables(
@@ -101,7 +100,7 @@ def create():
         while not addrs(conn):
             logging.info('Creating public IP address...')
             sleep(SLEEP)
-    if not irsvs(conn):
+    if not insts(conn):
         conn.run_instances(IMAGE, key_name=key_pairs(conn)[0].name,
             security_group_ids=[sgroups(conn)[0].id],
             subnet_id=subnets(conn)[0].id, instance_type=INSTANCE_TYPE
