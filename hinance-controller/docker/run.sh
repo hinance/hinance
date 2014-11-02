@@ -48,6 +48,7 @@ create_stack() {
     aws cloudformation create-stack --stack-name $STAMP \
       --template-body file:///usr/share/$APP/repo/$APP/docker/cloud.json \
       --parameters ParameterKey=appVersion,ParameterValue="$APP_VERSION" \
+                   ParameterKey=keyName,ParameterValue="$STAMP" \
       >/dev/null
     while true ; do
       get_stack_status
@@ -69,6 +70,7 @@ aws ec2 delete-key-pair --key-name $STAMP
 aws ec2 create-key-pair --key-name $STAMP | python2 -c \
   'import json,sys; print json.loads(sys.stdin.read())["KeyMaterial"]' \
   > /var/lib/$APP/$STAMP.pem
+chmod 600 /var/lib/$APP/$STAMP.pem
 
 delete_stack
 create_stack

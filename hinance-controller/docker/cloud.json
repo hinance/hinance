@@ -1,7 +1,8 @@
 {
   "AWSTemplateFormatVersion" : "2010-09-09",
   "Parameters" : {
-    "appVersion": {"Type": "String"}
+    "appVersion": {"Type": "String"},
+    "keyName": {"Type": "String"}
   },
   "Resources" : {
     "myVPC": {
@@ -73,7 +74,8 @@
         "InstanceType" : "t2.medium",
         "ImageId" : "ami-b66ed3de",
         "SecurityGroupIds": [{"Ref": "mySecurityGroup"}],
-        "SubnetId": {"Ref": "mySubnet"}
+        "SubnetId": {"Ref": "mySubnet"},
+        "KeyName": {"Ref": "keyName"}
       }
     },
     "myAddress" : {
