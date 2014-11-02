@@ -3,61 +3,78 @@
 set -e
 
 APP='hinance-controller'
-APPW='hinance-worker'
 
 . /usr/share/$APP/repo/config.sh
 . /etc/$APP/config.sh
 
-export AWS_KEY
-export AWS_SECRET
-export APP_VERSION
+STAMP="$APP-$APP_VERSION"
 
-get_ip() { IP=$(cat /var/lib/$APP/ip.txt) ; }
+export AWS_ACCESS_KEY_ID
+export AWS_SECRET_ACCESS_KEY
+export AWS_DEFAULT_REGION
 
-run_remote() { get_ip ; ssh -i /var/lib/$APP/key.pem ubuntu@$IP "$@" ; }
-
-wait_remote() {
-    while run_remote ls 2>&1|grep \
-        "Connection closed\|Connection reset\|Connection refused" \
-    >/dev/null ; do
-        echo "Connecting to the instance."
-        sleep 1
-    done
+function log {
+  echo "[$(date +"%Y-%m-%d %H:%M:%S")]: $@"
 }
 
-cloud_cmd() {
-    rm -rf /var/lib/$APP/success
-    python2 -B /usr/share/$APP/repo/$APP/docker/cloud.py -l info "$@" &
-    local PID=$!
-    for run in {1..20} ; do
-        if [ ! -e /proc/$PID ] ; then break ; fi
-        sleep 10
-    done
-    if [ -e /var/lib/$APP/success ] ; then break ; fi
-    set +e ; kill -9 $PID ; set -e
+get_stack_info() {
+  set +e
+  INFO=$(aws cloudformation describe-stacks --stack-name $STAMP 2>/dev/null)
+  set -e
 }
 
-while true ; do
-    while true ; do cloud_cmd --delete ; done
-    cloud_cmd --run
-done
+get_stack_status() {
+  get_stack_info
+  if [ "$INFO" != "" ] ; then
+    STATUS=$(python2 -c 'import json,sys; print json.loads(sys.stdin.read()) \
+                         ["Stacks"][0]["StackStatus"]' <<< "$INFO")
+  else
+    STATUS=
+  fi
+}
 
-get_ip
-echo "Instance IP is: $IP"
-chmod 600 /var/lib/$APP/key.pem
+delete_stack() {
+  aws cloudformation delete-stack --stack-name $STAMP
+  while true ; do
+    get_stack_status
+    log "Deleting stack. Current status: $STATUS"
+    if [ "$STATUS" == "" ] ; then break ; fi 
+    sleep 10
+  done
+}
 
-wait_remote
+create_stack() {
+  while true ; do
+    aws cloudformation create-stack --stack-name $STAMP \
+      --template-body file:///usr/share/$APP/repo/$APP/docker/cloud.json \
+      --parameters ParameterKey=AppVersion,ParameterValue="$APP_VERSION" \
+      >/dev/null
+    while true ; do
+      get_stack_status
+      log "Creating stack. Current status: $STATUS"
+      if [[ $STATUS=='CREATE_COMPLETE'||$STATUS=='ROLLBACK_COMPLETE' ]] ; then
+        break ;
+      fi
+      sleep 10
+    done
+    if [ $STATUS == 'CREATE_COMPLETE' ] ; then break ; fi
+    delete_stack
+  done
+}
 
-scp -i /var/lib/$APP/key.pem \
-    /usr/share/$APP/repo/$APP/docker/setup_remote.sh \
-    ubuntu@$IP:~/
+aws ec2 delete-key-pair --key-name $STAMP
+aws ec2 create-key-pair --key-name $STAMP | python2 -c \
+  'import json,sys; print json.loads(sys.stdin.read())["KeyMaterial"]' \
+  > /var/lib/$APP/$STAMP.pem
 
-run_remote ./setup_remote.sh $APP_VERSION
+delete_stack
+create_stack
 
-while true ; do cloud_cmd --stop ; done
-while true ; do cloud_cmd --run ; done
+get_stack_info
+log "Info: $INFO"
 
-wait_remote
-run_remote sudo /usr/share/$APPW/repo/$APPW/run.sh
+delete_stack
+aws ec2 delete-key-pair --key-name $STAMP
 
-while true ; do cloud_cmd --delete ; done
+get_stack_info
+log "Info: $INFO"

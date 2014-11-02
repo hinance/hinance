@@ -1,0 +1,21 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+  "Parameters" : {
+    "AppVersion" : {
+      "Type" : "String"
+    }
+  },
+  "Resources" : {
+    "MyEC2Instance" : {
+      "Type" : "AWS::EC2::Instance",
+      "Properties" : {
+        "ImageId" : "ami-2f726546"
+      }
+    }
+  },
+  "Outputs" : {
+    "MyInstanceId" : {
+      "Value" : { "Ref" : "MyEC2Instance" }
+    }
+  }
+}
