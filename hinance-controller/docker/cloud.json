@@ -1,22 +1,82 @@
 {
   "AWSTemplateFormatVersion" : "2010-09-09",
   "Parameters" : {
-    "AppVersion" : {
-      "Type" : "String"
-    }
+    "appVersion": {"Type": "String"}
   },
   "Resources" : {
-    "MyEC2Instance" : {
+    "myVPC": {
+      "Type" : "AWS::EC2::VPC",
+      "Properties": {"CidrBlock": "10.0.0.0/16"}
+    },
+    "myGateway" : {
+      "Type" : "AWS::EC2::InternetGateway"
+    },
+    "myGateAttach" : {
+      "Type" : "AWS::EC2::VPCGatewayAttachment",
+      "DependsOn": ["myVPC", "myGateway"],
+      "Properties" : {
+        "VpcId": {"Ref": "myVPC" },
+        "InternetGatewayId": {"Ref": "myGateway"}
+      }
+    },
+    "mySubnet": {
+      "Type" : "AWS::EC2::Subnet",
+      "DependsOn": "myVPC",
+      "Properties": {"CidrBlock": "10.0.0.0/16", "VpcId": {"Ref": "myVPC"}}
+    },
+    "myRouteTable": {
+      "Type" : "AWS::EC2::RouteTable",
+      "DependsOn": "myVPC",
+      "Properties": {"VpcId" : {"Ref": "myVPC"}}
+    },
+    "myRTA" : {
+      "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      "DependsOn": ["myRouteTable", "mySubnet"],
+      "Properties" : {
+        "SubnetId": {"Ref": "mySubnet"},
+        "RouteTableId": {"Ref": "myRouteTable"}
+      }
+    },
+    "myRoute" : {
+      "Type" : "AWS::EC2::Route",
+      "DependsOn" : ["myGateway", "myRouteTable"],
+      "Properties" : {
+        "RouteTableId" : { "Ref" : "myRouteTable" },
+        "DestinationCidrBlock" : "0.0.0.0/0",
+        "GatewayId" : { "Ref" : "myGateway" }
+      }
+    },
+    "mySecurityGroup" : {
+      "Type" : "AWS::EC2::SecurityGroup",
+      "DependsOn": "myVPC",
+      "Properties" : {
+        "VpcId" : {"Ref" : "myVPC"},
+        "SecurityGroupIngress" : [{
+          "IpProtocol" : "-1",
+          "FromPort" : "0",
+          "ToPort" : "65535",
+          "CidrIp" : "0.0.0.0/0"
+        }],
+        "SecurityGroupEgress" : [{
+          "IpProtocol" : "-1",
+          "FromPort" : "0",
+          "ToPort" : "65535",
+          "CidrIp" : "0.0.0.0/0"
+        }]
+      }
+    },
+    "myInstance" : {
       "Type" : "AWS::EC2::Instance",
+      "DependsOn": ["mySecurityGroup", "mySubnet"],
       "Properties" : {
         "InstanceType" : "t2.medium",
-        "ImageId" : "ami-b66ed3de"
+        "ImageId" : "ami-b66ed3de",
+        "SecurityGroupIds": [{"Ref": "mySecurityGroup"}],
+        "SubnetId": {"Ref": "mySubnet"}
       }
     }
   },
   "Outputs" : {
-    "MyInstanceId" : {
-      "Value" : { "Ref" : "MyEC2Instance" }
-    }
+    "myInstanceId": {"Value": {"Ref": "myInstance"}}
   }
 }

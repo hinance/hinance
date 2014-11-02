@@ -47,11 +47,12 @@ create_stack() {
   while true ; do
     aws cloudformation create-stack --stack-name $STAMP \
       --template-body file:///usr/share/$APP/repo/$APP/docker/cloud.json \
-      --parameters ParameterKey=AppVersion,ParameterValue="$APP_VERSION" \
+      --parameters ParameterKey=appVersion,ParameterValue="$APP_VERSION" \
       >/dev/null
     while true ; do
       get_stack_status
       log "Creating stack. Current status: $STATUS"
+      echo $INFO
       if [[ "$STATUS" == 'CREATE_COMPLETE' \
          || "$STATUS" == 'ROLLBACK_COMPLETE' ]] ;
       then
