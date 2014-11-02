@@ -50,6 +50,7 @@
       "Type" : "AWS::EC2::SecurityGroup",
       "DependsOn": "myVPC",
       "Properties" : {
+        "GroupDescription": "My security group",
         "VpcId" : {"Ref" : "myVPC"},
         "SecurityGroupIngress" : [{
           "IpProtocol" : "-1",
@@ -74,9 +75,14 @@
         "SecurityGroupIds": [{"Ref": "mySecurityGroup"}],
         "SubnetId": {"Ref": "mySubnet"}
       }
+    },
+    "myAddress" : {
+      "Type" : "AWS::EC2::EIP",
+      "DependsOn": "myInstance",
+      "Properties": {"InstanceId": {"Ref": "myInstance"}, "Domain": "vpc"}
     }
   },
   "Outputs" : {
-    "myInstanceId": {"Value": {"Ref": "myInstance"}}
+    "myInstanceIp": {"Value": {"Ref": "myAddress"}}
   }
 }
