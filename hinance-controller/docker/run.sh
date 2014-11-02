@@ -33,6 +33,16 @@ get_stack_status() {
   fi
 }
 
+get_stack_ip() {
+  get_stack_info
+  if [ "$INFO" != "" ] ; then
+    IP=$(python2 -c 'import json,sys; print json.loads(sys.stdin.read()) \
+                     ["Stacks"][0]["Outputs"][0]["OutputValue"]' <<< "$INFO")
+  else
+    IP=
+  fi
+}
+
 delete_stack() {
   aws cloudformation delete-stack --stack-name $STAMP
   while true ; do
@@ -75,11 +85,8 @@ chmod 600 /var/lib/$APP/$STAMP.pem
 delete_stack
 create_stack
 
-get_stack_info
-log "Info: $INFO"
+get_stack_ip
+ssh -i /var/lib/$APP/$STAMP.pem ec2-user@$IP echo "hello world!!!"
 
 delete_stack
 aws ec2 delete-key-pair --key-name $STAMP
-
-get_stack_info
-log "Info: $INFO"
