@@ -18,14 +18,10 @@ echo "Instance IP is: $IP"
 
 chmod 600 /var/lib/$APP/key.pem
 
-run_remote() {
-    set -e
-    ssh -i /var/lib/$APP/key.pem ubuntu@$IP "$@";
-    set +e
-}
+run_remote() { ssh -i /var/lib/$APP/key.pem ubuntu@$IP "$@"; }
 
 wait_remote() {
-    while run-remote ls 2>&1|grep \
+    while run_remote ls 2>&1|grep \
         "Connection closed\|Connection reset\|Connection refused" \
     >/dev/null ; do
         echo "Connecting to the instance."
