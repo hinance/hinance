@@ -52,12 +52,14 @@ create_stack() {
     while true ; do
       get_stack_status
       log "Creating stack. Current status: $STATUS"
-      if [[ $STATUS=='CREATE_COMPLETE'||$STATUS=='ROLLBACK_COMPLETE' ]] ; then
-        break ;
+      if [[ "$STATUS" == 'CREATE_COMPLETE' \
+         || "$STATUS" == 'ROLLBACK_COMPLETE' ]] ;
+      then
+        break
       fi
       sleep 10
     done
-    if [ $STATUS == 'CREATE_COMPLETE' ] ; then break ; fi
+    if [ "$STATUS" == 'CREATE_COMPLETE' ] ; then break ; fi
     delete_stack
   done
 }
