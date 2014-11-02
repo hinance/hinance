@@ -2,7 +2,10 @@
 
 set -e
 
+SLEEP=10
+
 APP='hinance-controller'
+APPW='hinance-worker'
 
 . /usr/share/$APP/repo/config.sh
 . /etc/$APP/config.sh
@@ -26,30 +29,61 @@ get_stack_info() {
 get_stack_status() {
   get_stack_info
   if [ "$INFO" != "" ] ; then
-    STATUS=$(python2 -c 'import json,sys; print json.loads(sys.stdin.read()) \
-                         ["Stacks"][0]["StackStatus"]' <<< "$INFO")
+    SSTATUS=$(python2 -c 'import json,sys; print json.loads(sys.stdin.read()) \
+                          ["Stacks"][0]["StackStatus"]' <<< "$INFO")
   else
-    STATUS=
+    SSTATUS=
   fi
 }
 
-get_stack_ip() {
+get_stack_output() {
   get_stack_info
-  if [ "$INFO" != "" ] ; then
-    IP=$(python2 -c 'import json,sys; print json.loads(sys.stdin.read()) \
-                     ["Stacks"][0]["Outputs"][0]["OutputValue"]' <<< "$INFO")
-  else
-    IP=
-  fi
+  OUTPUT=$(python2 -c \
+    "import sys,json; print dict((x['OutputKey'], x['OutputValue']) \
+       for x in json.loads(sys.stdin.read())['Stacks'][0]['Outputs'] \
+     )['$1']" <<< "$INFO")
+}
+
+get_instance_status() {
+  get_stack_output myInstanceId
+  ISTATUS=$(aws ec2 describe-instance-status --instance-id $OUTPUT|python2 -c\
+            'import json,sys; print json.loads(sys.stdin.read()) \
+             ["InstanceStatuses"][0]["InstanceState"]["Name"]')
+}
+
+run_remote() {
+  get_stack_output myInstanceIp
+  ssh -i /var/lib/$APP/$STAMP.pem ec2-user@$OUTPUT "$@"
+}
+
+wait_remote() {
+  while run_remote ls 2>&1|grep \
+    "Connection closed\|Connection reset\|Connection refused" \
+  >/dev/null ; do
+    echo "Connecting to the instance."
+    sleep $SLEEP
+  done
+}
+
+reboot_remote() {
+  get_stack_output myInstanceId
+  aws ec2 reboot-instances --instance-ids $OUTPUT
+  get_instance_status
+  while [ "$ISTATUS" != "running" ] ; do
+    echo "Rebooting instance. Current status: $ISTATUS"
+    sleep $SLEEP
+    get_instance_status
+  done
+  wait_remote
 }
 
 delete_stack() {
   aws cloudformation delete-stack --stack-name $STAMP
   while true ; do
     get_stack_status
-    log "Deleting stack. Current status: $STATUS"
-    if [ "$STATUS" == "" ] ; then break ; fi 
-    sleep 10
+    log "Deleting stack. Current status: $SSTATUS"
+    if [ "$SSTATUS" == "" ] ; then break ; fi 
+    sleep $SLEEP
   done
 }
 
@@ -62,18 +96,18 @@ create_stack() {
       >/dev/null
     while true ; do
       get_stack_status
-      log "Creating stack. Current status: $STATUS"
-      echo $INFO
-      if [[ "$STATUS" == 'CREATE_COMPLETE' \
-         || "$STATUS" == 'ROLLBACK_COMPLETE' ]] ;
+      log "Creating stack. Current status: $SSTATUS"
+      if [[ "$SSTATUS" == 'CREATE_COMPLETE' \
+         || "$SSTATUS" == 'ROLLBACK_COMPLETE' ]] ;
       then
         break
       fi
-      sleep 10
+      sleep $SLEEP
     done
-    if [ "$STATUS" == 'CREATE_COMPLETE' ] ; then break ; fi
+    if [ "$SSTATUS" == 'CREATE_COMPLETE' ] ; then break ; fi
     delete_stack
   done
+  wait_remote
 }
 
 aws ec2 delete-key-pair --key-name $STAMP
@@ -84,9 +118,12 @@ chmod 600 /var/lib/$APP/$STAMP.pem
 
 delete_stack
 create_stack
-
-get_stack_ip
-ssh -i /var/lib/$APP/$STAMP.pem ec2-user@$IP echo "hello world!!!"
+run_remote "set -e; sudo yum -y update; sudo yum -y install git docker; \
+            sudo mkdir -p /etc/$APPW; sudo git clone -b \"$APP_VERSION\" \
+            https://github.com/olegus8/hinance.git /usr/share/$APPW/repo"
+reboot_remote
+run_remote "set -e; sudo service docker start; \
+            sudo /usr/share/$APPW/repo/$APPW/run.sh"
 
 delete_stack
 aws ec2 delete-key-pair --key-name $STAMP

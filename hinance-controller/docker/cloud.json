@@ -85,6 +85,7 @@
     }
   },
   "Outputs" : {
-    "myInstanceIp": {"Value": {"Ref": "myAddress"}}
+    "myInstanceIp": {"Value": {"Ref": "myAddress"}},
+    "myInstanceId": {"Value": {"Ref": "myInstance"}}
   }
 }
