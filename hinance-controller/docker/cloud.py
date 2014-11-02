@@ -4,7 +4,6 @@ import optparse
 from boto import vpc as botovpc
 from os import environ
 from time import sleep
-from sys import stdout
 
 APP = 'hinance-controller'
 REGION = 'us-east-1'
@@ -65,8 +64,9 @@ def create():
         while not subnets(conn):
             logging.info('Creating subnet...')
             sleep(SLEEP)
-        for net in subnets(conn):
-            for rtab in rtabs(conn):
+    for net in subnets(conn):
+        for rtab in rtabs(conn):
+            if net.id not in [a.subnet_id for a in rtab.associations]:
                 conn.associate_route_table(rtab.id, net.id)
     if not key_pairs(conn):
         with open('/var/lib/%s/key.pem' % APP, 'w') as f:
@@ -79,7 +79,9 @@ def create():
         while not sgroups(conn):
             logging.info('Creating security group...')
             sleep(SLEEP)
-        for sgroup in sgroups(conn):
+    for sgroup in sgroups(conn):
+        if ('tcp', '0', '65535') not in [
+        (r.ip_protocol, r.from_port, r.to_port) for r in sgroup.rules]:
             sgroup.authorize(ip_protocol='tcp', from_port=0, to_port=65535,
                              cidr_ip='0.0.0.0/0')
     if not gates(conn):
@@ -87,28 +89,32 @@ def create():
         while not gates(conn):
             logging.info('Creating internet gateway...')
             sleep(SLEEP)
-        for gate in gates(conn):
-            for vpc in vpcs(conn):
+    for gate in gates(conn):
+        for vpc in vpcs(conn):
+            if vpc.id not in [a.vpc_id for a in gate.attachments]:
                 conn.attach_internet_gateway(gate.id, vpc.id)
-            for rtab in rtabs(conn):
+        for rtab in rtabs(conn):
+            if gate.id not in [r.gateway_id for r in rtab.routes]:
                 conn.create_route(rtab.id, '0.0.0.0/0', gateway_id=gate.id)
     if not addrs(conn):
         conn.allocate_address(domain='vpc')
         while not addrs(conn):
             logging.info('Creating public IP address...')
+            sleep(SLEEP)
     if not irsvs(conn):
         conn.run_instances(IMAGE, key_name=key_pairs(conn)[0].name,
             security_group_ids=[sgroups(conn)[0].id],
             subnet_id=subnets(conn)[0].id, instance_type=INSTANCE_TYPE
         ).instances[0].add_tag('Name', tag())
-        while set(i.state for i in insts(conn)) != {'running'}:
-            for inst in insts(conn):
-                logging.info('Starting. Instance %s current state: %s' % (
-                    inst.id, inst.state))
-                inst.start()
-            sleep(SLEEP)
+    while set(i.state for i in insts(conn)) != {'running'}:
         for inst in insts(conn):
-            for addr in addrs(conn):
+            logging.info('Starting. Instance %s current state: %s' % (
+                inst.id, inst.state))
+            inst.start()
+        sleep(SLEEP)
+    for inst in insts(conn):
+        for addr in addrs(conn):
+            if addr.instance_id != inst.id:
                 addr.associate(inst.id)
     conn.close()
     logging.info('Created.')
@@ -121,15 +127,13 @@ def delete():
             logging.info('Terminating. Instance %s current state: %s' % (
                 inst.id, inst.state))
             inst.terminate()
-        if insts(conn):
-            sleep(SLEEP)
+        sleep(SLEEP)
     while addrs(conn):
         for addr in addrs(conn):
             logging.info('Releasing address %s' % addr.public_ip)
             if not addr.association_id:
                 conn.release_address(allocation_id=addr.allocation_id)
-        if addrs(conn):
-            sleep(SLEEP)
+        sleep(SLEEP)
     for gate in gates(conn):
         for vpc in vpcs(conn):
             conn.detach_internet_gateway(gate.id, vpc.id)
@@ -166,7 +170,8 @@ if __name__ == '__main__':
                     inst.id, inst.state))
                 inst.start()
             sleep(SLEEP)
-        stdout.write(str(insts(conn)[0].ip_address))
+        with open('/var/lib/%s/ip.txt' % APP, 'w') as f:
+            f.write(str(insts(conn)[0].ip_address))
         conn.close()
         logging.info('Running.')
     elif options.stop:
@@ -182,3 +187,5 @@ if __name__ == '__main__':
         logging.info('Stopped.')
     else:
         logging.error('Nothing to do.')
+    with open('/var/lib/%s/success' % APP, 'w') as f:
+        pass
