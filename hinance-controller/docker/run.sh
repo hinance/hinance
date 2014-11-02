@@ -31,10 +31,10 @@ wait_remote() {
 wait_remote
 
 scp -i /var/lib/$APP/key.pem \
-    /usr/share/$APP/repo/$APP/docker/setup-remote.sh \
+    /usr/share/$APP/repo/$APP/docker/setup_remote.sh \
     ubuntu@$IP:~/
 
-run_remote setup-remote.sh $APP_VERSION
+run_remote setup_remote.sh $APP_VERSION
 python2 -B /usr/share/$APP/repo/$APP/docker/cloud.py -l info --stop
 python2 -B /usr/share/$APP/repo/$APP/docker/cloud.py -l info --run
 wait_remote
