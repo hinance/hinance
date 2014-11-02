@@ -1,0 +1,43 @@
+#!/bin/sh
+
+set -e
+
+APP='hinance-controller'
+APPW='hinance-worker'
+
+. /usr/share/$APP/repo/config.sh
+. /etc/$APP/config.sh
+
+export AWS_KEY
+export AWS_SECRET
+export APP_VERSION
+
+IP=$(python2 -B /usr/share/$APP/repo/$APP/docker/cloud.py -l info --run)
+
+echo "Instance IP is: $IP"
+
+chmod 600 /ver/lib/$APP/key.pem
+
+run-remote() { ssh -i /var/lib/$APP/key.pem ubuntu@$IP "$@"; }
+
+wait-remote() {
+    while run-remote ls 2>&1|grep "Connection closed\|Connection reset" \
+    >/dev/null ; do
+        echo "Connecting to the instance."
+        sleep 1
+    done
+}
+
+wait-remote
+
+scp -i /var/lib/$APP/key.pem \
+    /usr/share/$APP/repo/$APP/docker/setup-remote.sh \
+    ubuntu@$IP:~/
+
+run-remote setup-remote.sh $APP_VERSION
+python2 -B /usr/share/$APP/repo/$APP/docker/cloud.py -l info --stop
+python2 -B /usr/share/$APP/repo/$APP/docker/cloud.py -l info --run
+wait-remote
+run-remote sudo /usr/share/$APPW/repo/$APPW/run.sh
+python2 -B /usr/share/$APP/repo/$APP/docker/cloud.py -l info --delete
+
