@@ -40,12 +40,12 @@ subnets = get_all('subnets', {'tag:Name': tag()})
 gates = get_all('internet_gateways', {'tag:Name': tag()})
 key_pairs = get_all('key_pairs', {'key-name': tag()})
 sgroups = get_all('security_groups', {'group-name': tag()})
-irsvs = get_all('instances', {'tag:Name': tag(), 'instance-state-name': [
-    'pending', 'running', 'shutting-down', 'stopping', 'stopped']})
+irsvs = get_all('instances', {'tag:Name': tag()})
 addrs = get_all('addresses')
 
 def insts(conn):
-    return [i for r in irsvs(conn) for i in r.instances]
+    return [i for r in irsvs(conn) for i in r.instances
+            if i.state != 'terminated']
 
 def rtabs(conn):
     return [r for v in vpcs(conn) for r in conn.get_all_route_tables(
@@ -131,7 +131,7 @@ def delete():
     while addrs(conn):
         for addr in addrs(conn):
             logging.info('Releasing address %s' % addr.public_ip)
-            if not addr.association_id:
+            if not addr.instance_id:
                 conn.release_address(allocation_id=addr.allocation_id)
         sleep(SLEEP)
     for gate in gates(conn):

@@ -12,14 +12,9 @@ export AWS_KEY
 export AWS_SECRET
 export APP_VERSION
 
-get_ip() {
-    IP=$(cat /var/lib/$APP/ip.txt)
-}
+get_ip() { IP=$(cat /var/lib/$APP/ip.txt) ; }
 
-run_remote() {
-    get_ip
-    ssh -i /var/lib/$APP/key.pem ubuntu@$IP "$@";
-}
+run_remote() { get_ip ; ssh -i /var/lib/$APP/key.pem ubuntu@$IP "$@" ; }
 
 wait_remote() {
     while run_remote ls 2>&1|grep \
@@ -35,23 +30,15 @@ cloud_cmd() {
     python2 -B /usr/share/$APP/repo/$APP/docker/cloud.py -l info "$@" &
     local PID=$!
     for run in {1..20} ; do
-        if [ ! -e /proc/$PID ] ; then
-            break
-        fi
+        if [ ! -e /proc/$PID ] ; then break ; fi
         sleep 10
     done
-    if [ -e /var/lib/$APP/success ] ; then
-        break
-    fi
-    set +e
-    kill -9 $PID
-    set -e
+    if [ -e /var/lib/$APP/success ] ; then break ; fi
+    set +e ; kill -9 $PID ; set -e
 }
 
 while true ; do
-    while true ; do
-        cloud_cmd --delete
-    done
+    while true ; do cloud_cmd --delete ; done
     cloud_cmd --run
 done
 
@@ -67,16 +54,10 @@ scp -i /var/lib/$APP/key.pem \
 
 run_remote ./setup_remote.sh $APP_VERSION
 
-while true ; do
-    cloud_cmd --stop
-done
-while true ; do
-    cloud_cmd --run
-done
+while true ; do cloud_cmd --stop ; done
+while true ; do cloud_cmd --run ; done
 
 wait_remote
 run_remote sudo /usr/share/$APPW/repo/$APPW/run.sh
 
-while true ; do
-    cloud_cmd --delete
-done
+while true ; do cloud_cmd --delete ; done
