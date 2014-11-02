@@ -16,11 +16,11 @@ IP=$(python2 -B /usr/share/$APP/repo/$APP/docker/cloud.py -l info --run)
 
 echo "Instance IP is: $IP"
 
-chmod 600 /ver/lib/$APP/key.pem
+chmod 600 /var/lib/$APP/key.pem
 
-run-remote() { ssh -i /var/lib/$APP/key.pem ubuntu@$IP "$@"; }
+run_remote() { ssh -i /var/lib/$APP/key.pem ubuntu@$IP "$@"; }
 
-wait-remote() {
+wait_remote() {
     while run-remote ls 2>&1|grep "Connection closed\|Connection reset" \
     >/dev/null ; do
         echo "Connecting to the instance."
@@ -28,16 +28,16 @@ wait-remote() {
     done
 }
 
-wait-remote
+wait_remote
 
 scp -i /var/lib/$APP/key.pem \
     /usr/share/$APP/repo/$APP/docker/setup-remote.sh \
     ubuntu@$IP:~/
 
-run-remote setup-remote.sh $APP_VERSION
+run_remote setup-remote.sh $APP_VERSION
 python2 -B /usr/share/$APP/repo/$APP/docker/cloud.py -l info --stop
 python2 -B /usr/share/$APP/repo/$APP/docker/cloud.py -l info --run
-wait-remote
-run-remote sudo /usr/share/$APPW/repo/$APPW/run.sh
+wait_remote
+run_remote sudo /usr/share/$APPW/repo/$APPW/run.sh
 python2 -B /usr/share/$APP/repo/$APP/docker/cloud.py -l info --delete
 
