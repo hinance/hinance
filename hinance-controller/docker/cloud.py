@@ -1,3 +1,5 @@
+#TODO: try tearing to shreds and use aws-cli
+
 import boto
 import logging
 import optparse
