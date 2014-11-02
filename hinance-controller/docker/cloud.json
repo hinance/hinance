@@ -62,7 +62,7 @@
         "SubnetId": {"Ref": "mySubnet"},
         "KeyName": {"Ref": "keyName"},
         "UserData": {"Fn::Base64": {"Fn::Join": ["", [
-          "#!/bin/bash -v\n",
+          "#!/bin/sh\n",
           "sed -ie 's/Defaults.*requiretty//' /etc/sudoers\n"]]}}}},
     "myAddress" : {
       "Type" : "AWS::EC2::EIP",
