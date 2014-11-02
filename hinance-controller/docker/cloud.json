@@ -9,7 +9,8 @@
     "MyEC2Instance" : {
       "Type" : "AWS::EC2::Instance",
       "Properties" : {
-        "ImageId" : "ami-2f726546"
+        "InstanceType" : "t2.medium",
+        "ImageId" : "ami-b66ed3de"
       }
     }
   },
