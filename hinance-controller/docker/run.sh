@@ -111,6 +111,11 @@ create_stack() {
     if [ "$SSTATUS" == 'CREATE_COMPLETE' ] ; then break ; fi
     delete_stack
   done
+  get_stack_output myInstanceIp
+  IP="$OUTPUT"
+  get_stack_output myInstanceId
+  ID="$OUTPUT"
+  log "Instance address is $IP, id is $ID"
   wait_remote
 }
 
