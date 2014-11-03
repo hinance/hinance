@@ -52,6 +52,7 @@ get_instance_status() {
 }
 
 run_remote() {
+  log "Running a command on instance."
   get_stack_output myInstanceIp
   ssh -i /var/lib/$APP/$STAMP.pem ec2-user@$OUTPUT "$@"
 }
@@ -60,17 +61,18 @@ wait_remote() {
   while run_remote ls 2>&1|grep \
     "Connection closed\|Connection reset\|Connection refused" \
   >/dev/null ; do
-    echo "Connecting to the instance."
+    log "Connecting to the instance."
     sleep $SLEEP
   done
 }
 
 reboot_remote() {
+  log "Rebooting instance."
   get_stack_output myInstanceId
   aws ec2 reboot-instances --instance-ids $OUTPUT
   get_instance_status
   while [ "$ISTATUS" != "running" ] ; do
-    echo "Rebooting instance. Current status: $ISTATUS"
+    log "Rebooting instance. Current status: $ISTATUS"
     sleep $SLEEP
     get_instance_status
   done
@@ -78,6 +80,7 @@ reboot_remote() {
 }
 
 delete_stack() {
+  log "Deleting stack."
   aws cloudformation delete-stack --stack-name $STAMP
   while true ; do
     get_stack_status
@@ -89,6 +92,7 @@ delete_stack() {
 
 create_stack() {
   while true ; do
+    log "Creating stack."
     aws cloudformation create-stack --stack-name $STAMP \
       --template-body file:///usr/share/$APP/repo/$APP/docker/cloud.json \
       --parameters ParameterKey=appVersion,ParameterValue="$APP_VERSION" \
