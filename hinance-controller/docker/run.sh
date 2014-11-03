@@ -119,6 +119,8 @@ create_stack() {
   wait_remote
 }
 
+log "$APP started."
+
 aws ec2 delete-key-pair --key-name $STAMP
 aws ec2 create-key-pair --key-name $STAMP | python2 -c \
   'import json,sys; print json.loads(sys.stdin.read())["KeyMaterial"]' \
@@ -136,3 +138,5 @@ run_remote "set -e; sudo service docker start; \
 
 delete_stack
 aws ec2 delete-key-pair --key-name $STAMP
+
+log "$APP finished."
