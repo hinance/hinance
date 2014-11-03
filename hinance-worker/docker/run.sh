@@ -17,4 +17,4 @@ weboob-config update
 
 Xvfb &
 
-boobank -adv -f json_line -O /var/lib/$APP/data.json ls
+python2 -B /usr/share/$APP/repo/$APP/docker/scrape.py /var/lib/$APP/data.json
