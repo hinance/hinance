@@ -139,8 +139,7 @@ run_remote "set -e; sudo yum -y update; sudo yum -y install git docker; \
 scp -i /var/lib/$APP/$STAMP.pem /etc/$APP/backends ec2-user@$IP:/etc/$APPW
 
 reboot_remote
-run_remote "set -e; sudo service docker start; \
-            sudo /usr/share/$APPW/repo/$APPW/run.sh"
+run_remote sudo /usr/share/$APPW/repo/$APPW/run.sh
 
 scp -i /var/lib/$APP/$STAMP.pem ec2-user@$IP:/var/lib/$APPW/data.json \
   /var/lib/$APP/$DATAFILE.part
