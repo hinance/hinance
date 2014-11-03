@@ -132,7 +132,8 @@ chmod 600 /var/lib/$APP/$STAMP.pem
 delete_stack
 create_stack
 run_remote "set -e; sudo yum -y update; sudo yum -y install git docker; \
-            sudo mkdir -p /etc/$APPW; sudo git clone -b \"$APP_VERSION\" \
+            sudo mkdir -p /etc/$APPW; sudo chown ec2-user:ec2-user /etc/$APPW;\
+            sudo git clone -b \"$APP_VERSION\" \
             https://github.com/olegus8/hinance.git /usr/share/$APPW/repo"
 
 scp -i /var/lib/$APP/$STAMP.pem /etc/$APP/backends ec2-user@$IP:/etc/$APPW

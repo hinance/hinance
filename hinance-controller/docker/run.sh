@@ -19,10 +19,10 @@ while true ; do
   while true ; do
     log "Restarting fetcher."
     set +e; kill -9 $PID; set -e
-    /usr/share/$APP/repo/$APP/docker/fetch.sh $DATAFILE
+    /usr/share/$APP/repo/$APP/docker/fetch.sh $DATAFILE &
     PID=$!
     for i in {0..30} ; do
-      if [ -e /var/lib/$APP/$DATAFILE ] ; then break ; fi
+      if [ ! -e /proc/$PID ] ; then break ; fi
       sleep_for 60
     done
     if [ -e /var/lib/$APP/$DATAFILE ] ; then break ; fi
