@@ -121,7 +121,7 @@ create_stack() {
   while [ "$HOSTKEY" == "" ] ; do
     log "Obtaining instance public key."
     HOSTKEY=$(aws ec2 get-console-output --instance-id $ID \
-      | sed -nr 's/.*(necdsa-sha2-nistp256[^=]+=).*/\1/p')
+      | sed -nr 's/.*(ecdsa-sha2-nistp256[^=]+=).*/\1/p')
     sleep $SLEEP
   done
   log "Instance public key is: $HOSTKEY"
