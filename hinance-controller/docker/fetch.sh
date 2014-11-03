@@ -56,8 +56,7 @@ get_instance_status() {
 run_remote() {
   log "Running a command on instance."
   get_stack_output myInstanceIp
-  ssh -o StrictHostKeyChecking=no -i /var/lib/$APP/$STAMP.pem \
-    ec2-user@$OUTPUT "$@"
+  ssh -i /var/lib/$APP/$STAMP.pem ec2-user@$OUTPUT "$@"
 }
 
 wait_remote() {
@@ -118,7 +117,11 @@ create_stack() {
   IP="$OUTPUT"
   get_stack_output myInstanceId
   ID="$OUTPUT"
-  log "Instance address is $IP, id is $ID"
+  HOSTKEY=$(aws ec2 get-console-output --instance-id $ID | python2 -c \
+    'import json,sys; print json.loads(sys.stdin.read())["Output"]' \
+    | grep ecdsa-sha2 )
+  log "Instance address is $IP, id is $ID, public key is: \"$HOSTKEY\"."
+  echo "$IP" "$HOSTKEY" > $HOME/.ssh/known_hosts
   wait_remote
 }
 
@@ -137,13 +140,13 @@ run_remote "set -e; sudo yum -y update; sudo yum -y install git docker; \
             sudo git clone -b \"$APP_VERSION\" \
             https://github.com/olegus8/hinance.git /usr/share/$APPW/repo"
 
-scp -o StrictHostKeyChecking=no -i /var/lib/$APP/$STAMP.pem \
+scp -i /var/lib/$APP/$STAMP.pem \
   /etc/$APP/backends ec2-user@$IP:/etc/$APPW
 
 reboot_remote
 run_remote sudo /usr/share/$APPW/repo/$APPW/run.sh
 
-scp -o StrictHostKeyChecking=no -i /var/lib/$APP/$STAMP.pem \
+scp -i /var/lib/$APP/$STAMP.pem \
   ec2-user@$IP:/var/lib/$APPW/data.json /var/lib/$APP/$DATAFILE.part
 
 delete_stack
