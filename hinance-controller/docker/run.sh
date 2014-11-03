@@ -4,7 +4,7 @@ set -e
 
 # minutes
 FETCH_TIMEOUT=30
-FETCH_PERIOD=1
+FETCH_PERIOD=1440
 
 APP='hinance-controller'
 

@@ -121,7 +121,7 @@ create_stack() {
   wait_remote
 }
 
-log "Started."
+log "Started. Fetching $DATAFILE"
 
 aws ec2 delete-key-pair --key-name $STAMP
 aws ec2 create-key-pair --key-name $STAMP | python2 -c \
@@ -149,4 +149,4 @@ aws ec2 delete-key-pair --key-name $STAMP
 
 mv /var/lib/$APP/$DATAFILE{.part,}
 
-log "Finished."
+log "Finished. Fetched $DATAFILE"
