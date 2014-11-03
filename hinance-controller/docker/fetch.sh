@@ -95,6 +95,7 @@ delete_stack() {
 create_stack() {
   while true ; do
     log "Creating stack."
+    rm -rf /var/lib/$APP/ssh_host_ecdsa_key*
     ssh-keygen -q -t ecdsa -N "" -C "" -f /var/lib/$APP/ssh_host_ecdsa_key
     aws cloudformation create-stack --stack-name $STAMP \
       --template-body file:///usr/share/$APP/repo/$APP/docker/cloud.json \
