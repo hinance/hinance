@@ -117,9 +117,12 @@ create_stack() {
   IP="$OUTPUT"
   get_stack_output myInstanceId
   ID="$OUTPUT"
-  HOSTKEY=$(aws ec2 get-console-output --instance-id $ID | python2 -c \
-    'import json,sys; print json.loads(sys.stdin.read())["Output"]' \
-    | grep ecdsa-sha2 )
+  while [ "$HOSTKEY" == "" ] ; do
+    log "Obtaining host public key."
+    HOSTKEY=$(aws ec2 get-console-output --instance-id $ID \
+      | sed -nr 's/.*(necdsa-sha2-nistp256[^=]+=).*/\1/p')
+    sleep $SLEEP
+  done
   log "Instance address is $IP, id is $ID, public key is: \"$HOSTKEY\"."
   echo "$IP" "$HOSTKEY" > $HOME/.ssh/known_hosts
   wait_remote
