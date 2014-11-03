@@ -3,9 +3,10 @@
 set -e
 
 APP="hinance-worker"
-IMAGE="olegus8/$APP:$APP_VERSION"
 
 . /usr/share/$APP/repo/config.sh
+
+IMAGE="olegus8/$APP:$APP_VERSION"
 
 if docker ps|grep $APP >/dev/null ; then
     echo "Stopping old $APP container."
