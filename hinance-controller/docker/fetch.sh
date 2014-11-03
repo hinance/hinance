@@ -56,7 +56,8 @@ get_instance_status() {
 run_remote() {
   log "Running a command on instance."
   get_stack_output myInstanceIp
-  ssh -i /var/lib/$APP/$STAMP.pem ec2-user@$OUTPUT "$@"
+  ssh -o StrictHostKeyChecking=no -i /var/lib/$APP/$STAMP.pem \
+    ec2-user@$OUTPUT "$@"
 }
 
 wait_remote() {
@@ -136,13 +137,14 @@ run_remote "set -e; sudo yum -y update; sudo yum -y install git docker; \
             sudo git clone -b \"$APP_VERSION\" \
             https://github.com/olegus8/hinance.git /usr/share/$APPW/repo"
 
-scp -i /var/lib/$APP/$STAMP.pem /etc/$APP/backends ec2-user@$IP:/etc/$APPW
+scp -o StrictHostKeyChecking=no -i /var/lib/$APP/$STAMP.pem \
+  /etc/$APP/backends ec2-user@$IP:/etc/$APPW
 
 reboot_remote
 run_remote sudo /usr/share/$APPW/repo/$APPW/run.sh
 
-scp -i /var/lib/$APP/$STAMP.pem ec2-user@$IP:/var/lib/$APPW/data.json \
-  /var/lib/$APP/$DATAFILE.part
+scp -o StrictHostKeyChecking=no -i /var/lib/$APP/$STAMP.pem \
+  ec2-user@$IP:/var/lib/$APPW/data.json /var/lib/$APP/$DATAFILE.part
 
 delete_stack
 aws ec2 delete-key-pair --key-name $STAMP
