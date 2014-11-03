@@ -2,7 +2,7 @@
 
 set -e
 
-SLEEP=10
+SLEEP=30
 
 APP='hinance-controller'
 APPW='hinance-worker'
