@@ -2,31 +2,33 @@
 
 set -e
 
+# minutes
+FETCH_TIMEOUT=30
+FETCH_PERIOD=1
+
 APP='hinance-controller'
 
 log() {
   echo "[$(date +"%Y-%m-%d %H:%M:%S") run]: $@"
 }
 
-sleep_for() {
-  log "Sleeping for $1 seconds."
-  sleep $1
-}
-
 while true ; do
   DATAFILE="data-$(date +"%Y-%m-%d_%H-%M").json"
   log "Fetching $DATAFILE"
   while true ; do
-    log "Restarting fetcher."
-    set +e; kill -9 $PID; set -e
     /usr/share/$APP/repo/$APP/docker/fetch.sh $DATAFILE &
     PID=$!
-    for i in {0..30} ; do
+    COUNT=$FETCH_TIMEOUT
+    while (( COUNT > 0 )) ; do
       if [ ! -e /proc/$PID ] ; then break ; fi
-      sleep_for 60
+      log "Will restart fetcher in $COUNT minutes."
+      COUNT=$((COUNT-1))
+      sleep 60
     done
     if [ -e /var/lib/$APP/$DATAFILE ] ; then break ; fi
+    log "Restarting fetcher."
+    set +e; kill -9 $PID; set -e
   done
-  sleep_for 10
-  #sleep_for 86400
+  log "Next fetch is due in $FETCH_PERIOD minutes."
+  sleep $((FETCH_PERIOD*60))
 done
