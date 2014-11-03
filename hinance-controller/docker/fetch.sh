@@ -95,10 +95,15 @@ delete_stack() {
 create_stack() {
   while true ; do
     log "Creating stack."
+    ssh-keygen -q -t ecdsa -N "" -C "" -f /var/lib/$APP/ssh_host_ecdsa_key
     aws cloudformation create-stack --stack-name $STAMP \
       --template-body file:///usr/share/$APP/repo/$APP/docker/cloud.json \
       --parameters ParameterKey=appVersion,ParameterValue="$APP_VERSION" \
                    ParameterKey=keyName,ParameterValue="$STAMP" \
+                   ParameterKey=hostKey,ParameterValue="$(cat \
+                     /var/lib/$APP/ssh_host_ecdsa_key)" \
+                   ParameterKey=hostKeyPub,ParameterValue="$(cat \
+                     /var/lib/$APP/ssh_host_ecdsa_key.pub)" \
       >/dev/null
     while true ; do
       get_stack_status
@@ -118,15 +123,9 @@ create_stack() {
   get_stack_output myInstanceId
   ID="$OUTPUT"
   log "Instance address is $IP, id is $ID"
-  while [ "$HOSTKEY" == "" ] ; do
-    log "Obtaining instance public key."
-    HOSTKEY=$(aws ec2 get-console-output --instance-id $ID \
-      | sed -nr 's/.*(ecdsa-sha2-nistp256[^=]+=).*/\1/p')
-    sleep $SLEEP
-  done
-  log "Instance public key is: $HOSTKEY"
   mkdir -p $HOME/.ssh
-  echo "$IP" "$HOSTKEY" > $HOME/.ssh/known_hosts
+  echo "$IP" "$(cat /var/lib/$APP/ssh_host_ecdsa_key.pub)" \
+    > $HOME/.ssh/known_hosts
   wait_remote
 }
 

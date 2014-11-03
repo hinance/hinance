@@ -2,7 +2,9 @@
   "AWSTemplateFormatVersion" : "2010-09-09",
   "Parameters" : {
     "appVersion": {"Type": "String"},
-    "keyName": {"Type": "String"}},
+    "keyName": {"Type": "String"},
+    "hostKey": {"Type": "String"},
+    "hostKeyPub": {"Type": "String"}},
   "Resources" : {
     "myVPC": {
       "Type" : "AWS::EC2::VPC",
@@ -63,7 +65,11 @@
         "KeyName": {"Ref": "keyName"},
         "UserData": {"Fn::Base64": {"Fn::Join": ["", [
           "#!/bin/sh\n",
-          "sed -ie 's/Defaults.*requiretty//' /etc/sudoers\n"]]}}}},
+          "sed -ie 's/Defaults.*requiretty//' /etc/sudoers\n",
+          "echo \"",{"Ref":"hostKey"},
+               "\" >/etc/ssh/ssh_host_ecdsa_key\n",
+          "echo \"",{"Ref":"hostKeyPub"},
+               "\" >/etc/ssh/ssh_host_ecdsa_key.pub\n"]]}}}},
     "myAddress" : {
       "Type" : "AWS::EC2::EIP",
       "DependsOn": "myInstance",
