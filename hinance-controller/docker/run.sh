@@ -13,16 +13,15 @@ sleep_for() {
   sleep $1
 }
 
-sleep_for 
 while true ; do
   DATAFILE="data-$(date +"%Y-%m-%d_%H-%M").json"
   log "Fetching $DATAFILE"
   while true ; do
     log "Restarting fetcher."
-    set +e; kill $PID; set -e
+    set +e; kill -9 $PID; set -e
     /usr/share/$APP/repo/$APP/docker/fetch.sh $DATAFILE
     PID=$!
-    for i in {0..10} ; do
+    for i in {0..30} ; do
       if [ -e /var/lib/$APP/$DATAFILE ] ; then break ; fi
       sleep_for 60
     done

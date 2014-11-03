@@ -10,8 +10,6 @@ export PYTHONPATH=$PYTHONPATH:/usr/share/$APP/weboob
 export WEBOOB_BACKENDS=/etc/$APP/backends
 export DISPLAY=:0
 
-chmod 600 /etc/$APP/backends
-
 weboob-config
 patch $HOME/.config/weboob/sources.list \
     /usr/share/$APP/repo/$APP/docker/sources.list.patch

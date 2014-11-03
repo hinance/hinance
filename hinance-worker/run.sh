@@ -28,9 +28,13 @@ if ! docker run --rm $IMAGE pwd >/dev/null 2>&1 ; then
     docker build --rm -t $IMAGE /usr/share/$APP/repo/$APP/docker
 fi
 
+chmod 600 /etc/$APP/backends
+mkdir -p /var/lib/$APP
+
 docker run \
     -v /etc/localtime:/etc/localtime:ro \
     -v /etc/$APP:/etc/$APP:ro \
     -v /usr/share/$APP/repo:/usr/share/$APP/repo:ro \
+    -v /var/lib/$APP:/var/lib/$APP \
     --name $APP -h $APP $IMAGE \
     bash -l /usr/share/$APP/repo/$APP/docker/run.sh
