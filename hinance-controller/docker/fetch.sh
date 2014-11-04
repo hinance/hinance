@@ -152,7 +152,7 @@ reboot_remote
 run_remote sudo /usr/share/$APPW/repo/$APPW/run.sh
 
 scp -i /var/lib/$APP/$STAMP.pem \
-  ec2-user@$IP:/var/lib/$APPW/data.json /var/lib/$APP/$DATAFILE.part
+  ec2-user@$IP:/var/lib/$APPW/data.tar.gz /var/lib/$APP/$DATAFILE.part
 
 delete_stack
 aws ec2 delete-key-pair --key-name $STAMP

@@ -13,7 +13,7 @@ log() {
 }
 
 while true ; do
-  DATAFILE="data-$(date +"%Y-%m-%d_%H-%M").json"
+  DATAFILE="data-$(date +"%Y-%m-%d_%H-%M").tar.gz"
   log "Fetching $DATAFILE"
   while true ; do
     /usr/share/$APP/repo/$APP/docker/fetch.sh $DATAFILE &

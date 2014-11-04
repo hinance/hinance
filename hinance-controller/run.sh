@@ -18,12 +18,7 @@ if docker ps -a|grep $APP >/dev/null ; then
     docker rm $APP >/dev/null
 fi
 
-set +e
-echo "Pulling $IMAGE image."
-docker pull $IMAGE
-set -e
-
-if ! docker run --rm $IMAGE pwd >/dev/null 2>&1 ; then
+if ! docker run --rm $IMAGE uname -a ; then
     echo "Building $IMAGE container."
     docker build --rm -t $IMAGE /usr/share/$APP/repo/$APP/docker
 fi
