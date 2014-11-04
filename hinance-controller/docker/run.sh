@@ -3,8 +3,8 @@
 set -e
 
 # minutes
-FETCH_TIMEOUT=30
-FETCH_PERIOD=1440
+FETCH_TIMEOUT=60 # Instances are billed per whole hours.
+FETCH_PERIOD=$((24*60))
 
 APP='hinance-controller'
 
