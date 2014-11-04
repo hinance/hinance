@@ -140,7 +140,7 @@ run_remote "set -e; sudo yum -y update; sudo yum -y install git docker; \
             sudo mkdir -p /etc/$APPW; sudo chown ec2-user:ec2-user /etc/$APPW;\
             sudo git clone -b \"$APP_VERSION\" \
             https://github.com/olegus8/hinance.git /usr/share/$APPW/repo" \
-           2>&1 >/dev/null
+           >/dev/null 2>&1
 
 scp -i /var/tmp/$APP/$STAMP.pem \
   /etc/$APP/backends ec2-user@$IP:/etc/$APPW
