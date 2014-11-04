@@ -18,10 +18,6 @@ export AWS_ACCESS_KEY_ID
 export AWS_SECRET_ACCESS_KEY
 export AWS_DEFAULT_REGION
 
-log() {
-  echo "[$(date +"%Y-%m-%d %H:%M:%S") fetch]: $@"
-}
-
 get_stack_info() {
   set +e
   INFO=$(aws cloudformation describe-stacks --stack-name $STAMP 2>/dev/null)
@@ -54,27 +50,27 @@ get_instance_status() {
 }
 
 run_remote() {
-  log "Running a command on instance."
+  echo "Running a command on instance."
   get_stack_output myInstanceIp
-  ssh -i /var/lib/$APP/$STAMP.pem ec2-user@$OUTPUT "$@"
+  ssh -i /var/tmp/$APP/$STAMP.pem ec2-user@$OUTPUT "$@"
 }
 
 wait_remote() {
   while run_remote ls 2>&1|grep \
     "Connection closed\|Connection reset\|Connection refused" \
   >/dev/null ; do
-    log "Connecting to the instance."
+    echo "Connecting to the instance."
     sleep $SLEEP
   done
 }
 
 reboot_remote() {
-  log "Rebooting instance."
+  echo "Rebooting instance."
   get_stack_output myInstanceId
   aws ec2 reboot-instances --instance-ids $OUTPUT
   get_instance_status
   while [ "$ISTATUS" != "running" ] ; do
-    log "Rebooting instance. Current status: $ISTATUS"
+    echo "Rebooting instance. Current status: $ISTATUS"
     sleep $SLEEP
     get_instance_status
   done
@@ -82,11 +78,11 @@ reboot_remote() {
 }
 
 delete_stack() {
-  log "Deleting stack."
+  echo "Deleting stack."
   aws cloudformation delete-stack --stack-name $STAMP
   while true ; do
     get_stack_status
-    log "Deleting stack. Current status: $SSTATUS"
+    echo "Deleting stack. Current status: $SSTATUS"
     if [ "$SSTATUS" == "" ] ; then break ; fi 
     sleep $SLEEP
   done
@@ -94,21 +90,21 @@ delete_stack() {
 
 create_stack() {
   while true ; do
-    log "Creating stack."
-    rm -rf /var/lib/$APP/ssh_host_ecdsa_key*
-    ssh-keygen -q -t ecdsa -N "" -C "" -f /var/lib/$APP/ssh_host_ecdsa_key
+    echo "Creating stack."
+    rm -rf /var/tmp/$APP/ssh_host_ecdsa_key*
+    ssh-keygen -q -t ecdsa -N "" -C "" -f /var/tmp/$APP/ssh_host_ecdsa_key
     aws cloudformation create-stack --stack-name $STAMP \
       --template-body file:///usr/share/$APP/repo/$APP/docker/cloud.json \
       --parameters ParameterKey=appVersion,ParameterValue="$APP_VERSION" \
                    ParameterKey=keyName,ParameterValue="$STAMP" \
                    ParameterKey=hostKey,ParameterValue="$(cat \
-                     /var/lib/$APP/ssh_host_ecdsa_key)" \
+                     /var/tmp/$APP/ssh_host_ecdsa_key)" \
                    ParameterKey=hostKeyPub,ParameterValue="$(cat \
-                     /var/lib/$APP/ssh_host_ecdsa_key.pub)" \
+                     /var/tmp/$APP/ssh_host_ecdsa_key.pub)" \
       >/dev/null
     while true ; do
       get_stack_status
-      log "Creating stack. Current status: $SSTATUS"
+      echo "Creating stack. Current status: $SSTATUS"
       if [[ "$SSTATUS" == 'CREATE_COMPLETE' \
          || "$SSTATUS" == 'ROLLBACK_COMPLETE' ]] ;
       then
@@ -123,20 +119,20 @@ create_stack() {
   IP="$OUTPUT"
   get_stack_output myInstanceId
   ID="$OUTPUT"
-  log "Instance address is $IP, id is $ID"
+  echo "Instance address is $IP, id is $ID"
   mkdir -p $HOME/.ssh
-  echo "$IP" "$(cat /var/lib/$APP/ssh_host_ecdsa_key.pub)" \
+  echo "$IP" "$(cat /var/tmp/$APP/ssh_host_ecdsa_key.pub)" \
     > $HOME/.ssh/known_hosts
   wait_remote
 }
 
-log "Started. Fetching $DATAFILE"
+echo "Started. Fetching $DATAFILE"
 
 aws ec2 delete-key-pair --key-name $STAMP
 aws ec2 create-key-pair --key-name $STAMP | python2 -c \
   'import json,sys; print json.loads(sys.stdin.read())["KeyMaterial"]' \
-  > /var/lib/$APP/$STAMP.pem
-chmod 600 /var/lib/$APP/$STAMP.pem
+  > /var/tmp/$APP/$STAMP.pem
+chmod 600 /var/tmp/$APP/$STAMP.pem
 
 delete_stack
 create_stack
@@ -145,18 +141,18 @@ run_remote "set -e; sudo yum -y update; sudo yum -y install git docker; \
             sudo git clone -b \"$APP_VERSION\" \
             https://github.com/olegus8/hinance.git /usr/share/$APPW/repo"
 
-scp -i /var/lib/$APP/$STAMP.pem \
+scp -i /var/tmp/$APP/$STAMP.pem \
   /etc/$APP/backends ec2-user@$IP:/etc/$APPW
 
 reboot_remote
 run_remote sudo /usr/share/$APPW/repo/$APPW/run.sh
 
-scp -i /var/lib/$APP/$STAMP.pem \
+scp -i /var/tmp/$APP/$STAMP.pem \
   ec2-user@$IP:/var/lib/$APPW/data.tar.gz /var/lib/$APP/$DATAFILE.part
 
 delete_stack
 aws ec2 delete-key-pair --key-name $STAMP
+rm -rf /var/tmp/$APP/{$STAMP.pem,ssh_host_ecdsa_key*}
 
 mv /var/lib/$APP/$DATAFILE{.part,}
-
-log "Finished. Fetched $DATAFILE"
+echo "Finished. Fetched $DATAFILE"

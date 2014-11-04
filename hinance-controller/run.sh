@@ -28,5 +28,6 @@ docker run \
     -v /etc/$APP:/etc/$APP:ro \
     -v /usr/share/$APP/repo:/usr/share/$APP/repo:ro \
     -v /var/lib/$APP:/var/lib/$APP \
+    -v /var/tmp/$APP:/var/tmp/$APP \
     --name $APP -h $APP $IMAGE \
     bash -l /usr/share/$APP/repo/$APP/docker/run.sh
