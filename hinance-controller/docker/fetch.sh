@@ -50,7 +50,6 @@ get_instance_status() {
 }
 
 run_remote() {
-  echo "Running a command on instance."
   get_stack_output myInstanceIp
   ssh -i /var/tmp/$APP/$STAMP.pem ec2-user@$OUTPUT "$@"
 }
@@ -136,15 +135,18 @@ chmod 600 /var/tmp/$APP/$STAMP.pem
 
 delete_stack
 create_stack
+echo "Bootstrapping instance."
 run_remote "set -e; sudo yum -y update; sudo yum -y install git docker; \
             sudo mkdir -p /etc/$APPW; sudo chown ec2-user:ec2-user /etc/$APPW;\
             sudo git clone -b \"$APP_VERSION\" \
-            https://github.com/olegus8/hinance.git /usr/share/$APPW/repo"
+            https://github.com/olegus8/hinance.git /usr/share/$APPW/repo" \
+           2>&1 >/dev/null
 
 scp -i /var/tmp/$APP/$STAMP.pem \
   /etc/$APP/backends ec2-user@$IP:/etc/$APPW
 
 reboot_remote
+echo "Starting worker on instance."
 run_remote sudo /usr/share/$APPW/repo/$APPW/run.sh
 
 scp -i /var/tmp/$APP/$STAMP.pem \
