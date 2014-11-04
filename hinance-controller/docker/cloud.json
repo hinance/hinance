@@ -3,7 +3,7 @@
   "Parameters" : {
     "appVersion": {"Type": "String"},
     "keyName": {"Type": "String"},
-    "hostKey": {"Type": "String"},
+    "hostKey": {"Type": "String", "NoEcho" : "true"},
     "hostKeyPub": {"Type": "String"}},
   "Resources" : {
     "myVPC": {
