@@ -5,6 +5,7 @@ set -e
 APP="hinance-worker"
 
 . /usr/share/$APP/repo/config.sh
+. /etc/$APP/config.sh
 
 IMAGE="olegus8/$APP:$APP_VERSION"
 
@@ -64,9 +65,8 @@ tar -czf data.tar.gz *.json
 cd /var/log/$APP
 tar -czf /var/lib/$APP/log.tar.gz *
 
-gpg2 --passphrase-file /etc/$APP/passphrase --batch -c \
-  /var/lib/$APP/data.tar.gz
-gpg2 --passphrase-file /etc/$APP/passphrase --batch -c \
-  /var/lib/$APP/log.tar.gz
+for FILE in $(ls /var/lib/$APP/{data,log}.tar.gz) ; do
+  gpg2 --passphrase "$PASSPHRASE" --batch -c $FILE >/dev/null 2>&1
+done
 
 echo "Scraping finished."

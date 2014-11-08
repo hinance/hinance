@@ -30,6 +30,7 @@ Create file `/etc/hinance-controller/config.sh`:
 AWS_ACCESS_KEY_ID='<<<aws access key id>>>'
 AWS_SECRET_ACCESS_KEY='<<<aws secret access key>>>'
 AWS_DEFAULT_REGION='us-east-1'
+PASSPHRASE='<<<passphrase to encrypt scraped data>>>'
 ```
 
 Copy your [Weboob](http://weboob.org) `backends` file with banking
