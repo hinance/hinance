@@ -1,6 +1,7 @@
 from weboob.tools.application.base import Application
 import json
 from time import time
+from sys import stdout
 
 class MyApp(Application):
 
@@ -26,9 +27,11 @@ class MyApp(Application):
           if time()-lastReport > self.REPORT_TIME:
             print u'Scraped %i transactions in account %s' % \
               (len(transactions), a.id)
+            stdout.flush()
             lastReport = time()
         print u'Scraped %i transactions in account %s' % \
           (len(transactions), a.id)
+        stdout.flush()
         accounts.append({
           u'id': unicode(a.id),
           u'label': unicode(a.label),
