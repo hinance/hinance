@@ -49,7 +49,7 @@ for BACKEND in $(cat /var/lib/$APP/backends.txt) ; do
     echo "Scraping backend $BACKEND"
     set +e
     run python2 -B /usr/share/$APP/repo/$APP/docker/scrape.py -addv \
-      -b $BACKEND --logging-file /tmp/$BACKEND.log \
+      -b $BACKEND --logging-file /dev/null \
       -o /var/lib/$APP/$BACKEND.json
     set -e
     mkdir -p /var/log/$APP/$BACKEND
