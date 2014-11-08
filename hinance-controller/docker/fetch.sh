@@ -149,9 +149,10 @@ reboot_remote
 echo "Starting worker on instance."
 run_remote sudo /usr/share/$APPW/repo/$APPW/run.sh
 
-for FILE in $(echo {data,log}.tar.gz.gpg) do
+for FILE in $(echo {data,log}.tar.gz.gpg) ; do
   script -q -c "scp -i /var/tmp/$APP/$STAMP.pem -l $SPEED_LIMIT \
                 ec2-user@$IP:/var/lib/$APPW/$FILE /var/lib/$APP"
+done
 
 delete_stack
 aws ec2 delete-key-pair --key-name $STAMP
