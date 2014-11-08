@@ -5,6 +5,7 @@ set -e
 DATAFILE=$1
 
 SLEEP=30
+SPEED_LIMIT=1000 # Kbit/s
 
 APP='hinance-controller'
 APPW='hinance-worker'
@@ -151,9 +152,9 @@ reboot_remote
 echo "Starting worker on instance."
 run_remote sudo /usr/share/$APPW/repo/$APPW/run.sh
 
-scp -i /var/tmp/$APP/$STAMP.pem \
+scp -i /var/tmp/$APP/$STAMP.pem -l $SPEED_LIMIT \
   ec2-user@$IP:/var/lib/$APPW/data.tar.gz.gpg /var/lib/$APP/$DATAFILE.part
-scp -i /var/tmp/$APP/$STAMP.pem \
+scp -i /var/tmp/$APP/$STAMP.pem -l $SPEED_LIMIT \
   ec2-user@$IP:/var/lib/$APPW/log.tar.gz.gpg /var/lib/$APP/log-$DATAFILE.part
 
 delete_stack
