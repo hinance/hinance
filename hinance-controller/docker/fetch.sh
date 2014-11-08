@@ -155,7 +155,7 @@ for FILE in $(echo {data,log}.tar.gz.gpg) ; do
   PID=$!
   while [ -e /proc/$PID ] ; do
     set +e; echo "Downloading $(du -h /var/lib/$APP/$FILE)"; set -e
-    sleep SLEEP
+    sleep $SLEEP
   done
   echo "Downloaded $(du -h /var/lib/$APP/$FILE)"
 done
