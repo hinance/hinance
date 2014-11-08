@@ -154,7 +154,7 @@ for FILE in $(echo {data,log}.tar.gz.gpg) ; do
          ec2-user@$IP:/var/lib/$APPW/$FILE /var/lib/$APP &
   PID=$!
   while [ -e /proc/$PID ] ; do
-    set +e; echo "Downloading $(du -h /var/lib/$APP/$FILE)"; set -e
+    set +e; echo "Downloading $(du -h /var/lib/$APP/$FILE 2>/dev/null)"; set -e
     sleep $SLEEP
   done
   echo "Downloaded $(du -h /var/lib/$APP/$FILE)"
