@@ -144,17 +144,22 @@ run_remote "set -e; sudo yum -y update; sudo yum -y install git docker; \
 
 scp -i /var/tmp/$APP/$STAMP.pem \
   /etc/$APP/backends ec2-user@$IP:/etc/$APPW
+scp -i /var/tmp/$APP/$STAMP.pem \
+  /etc/$APP/passphrase ec2-user@$IP:/etc/$APPW
 
 reboot_remote
 echo "Starting worker on instance."
 run_remote sudo /usr/share/$APPW/repo/$APPW/run.sh
 
 scp -i /var/tmp/$APP/$STAMP.pem \
-  ec2-user@$IP:/var/lib/$APPW/data.tar.gz /var/lib/$APP/$DATAFILE.part
+  ec2-user@$IP:/var/lib/$APPW/data.tar.gz.gpg /var/lib/$APP/$DATAFILE.part
+scp -i /var/tmp/$APP/$STAMP.pem \
+  ec2-user@$IP:/var/lib/$APPW/log.tar.gz.gpg /var/lib/$APP/log-$DATAFILE.part
 
 delete_stack
 aws ec2 delete-key-pair --key-name $STAMP
 rm -rf /var/tmp/$APP/{$STAMP.pem,ssh_host_ecdsa_key*}
 
 mv /var/lib/$APP/$DATAFILE{.part,}
+mv /var/lib/$APP/log-$DATAFILE{.part,}
 echo "Finished. Fetched $DATAFILE"

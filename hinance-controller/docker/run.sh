@@ -9,7 +9,7 @@ FETCH_PERIOD=$((24*60))
 APP='hinance-controller'
 
 while true ; do
-  DATAFILE="data-$(date +"%Y-%m-%d_%H-%M").tar.gz"
+  DATAFILE="data-$(date +"%Y-%m-%d_%H-%M").tar.gz.gpg"
   echo "Fetching $DATAFILE"
   while true ; do
     /usr/share/$APP/repo/$APP/docker/fetch.sh $DATAFILE &

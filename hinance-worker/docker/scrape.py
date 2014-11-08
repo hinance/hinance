@@ -1,44 +1,43 @@
-from weboob.core import Weboob
-from weboob.capabilities.bank import CapBank
-from sys import argv
-import logging
+from weboob.tools.application.base import Application
 import json
 from time import time
 
-REPORT_TIME = 10
+class MyApp(Application):
 
-def scrape(bname):
+  REPORT_TIME = 10
+  VERSION = '0'
+  APPNAME = 'hinance-worker'
+
+  def add_application_options(self, group):
+    group.add_option('-o', '--output-file', help='where to write output')
+
+  def main(self, argv):
     lastReport = time()
-    backend = Weboob().load_backends(CapBank)[bname]
     accounts = []
-    for a in backend.iter_accounts():
+    for backend in self.load_backends().values():
+      for a in backend.iter_accounts():
         transactions = []
         for t in backend.iter_history(a):
-            transactions.append({
-                u'date': unicode(t.date),
-                u'rdate': unicode(t.rdate),
-                u'label': unicode(t.label),
-                u'amount': unicode(t.amount)})
-            if time()-lastReport > REPORT_TIME:
-                logging.info(u'Scraped %i transactions in account %s' % \
-                    (len(transactions), a.id))
-                lastReport = time()
-        logging.info(u'Scraped %i transactions in account %s' % \
-            (len(transactions), a.id))
+          transactions.append({
+            u'date': unicode(t.date),
+            u'rdate': unicode(t.rdate),
+            u'label': unicode(t.label),
+            u'amount': unicode(t.amount)})
+          if time()-lastReport > self.REPORT_TIME:
+            print u'Scraped %i transactions in account %s' % \
+              (len(transactions), a.id)
+            lastReport = time()
+        print u'Scraped %i transactions in account %s' % \
+          (len(transactions), a.id)
         accounts.append({
-            u'id': unicode(a.id),
-            u'label': unicode(a.label),
-            u'balance': unicode(a.balance),
-            u'currency': unicode(a.currency),
-            u'transactions': transactions})
-    return accounts
-
-logging.basicConfig(format='%(levelname)-8s %(asctime)-15s %(message)s')
-logging.getLogger().setLevel(logging.INFO)
+          u'id': unicode(a.id),
+          u'label': unicode(a.label),
+          u'balance': unicode(a.balance),
+          u'currency': unicode(a.currency),
+          u'transactions': transactions})
+    result = json.dumps(accounts, indent=2, sort_keys=True)
+    with open(self.options.output_file, 'w') as f:
+      f.write(result)
 
 if __name__ == '__main__':
-    backend = argv[1]
-    output = argv[2]
-    result = json.dumps(scrape(backend), indent=2, sort_keys=True)
-    with open(output, 'w') as f:
-        f.write(result)
+  MyApp.run()

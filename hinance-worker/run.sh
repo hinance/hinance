@@ -14,7 +14,7 @@ if ! docker run --rm $IMAGE uname -a ; then
 fi
 
 chmod 600 /etc/$APP/backends
-mkdir -p /var/lib/$APP
+mkdir -p /var/{lib,log}/$APP
 
 run() {
   if docker ps|grep $APP >/dev/null ; then
@@ -48,13 +48,25 @@ for BACKEND in $(cat /var/lib/$APP/backends.txt) ; do
   while [ ! -e /var/lib/$APP/$BACKEND.json ] ; do
     echo "Scraping backend $BACKEND"
     set +e
-    run python2 -B /usr/share/$APP/repo/$APP/docker/scrape.py $BACKEND \
-      /var/lib/$APP/$BACKEND.json
+    run python2 -B /usr/share/$APP/repo/$APP/docker/scrape.py -addv \
+      -b $BACKEND --logging-file /tmp/$BACKEND.log \
+      -o /var/lib/$APP/$BACKEND.json
     set -e
+    mkdir -p /var/log/$APP/$BACKEND
+    DIR=$(mktemp -d /var/log/$APP/$BACKEND/run.XXX)
+    docker cp hinance-worker:/tmp $DIR
+    echo "Logs saved to $DIR"
   done
 done
 
 cd /var/lib/$APP
 tar -czf data.tar.gz *.json
+cd /var/log/$APP
+tar -czf /var/lib/$APP/log.tar.gz *
+
+gpg2 --passphrase-file /etc/$APP/passphrase --batch -c \
+  /var/lib/$APP/data.tar.gz
+gpg2 --passphrase-file /etc/$APP/passphrase --batch -c \
+  /var/lib/$APP/log.tar.gz
 
 echo "Scraping finished."
