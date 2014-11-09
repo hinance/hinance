@@ -65,28 +65,30 @@ class MyApp(Application):
           u'date': unicode(p.date),
           u'method': unicode(p.method),
           u'amount': unicode(p.amount)})
-      shipments = []
-      for s in backend.iter_shipments(o):
-        items = []
-        for i in backend.iter_items(s):
-          items.append({
-            u'label': unicode(i.label),
-            u'url': unicode(i.url),
-            u'price': unicode(i.price)})
-        shipments.append({
-          u'shipping': unicode(s.shipping),
-          u'discount': unicode(s.discount),
-          u'tax': unicode(s.tax),
-          u'items': items})
+      items = []
+      for i in backend.iter_items(o):
+        items.append({
+          u'label': unicode(i.label),
+          u'url': unicode(i.url),
+          u'price': unicode(i.price)})
       orders.append({
         u'id': unicode(o.id),
         u'date': unicode(o.date),
+        u'shipping': unicode(o.shipping),
+        u'discount': unicode(o.discount),
+        u'tax': unicode(o.tax),
         u'payments': payments,
-        u'shipments': shipments})
+        u'items': items})
       if time()-lastReport > self.REPORT_TIME:
         print u'Scraped %i orders' % len(orders)
         stdout.flush()
         lastReport = time()
+      payments_total = sum(p.amount for p in backend.iter_payments(o))
+      items_total = sum(i.price for i in backend.iter_items(o))
+      order_total = o.shipping + o.discount + o.tax
+      assert payments_total == items_total + order_total, \
+        u'%s != %s + %s' % (payments_total, items_total, order_total)
+
     print u'Scraped %i orders' % len(orders)
     stdout.flush()
     return {'currency': currency,
