@@ -39,9 +39,8 @@ echo "Scraping started."
 
 echo "Obtaining list of backends."
 run python2 -c "from weboob.core import Weboob; \
-  from weboob.capabilities.bank import CapBank; \
   open('/var/lib/$APP/backends.txt','w').write( \
-    ' '.join(Weboob().load_backends(CapBank).keys()))"
+    ' '.join(Weboob().load_backends().keys()))"
 
 echo "Backends to scrape: $(cat /var/lib/$APP/backends.txt)"
 
