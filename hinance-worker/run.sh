@@ -40,7 +40,7 @@ echo "Scraping started."
 echo "Obtaining list of backends."
 run python2 -c "from weboob.core import Weboob; \
   open('/var/lib/$APP/backends.txt','w').write( \
-    ' '.join(Weboob().load_backends().keys()))"
+    ' '.join(sorted(Weboob().load_backends().keys())))"
 
 echo "Backends to scrape: $(cat /var/lib/$APP/backends.txt)"
 
