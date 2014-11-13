@@ -1,6 +1,7 @@
 from weboob.tools.application.base import Application
 from weboob.capabilities.bank import CapBank
 from weboob.capabilities.shop import CapShop
+from datetime import datetime
 from time import time
 from sys import stdout
 
