@@ -44,23 +44,30 @@ run python2 -c "from weboob.core import Weboob; \
 
 echo "Backends to scrape: $(cat /var/lib/$APP/backends.txt)"
 
+echo "module HinanceBanks where\nimport HinanceTypes\nbanks = []\n" \
+  > /var/lib/$APP/banks.hs
+echo "module HinanceShops where\nimport HinanceTypes\nshops = []\n" \
+  > /var/lib/$APP/shops.hs
+
 for BACKEND in $(cat /var/lib/$APP/backends.txt) ; do
-  while [ ! -e /var/lib/$APP/$BACKEND.json ] ; do
+  while [ ! -e /var/lib/$APP/$BACKEND_banks.hs ] ; do
     echo "Scraping backend $BACKEND"
     set +e
     run python2 -B /usr/share/$APP/repo/$APP/docker/scrape.py -addv \
       -b $BACKEND --logging-file /dev/null \
-      -o /var/lib/$APP/$BACKEND.json
+      -o /var/lib/$APP/$BACKEND
     set -e
     mkdir -p /var/log/$APP/$BACKEND
     DIR=$(mktemp -d /var/log/$APP/$BACKEND/run.XXX)
     docker cp hinance-worker:/tmp $DIR
     echo "Logs saved to $DIR"
   done
+  cat /var/lib/$APP/$BACKEND_banks.hs >> /var/lib/$APP/banks.hs
+  cat /var/lib/$APP/$BACKEND_shops.hs >> /var/lib/$APP/shops.hs
 done
 
 cd /var/lib/$APP
-tar -czf data.tar.gz *.json
+tar -czf data.tar.gz banks.hs shops.hs
 cd /var/log/$APP
 tar -czf /var/lib/$APP/log.tar.gz *
 
