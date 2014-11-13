@@ -44,9 +44,9 @@ run python2 -c "from weboob.core import Weboob; \
 
 echo "Backends to scrape: $(cat /var/lib/$APP/backends.txt)"
 
-echo "module HinanceBanks where\nimport HinanceTypes\nbanks = []\n" \
+echo -e "module HinanceBanks where\nimport HinanceTypes\nbanks = []" \
   > /var/lib/$APP/banks.hs
-echo "module HinanceShops where\nimport HinanceTypes\nshops = []\n" \
+echo -e "module HinanceShops where\nimport HinanceTypes\nshops = []" \
   > /var/lib/$APP/shops.hs
 
 for BACKEND in $(cat /var/lib/$APP/backends.txt) ; do
