@@ -2,13 +2,44 @@ import json
 from datetime import datetime
 from decimal import Decimal
 
+def r_bank(bank, bank_id):
+  return [
+    u'Bank',
+    u'{ bid = %s' % tostr(bank_id),
+    u', baccs ='] + [
+    u'  %s' % s for s in r_list(map(r_acc, bank))] + [
+    u'}'
+  ]
+
+def r_acc(acc):
+  return [
+    u'BankAcc',
+    u'{ baid = %s' % tostr(acc['id']),
+    u', balabel = %s' % tostr(acc['label']),
+    u', babalance = %i' % tocent(acc['balance']),
+    u', bacurrency = %s' % acc['currency'],
+    u', batrans ='] + [
+    u'  %s' % s for s in r_list(map(r_trans, acc['transactions']))] + [
+    u'}'
+  ]
+
+def r_trans(trans):
+  return [
+    u'BankTrans',
+    u'{ bttime = %i' % totime(trans['date']),
+    u', btrtime = %i' % totime(trans['rdate']),
+    u', btlabel = %s' % tostr(trans['label']),
+    u', btamount = %i' % tocent(trans['amount']),
+    u'}'
+  ]
+
 def r_shop(shop, shop_id):
   return [
     u'Shop',
     u'{ sid = %s' % tostr(shop_id),
     u', scurrency = %s' % shop['currency'],
     u', sorders ='] + [
-    u'  %s' % s for s in r_list(r_order(o) for o in shop['orders'])] + [
+    u'  %s' % s for s in r_list(map(r_order, shop['orders']))] + [
     u'}'
   ]
 
@@ -21,9 +52,9 @@ def r_order(order):
     u', soshipping = %i' % tocent(order['shipping']),
     u', sotax = %i' % tocent(order['tax']),
     u', sopayments ='] + [
-    u'  %s' % s for s in r_list(r_payment(p) for p in order['payments'])] + [
+    u'  %s' % s for s in r_list(map(r_payment, order['payments']))] + [
     u', soitems ='] + [
-    u'  %s' % s for s in r_list(r_item(p) for p in order['items'])] + [
+    u'  %s' % s for s in r_list(map(r_item, order['items']))] + [
     u'}'
   ]
 
@@ -67,7 +98,10 @@ shops = [
   u'module HinanceShops where',
   u'import HinanceTypes',
   u'shops = []']
-banks = []
+banks = [
+  u'module HinanceBanks where',
+  u'import HinanceTypes',
+  u'banks = []']
 
 for fname in ['amazonj', 'wellsfargoj', 'citibankj']:
   with open('/home/user/hinance-controller/%s.json' % fname) as f:
@@ -78,5 +112,14 @@ for fname in ['amazonj', 'wellsfargoj', 'citibankj']:
         u'    %s' % s for s in r_shop(shop, fname)] + [
         u'  ]'
       ]
+    for bank in data['banks']:
+      banks += [
+        u'  ++ [' ] + [
+        u'    %s' % s for s in r_bank(bank, fname)] + [
+        u'  ]'
+      ]
 
-print u'\n'.join(shops)
+with open('/srv/pub/projects/hinance/shops.hs', 'w') as f:
+    f.write(u'\n'.join(shops))
+with open('/srv/pub/projects/hinance/banks.hs', 'w') as f:
+    f.write(u'\n'.join(banks))
