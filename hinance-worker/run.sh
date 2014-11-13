@@ -50,7 +50,7 @@ echo "module HinanceShops where\nimport HinanceTypes\nshops = []\n" \
   > /var/lib/$APP/shops.hs
 
 for BACKEND in $(cat /var/lib/$APP/backends.txt) ; do
-  while [ ! -e /var/lib/$APP/$BACKEND_banks.hs ] ; do
+  while [ ! -e /var/lib/$APP/${BACKEND}_banks.hs ] ; do
     echo "Scraping backend $BACKEND"
     set +e
     run python2 -B /usr/share/$APP/repo/$APP/docker/scrape.py -addv \
@@ -62,8 +62,8 @@ for BACKEND in $(cat /var/lib/$APP/backends.txt) ; do
     docker cp hinance-worker:/tmp $DIR
     echo "Logs saved to $DIR"
   done
-  cat /var/lib/$APP/$BACKEND_banks.hs >> /var/lib/$APP/banks.hs
-  cat /var/lib/$APP/$BACKEND_shops.hs >> /var/lib/$APP/shops.hs
+  cat /var/lib/$APP/${BACKEND}_banks.hs >> /var/lib/$APP/banks.hs
+  cat /var/lib/$APP/${BACKEND}_shops.hs >> /var/lib/$APP/shops.hs
 done
 
 cd /var/lib/$APP
