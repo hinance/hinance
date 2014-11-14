@@ -45,6 +45,7 @@ class MyApp(Application):
       self.heartbeat()
       batrans = []
       for t in backend.iter_history(a):
+        self.heartbeat()
         batrans.append([
           u'BankTrans',
           u'{ bttime = %i' % totime(t.date),

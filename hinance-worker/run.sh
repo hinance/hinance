@@ -54,25 +54,24 @@ import Hinance.Currency\nshops = []" > /var/lib/$APP/shop_data.hs
 for BACKEND in $(cat /var/lib/$APP/backends.txt) ; do
   while [ ! -e /var/lib/$APP/${BACKEND}_banks.hs ] ; do
     echo "Scraping backend $BACKEND"
-    rm -rf /var/lib/$APP/${BACKEND}_tick
     run python2 -B /usr/share/$APP/repo/$APP/docker/scrape.py -addv \
       -b $BACKEND --logging-file /dev/null \
       -o /var/lib/$APP/$BACKEND \
       -H /var/lib/$APP/${BACKEND}_tick
-    # Typically it takes less than a minute to scrape first data.
-    for TICK in {12..1} ; do
-      if [ ! -e /proc/$RUN_PID ] ; then break ; fi
-      if [ -e /var/lib/$APP/${BACKEND}_tick ] ; then break ; fi
-      echo "Waiting for scraper to start: $TICK"
-      sleep 10
+    while [ -e /proc/$RUN_PID ] ; do
+      # Typically it takes less than a minute to scrape some new data.
+      rm -rf /var/lib/$APP/${BACKEND}_tick
+      for TICK in {10..1} ; do
+        if [ ! -e /proc/$RUN_PID ] ; then break ; fi
+        if [ -e /var/lib/$APP/${BACKEND}_tick ] ; then break ; fi
+        echo "Waiting for scraper heartbeat: $TICK"
+        sleep 10
+      done
+      if [ ! -e /var/lib/$APP/${BACKEND}_tick ] ; then
+        echo "Scraper is stuck."
+        set +e; docker stop $APP >/dev/null; set -e
+      fi
     done
-    if [ ! -e /var/lib/$APP/${BACKEND}_tick ] ; then
-      echo "Scraper is stuck."
-      set +e; docker stop $APP >/dev/null; set -e
-    else
-      echo "Waiting for scraper to finish."
-      set +e; wait $RUN_PID; set -e
-    fi
     mkdir -p /var/log/$APP/$BACKEND
     DIR=$(mktemp -d /var/log/$APP/$BACKEND/run.XXX)
     docker cp hinance-worker:/tmp $DIR
