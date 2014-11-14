@@ -57,7 +57,7 @@ for BACKEND in $(cat /var/lib/$APP/backends.txt) ; do
     rm -rf /var/lib/$APP/${BACKEND}_tick
     run python2 -B /usr/share/$APP/repo/$APP/docker/scrape.py -addv \
       -b $BACKEND --logging-file /dev/null \
-      -o /var/lib/$APP/$BACKEND
+      -o /var/lib/$APP/$BACKEND \
       -H /var/lib/$APP/${BACKEND}_tick
     # Typically it takes less than a minute to scrape first data.
     for TICK in {1..10} ; do
