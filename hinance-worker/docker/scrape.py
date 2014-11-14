@@ -13,6 +13,11 @@ class MyApp(Application):
 
   def add_application_options(self, group):
     group.add_option('-o', '--output-file', help='where to write output')
+    group.add_option('-H', '--heartbeat-file', help='where to write heartbeat')
+
+  def heartbeat(self):
+    with open(self.options.heartbeat_file, 'w') as f:
+        pass
 
   def main(self, argv):
     banks = []
@@ -37,6 +42,7 @@ class MyApp(Application):
     lastReport = time()
     baccs = []
     for a in backend.iter_accounts():
+      self.heartbeat()
       batrans = []
       for t in backend.iter_history(a):
         batrans.append([
@@ -63,6 +69,7 @@ class MyApp(Application):
         u', batrans ='] + [
         u'  %s' % s for s in r_list(batrans)] + [
         u'}'])
+    self.heartbeat()
     return [
       u'Bank',
       u'{ bid = %s' % tostr(backend.name),
@@ -75,6 +82,7 @@ class MyApp(Application):
     sorders = []
     currency = backend.get_currency()
     for o in backend.iter_orders():
+      self.heartbeat()
       sopayments = [[
         u'ShopPayment',
         u'{ sptime = %i' % totime(p.date),
@@ -111,6 +119,7 @@ class MyApp(Application):
       assert payments_total > 0
       assert items_total > 0
 
+    self.heartbeat()
     print u'Scraped %i orders' % len(sorders)
     stdout.flush()
     return [

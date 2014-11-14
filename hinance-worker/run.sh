@@ -32,7 +32,8 @@ run() {
     -v /usr/share/$APP/repo:/usr/share/$APP/repo:ro \
     -v /var/lib/$APP:/var/lib/$APP \
     --name $APP -h $APP $IMAGE \
-    bash -l /usr/share/$APP/repo/$APP/docker/run.sh "$@"
+    bash -l /usr/share/$APP/repo/$APP/docker/run.sh "$@" &
+  RUN_PID=$!
 }
 
 echo "Scraping started."
@@ -41,6 +42,7 @@ echo "Obtaining list of backends."
 run python2 -c "from weboob.core import Weboob; \
   open('/var/lib/$APP/backends.txt','w').write( \
     ' '.join(sorted(Weboob().load_backends().keys())))"
+wait $RUN_PID
 
 echo "Backends to scrape: $(cat /var/lib/$APP/backends.txt)"
 
@@ -52,11 +54,24 @@ import Hinance.Currency\nshops = []" > /var/lib/$APP/shop_data.hs
 for BACKEND in $(cat /var/lib/$APP/backends.txt) ; do
   while [ ! -e /var/lib/$APP/${BACKEND}_banks.hs ] ; do
     echo "Scraping backend $BACKEND"
-    set +e
+    rm -rf /var/lib/$APP/${BACKEND}_tick
     run python2 -B /usr/share/$APP/repo/$APP/docker/scrape.py -addv \
       -b $BACKEND --logging-file /dev/null \
       -o /var/lib/$APP/$BACKEND
-    set -e
+      -H /var/lib/$APP/${BACKEND}_tick
+    # Typically it takes less than a minute to scrape first data.
+    for TICK in {1..10} ; do
+      if [ ! -e /proc/$RUN_PID ] ; then break ; fi
+      echo "Waiting for scraper to start."
+      sleep 10
+    done
+    if [ ! -e /var/lib/$APP/${BACKEND}_tick ] ; then
+      echo "Scraper is stuck."
+      set +e; docker stop $APP >/dev/null; set -e
+    else
+      echo "Waiting for scraper to finish."
+      set +e; wait $RUN_PID; set -e
+    fi
     mkdir -p /var/log/$APP/$BACKEND
     DIR=$(mktemp -d /var/log/$APP/$BACKEND/run.XXX)
     docker cp hinance-worker:/tmp $DIR
