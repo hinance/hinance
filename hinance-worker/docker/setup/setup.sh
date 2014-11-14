@@ -22,9 +22,9 @@ pacman -Syyuu --noconfirm
 #
 
 pacman -S --noconfirm --needed \
-    base base-devel firefox git mupdf python2-beautifulsoup3 \
-    python2-dateutil python2-feedparser python2-flake8 python2-gdata \
-    python2-irc python2-lxml python2-mechanize python2-pillow \
+    base base-devel cabal-install firefox ghc git happy mupdf \
+    python2-beautifulsoup3 python2-dateutil python2-feedparser python2-flake8 \
+    python2-gdata python2-irc python2-lxml python2-mechanize python2-pillow \
     python2-requests python2-yaml xorg-server-xvfb
 
 #
@@ -51,6 +51,13 @@ cd /setup/$APP/aur/python2-selenium
 patch PKGBUILD /setup/$APP/python2-selenium/PKGBUILD.patch
 makepkg -s --asroot --noconfirm
 pacman -U --noconfirm python2-selenium-2.43.0-1-x86_64.pkg.tar.xz
+
+#
+# Install Haskell stuff.
+#
+
+cabal update
+cabal install pretty-show-1.6.8 regex-tdfa-1.2.0
 
 #
 # Removing unneeded stuff.

@@ -44,10 +44,10 @@ run python2 -c "from weboob.core import Weboob; \
 
 echo "Backends to scrape: $(cat /var/lib/$APP/backends.txt)"
 
-echo -e "module HinanceBanks where\nimport HinanceTypes\nbanks = []" \
-  > /var/lib/$APP/banks.hs
-echo -e "module HinanceShops where\nimport HinanceTypes\nshops = []" \
-  > /var/lib/$APP/shops.hs
+echo -e "module Hinance.Bank.Data where\nimport Hinance.Bank.Type\n\
+import Hinance.Currency\nbanks = []" > /var/lib/$APP/bank_data.hs
+echo -e "module Hinance.Shop.Data where\nimport Hinance.Shop.Type\n\
+import Hinance.Currency\nshops = []" > /var/lib/$APP/shop_data.hs
 
 for BACKEND in $(cat /var/lib/$APP/backends.txt) ; do
   while [ ! -e /var/lib/$APP/${BACKEND}_banks.hs ] ; do
@@ -62,12 +62,19 @@ for BACKEND in $(cat /var/lib/$APP/backends.txt) ; do
     docker cp hinance-worker:/tmp $DIR
     echo "Logs saved to $DIR"
   done
-  cat /var/lib/$APP/${BACKEND}_banks.hs >> /var/lib/$APP/banks.hs
-  cat /var/lib/$APP/${BACKEND}_shops.hs >> /var/lib/$APP/shops.hs
+  cat /var/lib/$APP/${BACKEND}_banks.hs >> /var/lib/$APP/bank_data.hs
+  cat /var/lib/$APP/${BACKEND}_shops.hs >> /var/lib/$APP/shop_data.hs
 done
 
+echo "Compiling the chewer."
+ghc -XFlexibleInstances -o /var/lib/$APP/chew \
+  /{etc,var/lib}/$APP/*.hs /usr/share/$APP/repo/$APP/docker/*.hs
+
+echo "Chewing."
+/var/lib/$APP/chew > /var/lib/$APP/chew.hs
+
 cd /var/lib/$APP
-tar -czf data.tar.gz banks.hs shops.hs
+tar -czf data.tar.gz bank_data.hs shop_data.hs chew.hs
 cd /var/log/$APP
 tar -czf /var/lib/$APP/log.tar.gz *
 
