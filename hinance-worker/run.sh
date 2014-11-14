@@ -60,11 +60,11 @@ for BACKEND in $(cat /var/lib/$APP/backends.txt) ; do
       -o /var/lib/$APP/$BACKEND \
       -H /var/lib/$APP/${BACKEND}_tick
     # Typically it takes less than a minute to scrape first data.
-    for TICK in {1..10} ; do
+    for TICK in {10..1} ; do
       if [ ! -e /proc/$RUN_PID ] ; then break ; fi
       if [ -e /var/lib/$APP/${BACKEND}_tick ] ; then break ; fi
-      echo "Waiting for scraper to start."
-      sleep 10
+      echo "Waiting for scraper to start: $TICK"
+      sleep 12
     done
     if [ ! -e /var/lib/$APP/${BACKEND}_tick ] ; then
       echo "Scraper is stuck."
