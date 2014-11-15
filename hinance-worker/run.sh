@@ -69,7 +69,7 @@ for BACKEND in $(cat /var/lib/$APP/backends.txt) ; do
       done
       if [ ! -e /var/lib/$APP/${BACKEND}_tick ] ; then
         echo "Scraper is stuck."
-        set +e; docker stop $APP >/dev/null; set -e
+        set +e; docker stop $APP >/dev/null; wait $RUN_PID; set -e
       fi
     done
     mkdir -p /var/log/$APP/$BACKEND
@@ -89,7 +89,7 @@ run ghc -XFlexibleInstances -o /var/lib/$APP/chew /var/lib/$APP/chew.src/*.hs
 wait $RUN_PID
 
 echo "Chewing."
-run /var/lib/$APP/chew > /var/lib/$APP/chew.hs
+run /var/lib/$APP/chew \> /var/lib/$APP/chew.hs
 wait $RUN_PID
 
 cd /var/lib/$APP
