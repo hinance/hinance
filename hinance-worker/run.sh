@@ -81,15 +81,8 @@ for BACKEND in $(cat /var/lib/$APP/backends.txt) ; do
   cat /var/lib/$APP/${BACKEND}_shops.hs >> /var/lib/$APP/shop_data.hs
 done
 
-echo "Compiling the chewer."
-mkdir -p /var/lib/$APP/chew.src
-cp -t /var/lib/$APP/chew.src /etc/$APP/*.hs /var/lib/$APP/{bank,shop}_data.hs \
-  /usr/share/$APP/repo/$APP/docker/*.hs
-run ghc -XFlexibleInstances -o /var/lib/$APP/chew /var/lib/$APP/chew.src/*.hs
-wait $RUN_PID
-
 echo "Chewing."
-run /var/lib/$APP/chew \> /var/lib/$APP/chew.hs
+run /usr/share/$APP/repo/$APP/docker/chew.sh
 wait $RUN_PID
 
 cd /var/lib/$APP
