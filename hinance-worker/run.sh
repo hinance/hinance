@@ -61,11 +61,11 @@ for BACKEND in $(cat /var/lib/$APP/backends.txt) ; do
     while [ -e /proc/$RUN_PID ] ; do
       # Typically it takes less than a minute to scrape some new data.
       rm -rf /var/lib/$APP/${BACKEND}_tick
-      for TICK in {10..1} ; do
+      for TICK in {3..1} ; do
+        sleep 30
         if [ ! -e /proc/$RUN_PID ] ; then break ; fi
         if [ -e /var/lib/$APP/${BACKEND}_tick ] ; then break ; fi
         echo "Waiting for scraper heartbeat: $TICK"
-        sleep 10
       done
       if [ ! -e /var/lib/$APP/${BACKEND}_tick ] ; then
         echo "Scraper is stuck."
@@ -82,8 +82,10 @@ for BACKEND in $(cat /var/lib/$APP/backends.txt) ; do
 done
 
 echo "Compiling the chewer."
-run ghc -XFlexibleInstances -o /var/lib/$APP/chew /etc/$APP/*.hs \
-  /var/lib/$APP/{bank,shop}_data.hs /usr/share/$APP/repo/$APP/docker/*.hs
+mkdir -p /var/lib/$APP/chew.src
+cp -t /var/lib/$APP/chew.src /etc/$APP/*.hs /var/lib/$APP/{bank,shop}_data.hs \
+  /usr/share/$APP/repo/$APP/docker/*.hs
+run ghc -XFlexibleInstances -o /var/lib/$APP/chew /var/lib/$APP/chew.src/*.hs
 wait $RUN_PID
 
 echo "Chewing."
