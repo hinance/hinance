@@ -4,15 +4,22 @@ import Hinance.Bank.Data
 import Hinance.Bank.Type
 import Hinance.Shop.Data
 import Hinance.Shop.Type
-import Hinance.Taggable
 import Hinance.User.Tag
-import Hinance.User.Taggable
+import Hinance.User.Type
+import Hinance.User.Data
 import Text.Show.Pretty
+import Text.Printf
 
 main = do
-  putStr $ ppShow $ concat $ (map changes $ banks) ++ (map changes $ shops)
+  putStrLn.ppShow.concat.map (concat.map chkbalance.baccs).patched$banks
+  putStrLn.ppShow.concat $ (map changes.patched$banks) ++
+                           (map changes.patched$shops)
 
 tags x = filter (tagged x) [minBound::Tag ..]
+baldiff a = (-) (babalance a) $ foldl (+) 0 $ map btamount $ batrans a
+chkbalance a | baldiff a /= 0 = [printf "Account %s balance mismatch: %i"
+                                 (baid a) (baldiff a)]
+             | otherwise = [] :: [String]
 
 data Change = Change {camount::Integer, ctime::Integer, clabel::String,
   ccur::Currency, curl::String, cgroup::String, ctags::[Tag]}
