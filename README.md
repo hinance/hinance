@@ -27,10 +27,18 @@ Clone this repo into `/usr/share/hinance-controller/repo`.
 Create file `/etc/hinance-controller/config.sh`:
 
 ```
+# Mandatory:
 AWS_ACCESS_KEY_ID='<<<aws access key id>>>'
 AWS_SECRET_ACCESS_KEY='<<<aws secret access key>>>'
 AWS_DEFAULT_REGION='us-east-1'
 PASSPHRASE='<<<passphrase to encrypt scraped data>>>'
+
+# Optional:
+SOCKS_PORT='<<<local socks server listening port>>>'
+SOCKS_SSH_HOST='<<<ssh tunnel host>>>'
+SOCKS_SSH_HOST_PUBKEY='<<<ssh tunnel host public key>>>'
+SOCKS_SSH_USER='<<<ssh tunnel user>>>'
+SOCKS_SSH_USER_PVTKEY='<<<ssh tunnel user private key>>>'
 ```
 
 Copy your [Weboob](http://weboob.org) `backends` file with banking
