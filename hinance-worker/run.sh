@@ -16,7 +16,6 @@ fi
 
 chmod 600 /etc/$APP/backends
 mkdir -p /var/{lib,log}/$APP
-tar -xzf /etc/$APP/*.tar.gz -C /etc/$APP
 
 run() {
   if docker ps|grep $APP >/dev/null ; then
