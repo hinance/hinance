@@ -1,4 +1,6 @@
 module Main where
+import Data.Function
+import Data.List
 import Hinance.Currency
 import Hinance.Bank.Data
 import Hinance.Bank.Type
@@ -11,15 +13,65 @@ import Text.Show.Pretty
 import Text.Printf
 
 main = do
+  let nchgs = filter (not.grouped) chgsfinal
+  let ugrps = unbalgrps chgsfinal
+  putStrLn "-- Checks:"
   putStrLn.ppShow.concat.map (concat.map chkbalance.baccs).patched$banks
-  putStrLn.ppShow.concat $ (map changes.patched$banks) ++
-                           (map changes.patched$shops)
+  putStrLn$printf "\n-- Changes without groups (%i):" (length nchgs)
+  putStrLn.ppShow$nchgs
+  putStrLn$printf "\n-- Unbalanced groups (%i):" (length ugrps)
+  putStrLn.ppShow$ugrps
+  putStrLn$printf "\n-- All changes (%i):" (length chgsfinal)
+  putStrLn.ppShow$chgsfinal
+
+chgsfinal = reverse.(sortBy (compare`on`ctime)).(concatMap addchanges)
+                   .joinxfers.mergechgs$raw where
+  raw = concat$(map changes.patched$banks)++(map changes.patched$shops)
 
 tags x = filter (tagged x) [minBound::Tag ..]
+grouped = (/="").cgroup
 baldiff a = (-) (babalance a) $ foldl (+) 0 $ map btamount $ batrans a
+
 chkbalance a | baldiff a /= 0 = [printf "Account %s balance mismatch: %i"
                                  (baid a) (baldiff a)]
              | otherwise = [] :: [String]
+
+unbalgrps = (filter (((/=) 0).sum.map camount))
+            .(groupBy$on(==)cgroup).(sortBy$on compare cgroup)
+
+mchgsplits as bs can = sortBy cmp splits where
+  cmp = (on compare) (uncurry$(.)(.)(.)abs$on(-)ctime) `on` fst
+  splits = [((a,b), (as',bs'))
+           | (a,as')<-splits' [] as, (b,bs')<-splits' [] bs, can a b]
+  splits' _ [] = []
+  splits' hs (x:ts) = (x, hs ++ ts) : splits' (x:hs) ts
+
+joinxfers = joinxfers'.partition grouped where
+  joinxfers' (gcs, ngcs) = gcs ++ (concatMap xfers$byabs$ngcs)
+  byabs = (groupBy$on(==)$abs.camount).(sortBy$on compare$abs.camount)
+  xfers = xfers1.partition ((<=0).camount)
+  xfers1 (as, bs) | null mchg = as ++ bs
+                  | otherwise = uncurry xfers2 $ head mchg where
+    can a b = any (uncurry $ on canxfer ctags) $ [(a,b), (b,a)]
+    mchg = mchgsplits as bs can
+    xfers2 (a,b) = (++) [c' a, c' b] . xfers1 where
+      c' c = c{cgroup=printf "%i %i %i %i %s %s" (ctime a)
+               (ctime b) (camount a) (camount b) (clabel a) (clabel b)}
+
+mergechgs = concatMap mrg.(groupBy$on(==)$camount)
+                         .(sortBy$on compare$camount) where
+  mrg = mrg1.partition grouped
+  mrg1 (gs, ngs) | null mchg = gs ++ ngs
+                 | otherwise = uncurry mrg2 $ head mchg where
+    mchg = mchgsplits gs ngs (canmerge`on`ctags)
+    mrg2 (g,ng) = (:) c' . mrg1 where
+      c' = g {clabel = printf "%s %s" (clabel ng) (clabel g),
+              ctags = union (ctags ng) (ctags g)}
+
+addchanges c@Change{cgroup=g, ctags=ts}
+  | g==""&&addtagged ts/=[] = [c', c'{camount=(-camount c),ctags=addtagged ts}]
+  | otherwise = [c] where
+  c' = c{cgroup=printf "%i %i %s" (ctime c) (camount c) (clabel c)}
 
 data Change = Change {camount::Integer, ctime::Integer, clabel::String,
   ccur::Currency, curl::String, cgroup::String, ctags::[Tag]}
@@ -40,9 +92,9 @@ instance Changeable Shop where
                  ccur=scurrency s, cgroup=g' o, ctags=tags (s,o) }
       | (l,a) <- [("discount", sodiscount o),
                   ("shipping", soshipping o),
-                  ("tax", sotax o)]]
-    ++[ Change { camount=spamount p, ctime=sptime p, curl="", ccur=scurrency s,
-                 clabel=spmethod p, cgroup=g' o, ctags=tags (s,o,p) }
+                  ("tax", sotax o)], a /= 0]
+    ++[ Change { camount= -spamount p, ctime=sptime p, ccur=scurrency s,
+                 clabel=spmethod p, curl="", cgroup=g' o, ctags=tags (s,o,p) }
       | p <- sopayments o]
     ++[ Change { camount=siprice i, ctime=sotime o, curl=siurl i, cgroup=g' o,
                  ccur=scurrency s, clabel=silabel i, ctags=tags (s,o,i) }
