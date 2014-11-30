@@ -31,8 +31,9 @@ Create file `/etc/hinance-controller/config.sh`:
 AWS_ACCESS_KEY_ID='<<<aws access key id>>>'
 AWS_SECRET_ACCESS_KEY='<<<aws secret access key>>>'
 AWS_DEFAULT_REGION='us-east-1'
-PASSPHRASE='<<<passphrase to encrypt scraped data>>>'
-S3_BUCKET='<<<aws s3 bucket in which to generate reports website>>>'
+PASSPHRASE='<<<passphrase to access scraped data and reports>>>'
+REPORT_HOST='<<<website host where to serve reports>>>'
+REPORT_PORT='<<<website port where to serve reports>>>'
 
 # Optional:
 SOCKS_PORT='<<<local socks server listening port>>>'

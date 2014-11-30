@@ -8,6 +8,31 @@ FETCH_PERIOD=$((24*60))
 
 APP='hinance-controller'
 
+. /usr/share/$APP/repo/config.sh
+. /etc/$APP/config.sh
+
+cat /usr/share/$APP/repo/$APP/docker/nginx.conf.template \
+  | sed -e "s/REPORT_HOST/$REPORT_HOST/" > /etc/nginx/nginx.conf
+
+patch /etc/ssl/openssl.cnf /usr/share/$APP/repo/$APP/docker/openssl.cnf.patch
+
+mkdir -p /var/log/nginx
+mkdir -p /var/tmp/$APP
+
+if [ ! -e /var/tmp/$APP/access.htpasswd ] ; then
+    htpasswd -bc /var/tmp/$APP/access.htpasswd hinance "$PASSPHRASE"
+fi
+
+if [[ ! -e /var/tmp/$APP/https.crt || ! -e /var/tmp/$APP/https.key ]] ; then
+    openssl req -x509 -newkey rsa:2048 -days 9999 -nodes \
+        -keyout /var/tmp/$APP/https.key -out /var/tmp/$APP/https.crt
+    CRT=$(sed -n -e '2,25p' /var/tmp/$APP/https.crt)
+    base64 -d <<< "$CRT" | md5sum > /var/lib/$APP/https.md5
+    base64 -d <<< "$CRT" | sha1sum > /var/lib/$APP/https.sha1
+fi
+
+nginx
+
 while true ; do
   DATAFILE="data-$(date +"%Y-%m-%d_%H-%M").tar.gz.gpg"
   echo "Fetching $DATAFILE"

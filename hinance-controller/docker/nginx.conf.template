@@ -1,0 +1,24 @@
+events {
+}
+
+http {
+    include mime.types;
+    default_type  application/octet-stream;
+    sendfile on;
+    keepalive_timeout 65;
+    ssl_certificate /var/tmp/hinance-controller/https.crt;
+    ssl_certificate_key /var/tmp/hinance-controller/https.key;
+    ssl_session_cache shared:SSL:1m;
+    ssl_session_timeout 10h;
+
+    server {
+        listen 443 ssl;
+        server_name REPORT_HOST;
+        client_max_body_size 0;
+        location / {
+            auth_basic "hinance";
+            auth_basic_user_file /var/tmp/hinance-controller/access.htpasswd;
+            root /var/tmp/hinance-controller/report;
+        }
+    }
+}

@@ -5,6 +5,7 @@ set -e
 APP="hinance-controller"
 
 . /usr/share/$APP/repo/config.sh
+. /etc/$APP/config.sh
 
 IMAGE="olegus8/$APP:$APP_VERSION"
 
@@ -29,5 +30,6 @@ docker run \
     -v /usr/share/$APP/repo:/usr/share/$APP/repo:ro \
     -v /var/lib/$APP:/var/lib/$APP \
     -v /var/tmp/$APP:/var/tmp/$APP \
+    -p $REPORT_PORT:443 \
     --name $APP -h $APP $IMAGE \
     bash -l /usr/share/$APP/repo/$APP/docker/run.sh

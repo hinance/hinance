@@ -149,22 +149,26 @@ reboot_remote
 echo "Starting worker on instance."
 run_remote sudo /usr/share/$APPW/repo/$APPW/run.sh
 
-for FILE in $(echo {data,log}.tar.gz.gpg) ; do
+for FILE in $(echo {data,log}.tar.gz.gpg report.tar.gz) ; do
   scp -i /var/tmp/$APP/$STAMP.pem -l $SPEED_LIMIT \
-         ec2-user@$IP:/var/lib/$APPW/$FILE /var/lib/$APP &
+         ec2-user@$IP:/var/lib/$APPW/$FILE /var/tmp/$APP &
   PID=$!
   while [ -e /proc/$PID ] ; do
-    set +e; echo "Downloading $(du -h /var/lib/$APP/$FILE 2>/dev/null)"; set -e
+    set +e; echo "Downloading $(du -h /var/tmp/$APP/$FILE 2>/dev/null)"; set -e
     sleep $SLEEP
   done
   wait $PID
-  echo "Downloaded $(du -h /var/lib/$APP/$FILE)"
+  echo "Downloaded $(du -h /var/tmp/$APP/$FILE)"
 done
 
 delete_stack
 aws ec2 delete-key-pair --key-name $STAMP
 rm -rf /var/tmp/$APP/{$STAMP.pem,ssh_host_ecdsa_key*}
 
-mv /var/lib/$APP/{data.tar.gz.gpg,$DATAFILE}
-mv /var/lib/$APP/{log.tar.gz.gpg,log-$DATAFILE}
+mkdir -p /var/tmp/$APP/report
+cd /var/tmp/$APP/report
+tar -xzf /var/tmp/$APP/report.tar.gz
+
+mv /var/tmp/$APP/data.tar.gz.gpg /var/lib/$APP/$DATAFILE
+mv /var/tmp/$APP/log.tar.gz.gpg /var/lib/$APP/log-$DATAFILE
 echo "Finished. Fetched $DATAFILE"
