@@ -25,8 +25,8 @@ echo -e "-- Generated on $(date)\n" >> /var/lib/$APP/chew.html
 cat /var/lib/$APP/chew.hs >> /var/lib/$APP/chew.html
 echo '</pre></body></html>' >> /var/lib/$APP/chew.html
 
-echo "Updating the S3 bucket $(S3_BUCKET)"
-aws s3 mb s3://$(S3_BUCKET)
-aws s3 website s3://$(S3_BUCKET) --index-document index.html
+echo "Updating the S3 bucket $S3_BUCKET"
+aws s3 mb s3://$S3_BUCKET
+aws s3 website s3://$S3_BUCKET --index-document index.html
 aws s3 cp --acl public-read /var/lib/$APP/chew.html \
-  s3://$(S3_BUCKET)/index.html
+  s3://$S3_BUCKET/index.html
