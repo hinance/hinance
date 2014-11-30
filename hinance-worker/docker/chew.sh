@@ -11,8 +11,8 @@ ghc -O -XFlexibleInstances -o /tmp/$APP/chew /tmp/$APP/chew.src/*.hs
 
 /tmp/$APP/chew > /var/lib/$APP/chew.hs
 
-mkdir -p /tmp/$APP/report
-cd /tmp/$APP/report
+mkdir -p /var/lib/$APP/report
+cd /var/lib/$APP/report
 echo '<!DOCTYPE html><html lang="en"><head><title>chew</title>
       <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
       </head><body><pre>' > index.html

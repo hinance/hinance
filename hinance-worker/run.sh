@@ -87,10 +87,10 @@ wait $RUN_PID
 
 cd /var/lib/$APP
 tar -czf data.tar.gz bank_data.hs shop_data.hs chew.hs
+cd /var/lib/$APP/report
+tar -czf /var/lib/$APP/report.tar.gz *
 cd /var/log/$APP
 tar -czf /var/lib/$APP/log.tar.gz *
-cd /tmp/$APP/report
-tar -czf /var/lib/$APP/report.tar.gz *
 
 for FILE in $(ls /var/lib/$APP/{data,log}.tar.gz) ; do
   gpg2 --passphrase "$PASSPHRASE" --batch -c $FILE >/dev/null 2>&1
