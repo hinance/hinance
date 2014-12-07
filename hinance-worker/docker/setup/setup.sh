@@ -6,11 +6,11 @@ APP="hinance-worker"
 
 # Arch Rollback Machine date.
 ARM_YEAR=2014
-ARM_MONTH=09
-ARM_DAY=25
+ARM_MONTH=11
+ARM_DAY=11
 
-# Arch User Repository snapshot of 2014-09-25.
-AUR_TAG=b0f32825643c541d9fc647d31ebda863819d1570
+# Arch User Repository snapshot of 2014-11-11.
+AUR_TAG=6c79797067afd7e029461cf54ff0773cb8b7189c
 
 echo "Server = " \
      "http://seblu.net/a/arm/$ARM_YEAR/$ARM_MONTH/$ARM_DAY/\$repo/os/\$arch" \
@@ -43,7 +43,7 @@ rm aur-mirror-$AUR_TAG.tar.xz
 # python2-html2text
 cd /setup/$APP/aur/python2-html2text
 makepkg -s --asroot --noconfirm
-pacman -U --noconfirm python2-html2text-2014.7.3-2-any.pkg.tar.xz
+pacman -U --noconfirm python2-html2text-2014.9.25-2-any.pkg.tar.xz
 
 # python2-selenium
 # TODO: remove patch when the package is updated
@@ -72,4 +72,4 @@ paccache -rk0
 mkdir -p /usr/share/$APP/weboob
 git clone git://git.symlink.me/pub/oleg/weboob.git /usr/share/$APP/weboob
 cd /usr/share/$APP/weboob
-git checkout 573bae4
+git checkout 90a3b9b
