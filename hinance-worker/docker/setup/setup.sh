@@ -72,4 +72,4 @@ paccache -rk0
 mkdir -p /usr/share/$APP/weboob
 git clone git://git.symlink.me/pub/oleg/weboob.git /usr/share/$APP/weboob
 cd /usr/share/$APP/weboob
-git checkout 90a3b9b
+git checkout 1d7cf75
