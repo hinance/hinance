@@ -17,6 +17,10 @@ fi
 chmod 600 /etc/$APP/backends
 mkdir -p /var/{lib,log}/$APP
 
+for FILE in $(ls /etc/$APP/*.tar.gz.gpg); do
+  gpg2 --passphrase "$PASSPHRASE" --batch -d $FILE 2>/dev/null | tar -xz
+done
+
 run() {
   if docker ps|grep $APP >/dev/null ; then
     echo "Stopping old $APP container."
@@ -46,11 +50,7 @@ wait $RUN_PID
 
 echo "Backends to scrape: $(cat /var/lib/$APP/backends.txt)"
 
-echo -e "module Hinance.Bank.Data where\nimport Hinance.Bank.Type\n\
-import Hinance.Currency\nbanks = []" > /var/lib/$APP/bank_data.hs
-echo -e "module Hinance.Shop.Data where\nimport Hinance.Shop.Type\n\
-import Hinance.Currency\nshops = []" > /var/lib/$APP/shop_data.hs
-
+DATE=$(date +"%Y_%m_%d_%H_%M")
 for BACKEND in $(cat /var/lib/$APP/backends.txt) ; do
   while [ ! -e /var/lib/$APP/${BACKEND}_banks.hs ] ; do
     echo "Scraping backend $BACKEND"
@@ -77,8 +77,8 @@ for BACKEND in $(cat /var/lib/$APP/backends.txt) ; do
     docker cp hinance-worker:/tmp $DIR
     echo "Logs saved to $DIR"
   done
-  cat /var/lib/$APP/${BACKEND}_banks.hs >> /var/lib/$APP/bank_data.hs
-  cat /var/lib/$APP/${BACKEND}_shops.hs >> /var/lib/$APP/shop_data.hs
+  cat /var/lib/$APP/${BACKEND}_banks.hs >> /var/lib/$APP/banks_${DATE}.hs.part
+  cat /var/lib/$APP/${BACKEND}_shops.hs >> /var/lib/$APP/shops_${DATE}.hs.part
 done
 
 echo "Chewing."
@@ -86,7 +86,7 @@ run /usr/share/$APP/repo/$APP/docker/chew.sh
 wait $RUN_PID
 
 cd /var/lib/$APP
-tar -czf data.tar.gz bank_data.hs shop_data.hs chew.hs
+tar -czf data.tar.gz banks_*.hs.part shops_*.hs.part chew.hs
 cd /var/lib/$APP/report
 tar -czf /var/lib/$APP/report.tar.gz *
 cd /var/log/$APP

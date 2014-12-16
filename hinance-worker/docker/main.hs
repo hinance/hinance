@@ -28,6 +28,9 @@ chgsfinal = reverse.(sortBy (compare`on`ctime)).(concatMap addchanges)
                    .joinxfers.mergechgs$raw where
   raw = concat$(map changes.patched$banks)++(map changes.patched$shops)
 
+banks = banksraw
+shops = shopsraw
+
 tags x = filter (tagged x) [minBound::Tag ..]
 grouped = (/="").cgroup
 baldiff a = (-) (babalance a) $ foldl (+) 0 $ map btamount $ batrans a
