@@ -54,7 +54,9 @@ DATE=$(date +"%Y_%m_%d_%H_%M")
 for BACKEND in $(cat /var/lib/$APP/backends.txt) ; do
   while [ ! -e /var/lib/$APP/${BACKEND}_banks.hs ] ; do
     echo "Scraping backend $BACKEND"
-    run proxychains python2 -B /usr/share/$APP/repo/$APP/docker/scrape.py \
+    unset PROXY
+    if [[ "$PROXY_FOR_BACKENDS" =~ $BACKEND ]]; then PROXY=proxychains; fi
+    run $PROXY python2 -B /usr/share/$APP/repo/$APP/docker/scrape.py \
       -addv -b $BACKEND --logging-file /dev/null \
       -o /var/lib/$APP/$BACKEND \
       -H /var/lib/$APP/${BACKEND}_tick
