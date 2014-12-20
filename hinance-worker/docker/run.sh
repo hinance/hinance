@@ -13,7 +13,7 @@ if [ "$SOCKS_SSH_HOST" != "" ] ; then
   echo "$SOCKS_SSH_HOST" "$SOCKS_SSH_HOST_PUBKEY" > $HOME/.ssh/known_hosts
   echo "$SOCKS_SSH_USER_PVTKEY" > /var/lib/$APP/socks.pem
   chmod 600 /var/lib/$APP/socks.pem
-  ssh -fND $SOCKS_PORT -i /var/lib/$APP/socks.pem \
+  ssh -fND 51080 -i /var/lib/$APP/socks.pem \
     ${SOCKS_SSH_USER}@${SOCKS_SSH_HOST}
 fi
 

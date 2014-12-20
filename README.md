@@ -36,7 +36,6 @@ REPORT_HOST='<<<website host where to serve reports>>>'
 REPORT_PORT='<<<website port where to serve reports>>>'
 
 # Optional:
-SOCKS_PORT='<<<local socks server listening port>>>'
 SOCKS_SSH_HOST='<<<ssh tunnel host>>>'
 SOCKS_SSH_HOST_PUBKEY='<<<ssh tunnel host public key>>>'
 SOCKS_SSH_USER='<<<ssh tunnel user>>>'

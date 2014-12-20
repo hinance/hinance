@@ -23,9 +23,9 @@ pacman -Syyuu --noconfirm
 
 pacman -S --noconfirm --needed \
     base base-devel cabal-install firefox ghc git happy mupdf openssh \
-    python2-beautifulsoup3 python2-dateutil python2-feedparser python2-flake8 \
-    python2-gdata python2-irc python2-lxml python2-mechanize python2-pillow \
-    python2-requests python2-yaml xorg-server-xvfb
+    proxychains-ng python2-beautifulsoup3 python2-dateutil python2-feedparser \
+    python2-flake8 python2-gdata python2-irc python2-lxml python2-mechanize \
+    python2-pillow python2-requests python2-yaml xorg-server-xvfb
 
 #
 # AUR mirror
