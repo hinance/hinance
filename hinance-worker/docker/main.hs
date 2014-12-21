@@ -28,19 +28,20 @@ chgsfinal = reverse.(sortBy (compare`on`ctime)).(concatMap addchanges)
                    .joinxfers.mergechgs$raw where
   raw = concat$(map changes.patched$banks)++(map changes.patched$shops)
 
-banks = banksraw
-shops = shopsraw
+banks = map (foldl joinbs Bank{bid="",baccs=[]})$groupSortBy bid banksraw where
+  joinbs a b = b{baccs = concat $ groupSortBy baid $ (baccs a) ++ (baccs b)}
+shops = concat $ groupSortBy sid $ shopsraw
 
 tags x = filter (tagged x) [minBound::Tag ..]
 grouped = (/="").cgroup
+groupSortBy f = (groupBy $ on (==) f) . (sortBy $ on compare f)
 baldiff a = (-) (babalance a) $ foldl (+) 0 $ map btamount $ batrans a
 
 chkbalance a | baldiff a /= 0 = [printf "Account %s balance mismatch: %i"
                                  (baid a) (baldiff a)]
              | otherwise = [] :: [String]
 
-unbalgrps = (filter (((/=) 0).sum.map camount))
-            .(groupBy$on(==)cgroup).(sortBy$on compare cgroup)
+unbalgrps = filter (((/=) 0).sum.map camount) . groupSortBy cgroup
 
 mchgsplits as bs can = sortBy cmp splits where
   cmp = (on compare) (uncurry$(.)(.)(.)abs$on(-)ctime) `on` fst
@@ -50,8 +51,7 @@ mchgsplits as bs can = sortBy cmp splits where
   splits' hs (x:ts) = (x, hs ++ ts) : splits' (x:hs) ts
 
 joinxfers = joinxfers'.partition grouped where
-  joinxfers' (gcs, ngcs) = gcs ++ (concatMap xfers$byabs$ngcs)
-  byabs = (groupBy$on(==)$abs.camount).(sortBy$on compare$abs.camount)
+  joinxfers' (gcs,ngcs) = gcs++(concatMap xfers$groupSortBy (abs.camount)$ngcs)
   xfers = xfers1.partition ((<=0).camount)
   xfers1 (as, bs) | null mchg = as ++ bs
                   | otherwise = uncurry xfers2 $ head mchg where
@@ -61,8 +61,7 @@ joinxfers = joinxfers'.partition grouped where
       c' c = c{cgroup=printf "%i %i %i %i %s %s" (ctime a)
                (ctime b) (camount a) (camount b) (clabel a) (clabel b)}
 
-mergechgs = concatMap mrg.(groupBy$on(==)$camount)
-                         .(sortBy$on compare$camount) where
+mergechgs = concatMap mrg . groupSortBy camount where
   mrg = mrg1.partition grouped
   mrg1 (gs, ngs) | null mchg = gs ++ ngs
                  | otherwise = uncurry mrg2 $ head mchg where
