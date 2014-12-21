@@ -1,6 +1,7 @@
 module Main where
 import Data.Function
 import Data.List
+import Data.Monoid
 import Hinance.Currency
 import Hinance.Bank.Data
 import Hinance.Bank.Type
@@ -81,13 +82,20 @@ addchanges c@Change{cgroup=g, ctags=ts}
   c' = c{cgroup=printf "%i %i %s" (ctime c) (camount c) (clabel c)}
 
 class Mergeable a where
+  mtime :: a -> Integer
+  meq :: a -> a -> Bool
   merge :: [[a]] -> [a]
+  merge = merge' . reverse . sortBy cmp where
+    cmp x y = mconcat $ map (\fn -> (on compare (mtime.fn)) x y) [last, head]
+    merge' (x:xs) = foldl (++) x xs
 
 instance Mergeable BankTrans where
-  merge = concat
+  mtime BankTrans{bttime=t} = t
+  meq t1 t2 = bttime t1 == bttime t2 && btamount t1 == btamount t2
 
 instance Mergeable ShopOrder where
-  merge = concat
+  mtime ShopOrder{sotime=t} = t
+  meq = (==) `on` soid
 
 data Change = Change {camount::Integer, ctime::Integer, clabel::String,
   ccur::Currency, curl::String, cgroup::String, ctags::[Tag]}
