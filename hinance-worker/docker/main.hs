@@ -41,6 +41,7 @@ shops = map mrgss $ groupSortBy sid $ shopsraw where
 tags x = filter (tagged x) [minBound::Tag ..]
 grouped = (/="").cgroup
 groupSortBy f = (groupBy $ on (==) f) . (sortBy $ on compare f)
+splits xs = [splitAt i xs | i <- [0..length xs]]
 baldiff a = (-) (babalance a) $ foldl (+) 0 $ map btamount $ batrans a
 
 chkbalance a | baldiff a /= 0 = [printf "Account %s balance mismatch: %i"
@@ -87,7 +88,9 @@ class Mergeable a where
   merge :: [[a]] -> [a]
   merge = foldl1 merge2 . reverse . sortBy cmp where
     cmp x y = mconcat $ map (\fn -> (on compare (mtime.fn)) x y) [last, head]
-    merge2 xs1 xs2 = xs1 ++ xs2
+    merge2 xs1 xs2 = snd $ maximumBy (on compare $ length . fst) merges where
+      merges = [(t1, h1++t1++t2) | (h1,t1)<-splits xs1, (h2,t2)<-splits xs2,
+                length h2 >= length t1, all (uncurry meq)$on zip reverse h2 t1]
 
 instance Mergeable BankTrans where
   mtime BankTrans{bttime=t} = t
