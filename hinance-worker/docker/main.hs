@@ -28,9 +28,14 @@ chgsfinal = reverse.(sortBy (compare`on`ctime)).(concatMap addchanges)
                    .joinxfers.mergechgs$raw where
   raw = concat$(map changes.patched$banks)++(map changes.patched$shops)
 
-banks = map (foldl joinbs Bank{bid="",baccs=[]})$groupSortBy bid banksraw where
-  joinbs a b = b{baccs = map merge $ groupSortBy baid $ (baccs a) ++ (baccs b)}
-shops = map merge $ groupSortBy sid $ shopsraw
+banks = map (mrgbacs.mrgbs) $ groupSortBy bid banksraw where
+  mrgbs (b:bs) = foldl (\a x -> x{baccs = (baccs a) ++ (baccs x)}) b bs
+  mrgbacs b = b{baccs = map mrgacs $ groupSortBy baid $ baccs b}
+  mrgacs acs = newest{batrans = merge $ map batrans acs} where
+    newest = maximumBy (on compare (bttime.head.batrans)) acs
+
+shops = map mrgss $ groupSortBy sid $ shopsraw where
+  mrgss (s:ss) = s{sorders = merge $ map sorders (s:ss)}
 
 tags x = filter (tagged x) [minBound::Tag ..]
 grouped = (/="").cgroup
@@ -76,13 +81,13 @@ addchanges c@Change{cgroup=g, ctags=ts}
   c' = c{cgroup=printf "%i %i %s" (ctime c) (camount c) (clabel c)}
 
 class Mergeable a where
-  merge :: [a] -> a
+  merge :: [[a]] -> [a]
 
-instance Mergeable BankAcc where
-  merge (a:as) = foldl (\a x -> x{batrans=(batrans a) ++ (batrans x)}) a as
+instance Mergeable BankTrans where
+  merge = concat
 
-instance Mergeable Shop where
-  merge (s:ss) = foldl (\a x -> x{sorders=(sorders a) ++ (sorders x)}) s ss
+instance Mergeable ShopOrder where
+  merge = concat
 
 data Change = Change {camount::Integer, ctime::Integer, clabel::String,
   ccur::Currency, curl::String, cgroup::String, ctags::[Tag]}
