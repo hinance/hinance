@@ -93,11 +93,11 @@ class Mergeable a where
                 length h2 >= length t1, all (uncurry meq)$on zip reverse h2 t1]
 
 instance Mergeable BankTrans where
-  mtime BankTrans{bttime=t} = t
+  mtime = bttime
   meq t1 t2 = bttime t1 == bttime t2 && btamount t1 == btamount t2
 
 instance Mergeable ShopOrder where
-  mtime ShopOrder{sotime=t} = t
+  mtime = sotime
   meq = (==) `on` soid
 
 data Change = Change {camount::Integer, ctime::Integer, clabel::String,
