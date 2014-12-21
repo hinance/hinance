@@ -30,7 +30,7 @@ chgsfinal = reverse.(sortBy (compare`on`ctime)).(concatMap addchanges)
   raw = concat$(map changes.patched$banks)++(map changes.patched$shops)
 
 banks = map (mrgbacs.mrgbs) $ groupSortBy bid banksraw where
-  mrgbs (b:bs) = foldl (\a x -> x{baccs = (baccs a) ++ (baccs x)}) b bs
+  mrgbs = foldl1 (\a x -> x{baccs = (baccs a) ++ (baccs x)})
   mrgbacs b = b{baccs = map mrgacs $ groupSortBy baid $ baccs b}
   mrgacs acs = newest{batrans = merge $ map batrans acs} where
     newest = maximumBy (on compare (bttime.head.batrans)) acs
@@ -85,9 +85,8 @@ class Mergeable a where
   mtime :: a -> Integer
   meq :: a -> a -> Bool
   merge :: [[a]] -> [a]
-  merge = merge' . reverse . sortBy cmp where
+  merge = foldl1 merge2 . reverse . sortBy cmp where
     cmp x y = mconcat $ map (\fn -> (on compare (mtime.fn)) x y) [last, head]
-    merge' (x:xs) = foldl merge2 x xs
     merge2 xs1 xs2 = xs1 ++ xs2
 
 instance Mergeable BankTrans where
