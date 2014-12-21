@@ -87,7 +87,8 @@ class Mergeable a where
   merge :: [[a]] -> [a]
   merge = merge' . reverse . sortBy cmp where
     cmp x y = mconcat $ map (\fn -> (on compare (mtime.fn)) x y) [last, head]
-    merge' (x:xs) = foldl (++) x xs
+    merge' (x:xs) = foldl merge2 x xs
+    merge2 xs1 xs2 = xs1 ++ xs2
 
 instance Mergeable BankTrans where
   mtime BankTrans{bttime=t} = t
