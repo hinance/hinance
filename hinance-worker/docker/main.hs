@@ -29,8 +29,8 @@ chgsfinal = reverse.(sortBy (compare`on`ctime)).(concatMap addchanges)
   raw = concat$(map changes.patched$banks)++(map changes.patched$shops)
 
 banks = map (foldl joinbs Bank{bid="",baccs=[]})$groupSortBy bid banksraw where
-  joinbs a b = b{baccs = concat $ groupSortBy baid $ (baccs a) ++ (baccs b)}
-shops = concat $ groupSortBy sid $ shopsraw
+  joinbs a b = b{baccs = map merge $ groupSortBy baid $ (baccs a) ++ (baccs b)}
+shops = map merge $ groupSortBy sid $ shopsraw
 
 tags x = filter (tagged x) [minBound::Tag ..]
 grouped = (/="").cgroup
@@ -74,6 +74,15 @@ addchanges c@Change{cgroup=g, ctags=ts}
   | g==""&&addtagged ts/=[] = [c', c'{camount=(-camount c),ctags=addtagged ts}]
   | otherwise = [c] where
   c' = c{cgroup=printf "%i %i %s" (ctime c) (camount c) (clabel c)}
+
+class Mergeable a where
+  merge :: [a] -> a
+
+instance Mergeable BankAcc where
+  merge (a:as) = foldl (\a x -> x{batrans=(batrans a) ++ (batrans x)}) a as
+
+instance Mergeable Shop where
+  merge (s:ss) = foldl (\a x -> x{sorders=(sorders a) ++ (sorders x)}) s ss
 
 data Change = Change {camount::Integer, ctime::Integer, clabel::String,
   ccur::Currency, curl::String, cgroup::String, ctags::[Tag]}
