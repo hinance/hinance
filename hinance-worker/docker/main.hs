@@ -58,7 +58,8 @@ mchgsplits as bs can = sortBy cmp splits where
   splits' hs (x:ts) = (x, hs ++ ts) : splits' (x:hs) ts
 
 joinxfers = joinxfers'.partition grouped where
-  joinxfers' (gcs,ngcs) = gcs++(concatMap xfers$groupSortBy (abs.camount)$ngcs)
+  joinxfers' (gcs,ngcs) = gcs++(concatMap xfers$groupSortBy crit$ngcs)
+  crit x = (ccur x, abs $ camount x)
   xfers = xfers1.partition ((<=0).camount)
   xfers1 (as, bs) | null mchg = as ++ bs
                   | otherwise = uncurry xfers2 $ head mchg where
@@ -68,7 +69,7 @@ joinxfers = joinxfers'.partition grouped where
       c' c = c{cgroup=printf "%i %i %i %i %s %s" (ctime a)
                (ctime b) (camount a) (camount b) (clabel a) (clabel b)}
 
-mergechgs = concatMap mrg . groupSortBy camount where
+mergechgs = concatMap mrg . groupSortBy (\x -> (ccur x, camount x)) where
   mrg = mrg1.partition grouped
   mrg1 (gs, ngs) | null mchg = gs ++ ngs
                  | otherwise = uncurry mrg2 $ head mchg where
