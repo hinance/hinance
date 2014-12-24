@@ -16,9 +16,10 @@ import Text.Printf
 main = do
   let nchgs = filter (not.grouped) chgsfinal
   let ugrps = unbalgrps chgsfinal
+  let mparts = concatMap (\(a,b) -> a++b) chkparts
   putStrLn "-- Checks:"
   putStrLn.ppShow.concat.map (concat.map chkbalance.baccs).patched$banks
-  putStrLn "\n-- Partitions mismatch:"
+  putStrLn$printf "\n-- Partitions mismatch (%i):" (length mparts)
   putStrLn.ppShow$chkparts
   putStrLn$printf "\n-- Changes without groups (%i):" (length nchgs)
   putStrLn.ppShow$nchgs
@@ -126,7 +127,7 @@ instance Changeable Bank where
 instance Changeable Shop where
   changes s = concat
     [ [ Change { camount=a, ctime=sotime o, curl="", clabel=l,
-                 ccur=scurrency s, cgroup=g' o, ctags=tags (s,o) }
+                 ccur=scurrency s, cgroup=g' o, ctags=tags (s,o,l) }
       | (l,a) <- [("discount", sodiscount o),
                   ("shipping", soshipping o),
                   ("tax", sotax o)], a /= 0]
