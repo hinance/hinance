@@ -18,6 +18,8 @@ main = do
   let ugrps = unbalgrps chgsfinal
   putStrLn "-- Checks:"
   putStrLn.ppShow.concat.map (concat.map chkbalance.baccs).patched$banks
+  putStrLn "\n-- Partitions mismatch:"
+  putStrLn.ppShow$chkparts
   putStrLn$printf "\n-- Changes without groups (%i):" (length nchgs)
   putStrLn.ppShow$nchgs
   putStrLn$printf "\n-- Unbalanced groups (%i):" (length ugrps)
@@ -47,6 +49,13 @@ baldiff a = (-) (babalance a) $ foldl (+) 0 $ map btamount $ batrans a
 chkbalance a | baldiff a /= 0 = [printf "Account %s balance mismatch: %i"
                                  (baid a) (baldiff a)]
              | otherwise = [] :: [String]
+
+chkparts = map chk tagparts where
+  chk (wf, pfs) = (srt $ whole \\ parts, srt $ parts \\ whole) where
+    srt = reverse.(sortBy (compare `on` ctime))
+    whole = sort $ filter (\Change{ctags=ts} -> wf ts) chgsfinal
+    parts = sort $ concatMap part pfs
+    part pf = filter (\Change{ctags=ts}->pf ts) whole
 
 unbalgrps = filter (((/=) 0).sum.map camount) . groupSortBy cgroup
 
@@ -103,7 +112,7 @@ instance Mergeable ShopOrder where
 
 data Change = Change {camount::Integer, ctime::Integer, clabel::String,
   ccur::Currency, curl::String, cgroup::String, ctags::[Tag]}
-  deriving (Read, Show)
+  deriving (Read, Show, Ord, Eq)
 
 class Changeable a where
   changes :: a -> [Change]
