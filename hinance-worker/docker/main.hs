@@ -19,12 +19,12 @@ main = do
   let mparts = concatMap (\(a,b) -> a++b) chkparts
   putStrLn "-- Checks:"
   putStrLn.ppShow.concat.map (concat.map chkbalance.baccs).patched$banks
-  putStrLn$printf "\n-- Partitions mismatch (%i):" (length mparts)
-  putStrLn.ppShow$chkparts
   putStrLn$printf "\n-- Changes without groups (%i):" (length nchgs)
   putStrLn.ppShow$nchgs
   putStrLn$printf "\n-- Unbalanced groups (%i):" (length ugrps)
   putStrLn.ppShow$ugrps
+  putStrLn$printf "\n-- Partitions mismatch (%i):" (length mparts)
+  putStrLn.ppShow$chkparts
   putStrLn$printf "\n-- All changes (%i):" (length chgsfinal)
   putStrLn.ppShow$chgsfinal
 
