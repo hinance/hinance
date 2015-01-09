@@ -14,19 +14,18 @@ import Text.Show.Pretty
 import Text.Printf
 
 main = do
-  let nchgs = filter (not.grouped) chgsfinal
-  let ugrps = unbalgrps chgsfinal
-  let mparts = concatMap (\(a,b) -> a++b) chkparts
-  putStrLn "-- Checks:"
-  putStrLn.ppShow.concat.map (concat.map chkbalance.baccs).patched$banks
-  putStrLn$printf "\n-- Changes without groups (%i):" (length nchgs)
-  putStrLn.ppShow$nchgs
-  putStrLn$printf "\n-- Unbalanced groups (%i):" (length ugrps)
-  putStrLn.ppShow$ugrps
-  putStrLn$printf "\n-- Partitions mismatch (%i):" (length mparts)
-  putStrLn.ppShow$chkparts
-  putStrLn$printf "\n-- All changes (%i):" (length chgsfinal)
-  putStrLn.ppShow$chgsfinal
+  putStrLn.concat $ intersperse "\n" diagnostics
+  putStrLn.ppShow $ chgsfinal
+
+diagnostics = [
+  "-- Checks:", ppShow.concat.map (concat.map chkbalance.baccs).patched$banks,
+  "", printf "-- Changes without groups (%i):" (length nchgs), ppShow$nchgs,
+  "", printf "-- Unbalanced groups (%i):" (length ugrps), ppShow$ugrps,
+  "", printf "-- Partitions mismatch (%i):" (length mparts), ppShow$chkparts,
+  "", printf "-- Total changes (%i)" (length chgsfinal)
+  ] where nchgs = filter (not.grouped) chgsfinal
+          ugrps = unbalgrps chgsfinal
+          mparts = concatMap (\(a,b) -> a++b) chkparts
 
 chgsfinal = reverse.(sortBy (compare`on`ctime)).(concatMap addchanges)
                    .joinxfers.mergechgs$raw where
