@@ -26,10 +26,5 @@ cd /tmp/$APP/chew.src
 lein cljsbuild once
 
 mkdir -p /var/lib/$APP/report
-cd /var/lib/$APP/report
-echo '<!DOCTYPE html><html lang="en"><head><title>chew</title>
-      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-      </head><body><pre>' > index.html
-echo -e "-- Generated on $(date)\n" >> index.html
-cat /var/lib/$APP/chew.hs >> index.html
-echo '</pre></body></html>' >> index.html
+cp -t /var/lib/$APP/report /tmp/$APP/chew.src/chew.js \
+  /usr/share/$APP/repo/$APP/docker/chew.html
