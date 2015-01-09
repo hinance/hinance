@@ -4,5 +4,5 @@
   :plugins [[lein-cljsbuild "1.0.4"]]
   :cljsbuild {
     :builds [{
-      :source-paths ["."]
+      :source-paths ["src-cljs"]
       :compiler {:output-to "chew.js" :optimizations :advanced}}]})
