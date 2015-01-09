@@ -4,7 +4,7 @@ set -e
 
 APP="hinance-worker"
 
-mkdir -p /tmp/$APP/chew.src/src-{hs,cljs}
+mkdir -p /tmp/$APP/chew.src/src-hs
 cp -t /tmp/$APP/chew.src/src-hs /etc/$APP/*.hs \
   /usr/share/$APP/repo/$APP/docker/src-hs/*
 cp -rt /tmp/$APP/chew.src /usr/share/$APP/repo/$APP/docker/{*.clj,src-cljs}
