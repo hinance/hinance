@@ -16,11 +16,12 @@ import Hinance.Currency\nshopsraw = []" >/tmp/$APP/chew.src/src-hs/shop_data.hs
 
 set +e
 cat /{etc,var/lib}/$APP/banks_*.hs.part>>/tmp/$APP/chew.src/src-hs/bank_data.hs
-cat /{etc,var/lib}/$APP/shops_*.hs.part>>/tmp/$APP/chew.src/src/hs/shop_data.hs
+cat /{etc,var/lib}/$APP/shops_*.hs.part>>/tmp/$APP/chew.src/src-hs/shop_data.hs
 set -e
 
 ghc -O -XFlexibleInstances -o /tmp/$APP/chew /tmp/$APP/chew.src/src-hs/*.hs
 
+echo 'Chewing.'
 /tmp/$APP/chew > /var/lib/$APP/chew.hs
 
 cd /tmp/$APP/chew.src
