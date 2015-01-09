@@ -22,10 +22,11 @@ pacman -Syyuu --noconfirm
 #
 
 pacman -S --noconfirm --needed \
-    base base-devel cabal-install firefox ghc git happy mupdf openssh \
-    proxychains-ng python2-beautifulsoup3 python2-dateutil python2-feedparser \
-    python2-flake8 python2-gdata python2-irc python2-lxml python2-mechanize \
-    python2-pillow python2-requests python2-yaml xorg-server-xvfb
+    base base-devel cabal-install firefox ghc git happy jdk8-openjdk mupdf \
+    openssh proxychains-ng python2-beautifulsoup3 python2-dateutil \
+    python2-feedparser python2-flake8 python2-gdata python2-irc python2-lxml \
+    python2-mechanize python2-pillow python2-requests python2-yaml \
+    xorg-server-xvfb
 
 #
 # AUR mirror
@@ -58,6 +59,15 @@ pacman -U --noconfirm python2-selenium-2.43.0-1-x86_64.pkg.tar.xz
 
 cabal update
 cabal install pretty-show-1.6.8 regex-tdfa-1.2.0
+
+#
+# Install Clojure stuff.
+#
+
+curl https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein \
+  > /usr/bin/lein
+chmod a+x /usr/bin/lein
+lein
 
 #
 # Removing unneeded stuff.
