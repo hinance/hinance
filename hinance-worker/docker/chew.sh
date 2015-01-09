@@ -16,10 +16,14 @@ cat /{etc,var/lib}/$APP/banks_*.hs.part >> /tmp/$APP/chew.src/bank_data.hs
 cat /{etc,var/lib}/$APP/shops_*.hs.part >> /tmp/$APP/chew.src/shop_data.hs
 set -e
 
-cp -t /tmp/$APP/chew.src /etc/$APP/*.hs /usr/share/$APP/repo/$APP/docker/*.hs
+cp -t /tmp/$APP/chew.src /etc/$APP/*.hs \
+  /usr/share/$APP/repo/$APP/docker/*.{hs,clj{,s}}
 ghc -O -XFlexibleInstances -o /tmp/$APP/chew /tmp/$APP/chew.src/*.hs
 
 /tmp/$APP/chew > /var/lib/$APP/chew.hs
+
+cd /tmp/$APP/chew.src
+lein cljsbuild once
 
 mkdir -p /var/lib/$APP/report
 cd /var/lib/$APP/report
