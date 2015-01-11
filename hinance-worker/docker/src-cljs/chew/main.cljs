@@ -1,6 +1,7 @@
-(ns chew
+(ns chew.main
   (:require [secretary.core :as secretary :refer-macros [defroute]]
-            [goog.events :as events])
+            [goog.events :as events]
+            [chew.data :as data])
   (:import goog.History
            goog.history.EventType))
 
@@ -28,6 +29,10 @@
 ;; /#/777
 (defroute jackpot-path "/777" []
   (set-html! application "<h1>YOU HIT THE JACKPOT!</h1>"))
+
+;; /#/data
+(defroute data-path "/data" []
+  (set-html! application (apply str data/checks)))
 
 ;; Catch all
 (defroute "*" []
