@@ -1,47 +1,20 @@
 (ns chew.main
-  (:require [secretary.core :as secretary :refer-macros [defroute]]
-            [goog.events :as events]
-            [chew.data :as data])
-  (:import goog.History
-           goog.history.EventType))
+  (:require [bidi.bidi :as bidi] [goog.events :as events] [chew.data :as data])
+  (:import goog.History goog.history.EventType))
 
-;; TODO: use https://github.com/juxt/bidi
+(defn set-html! [content]
+  (aset (js/document.getElementById "content") "innerHTML" content))
 
-(def application
-  (js/document.getElementById "application"))
+(def handlers {
+  :home #(set-html! "<h1>It's home!</h1>")
+  :diag #(set-html! "<h1>It's diag!</h1>")
+  :page #(set-html! (str "<h1>It's page " (% :id) "!</h1>"))})
 
-(defn set-html! [el content]
-  (aset el "innerHTML" content))
+(def routes ["/" {"home" :home "diag" :diag ["page/" :id] :page}])
 
-(secretary/set-config! :prefix "#")
+(defn handle! [path] (let [match (bidi/match-route routes path)]
+  ((handlers (match :handler)) (match :route-params))))
 
-;; /#/
-(defroute home-path "/" []
-  (set-html! application "<h1>OMG! YOU'RE HOME!</h1>"))
-
-;; /#/users
-(defroute user-path "/users" []
-  (set-html! application "<h1>USERS!</h1>"))
-
-;; /#/users/:id
-(defroute user-path "/users/:id" [id]
-  (let [message (str "<h1>HELLO USER <small>" id "</small>!</h1>")]
-    (set-html! application message)))
-
-;; /#/777
-(defroute jackpot-path "/777" []
-  (set-html! application "<h1>YOU HIT THE JACKPOT!</h1>"))
-
-;; /#/data
-(defroute data-path "/data" []
-  (set-html! application (apply str data/checks)))
-
-;; Catch all
-(defroute "*" []
-  (set-html! application "<h1>LOL! YOU LOST!</h1>"))
-
-;; Quick and dirty history configuration.
 (let [h (History.)]
-  (goog.events/listen h EventType.NAVIGATE #(secretary/dispatch! (.-token %)))
-  (doto h
-    (.setEnabled true)))
+  (events/listen h EventType.NAVIGATE #(handle! (.-token %)))
+  (doto h (.setEnabled true)))
