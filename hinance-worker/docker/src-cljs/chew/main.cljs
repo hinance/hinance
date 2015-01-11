@@ -5,6 +5,8 @@
   (:import goog.History
            goog.history.EventType))
 
+;; TODO: use https://github.com/juxt/bidi
+
 (def application
   (js/document.getElementById "application"))
 
