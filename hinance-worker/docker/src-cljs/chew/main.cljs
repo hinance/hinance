@@ -18,18 +18,18 @@
 (def routes ["" {"" :home "/diag" :diag}])
 
 (def handlers {
-  :home #(html! (page (concat
+  :home #(concat
     (if (== 0 (warns)) []
       [[:a {:href (str "#" (bidi.bidi/path-for routes :diag))}
         "There are " (str (warns)) " warnings"]])
-    [[:h1 "Changes:"]])))
-  :diag (fn [params] (html! (page (concat (map #(list
+    [[:h1 "Changes:"]])
+  :diag (fn [params] (concat (map #(list
       [:h1 (:title %) " (" (str (:warns %)) "):"]
       [:pre (clojure.string/join "\n" (:info %))]
-    ) chew.data/diag)))))})
+    ) chew.data/diag)))})
 
 (defn handle! [path] (let [match (bidi.bidi/match-route routes path)]
-  ((handlers (match :handler)) (match :route-params))))
+  (html! (page ((handlers (match :handler)) (match :route-params))))))
 
 (let [h (History.)]
   (goog.events/listen h EventType.NAVIGATE #(handle! (.-token %)))
