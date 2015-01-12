@@ -1,3 +1,3 @@
 (ns chew.type)
 
-(defrecord Diag [title warns msgs])
+(defrecord Diag [title warns info])

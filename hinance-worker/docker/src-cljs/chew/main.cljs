@@ -1,5 +1,6 @@
 (ns chew.main
-  (:require [bidi.bidi] [chew.data] [goog.events] [hiccups.runtime])
+  (:require [bidi.bidi] [chew.data] [clojure.string] [goog.events]
+            [hiccups.runtime])
   (:require-macros [hiccups.core])
   (:import goog.History goog.history.EventType))
 
@@ -9,7 +10,13 @@
 
 (def handlers {
   :home #(html! [:h1 "It's home!"])
-  :diag #(html! [:h1 "It's diag!"])
+  :diag (fn [params] (html! [
+    :div {:class "container"} [
+      :div {:class "row"} [
+        :div {:class "col-md-12"} (concat (map #(list
+          [:h1 (:title %) " (" (str (:warns %)) "):"]
+          [:pre (clojure.string/join "\n" (:info %))]
+        ) chew.data/diag))]]]))
   :page #(html! [:h1 "It's page " (% :id) "!"])})
 
 (def routes ["/" {"home" :home "diag" :diag ["page/" :id] :page}])
