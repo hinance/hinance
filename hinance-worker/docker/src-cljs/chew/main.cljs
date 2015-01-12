@@ -1,4 +1,6 @@
-(ns chew.main (:require [bidi.bidi] [chew.data] [goog.events] [sablono.core]))
+(ns chew.main
+  (:require [bidi.bidi] [chew.data] [goog.events] [dommy.core])
+  (:import goog.History goog.history.EventType))
 
 (defn set-html! [content]
   (aset (js/document.getElementById "content") "innerHTML" content))
@@ -13,6 +15,6 @@
 (defn handle! [path] (let [match (bidi.bidi/match-route routes path)]
   ((handlers (match :handler)) (match :route-params))))
 
-(let [h (goog.History.)]
-  (goog.events/listen h goog.history.EventType.NAVIGATE #(handle! (.-token %)))
+(let [h (History.)]
+  (goog.events/listen h EventType.NAVIGATE #(handle! (.-token %)))
   (doto h (.setEnabled true)))
