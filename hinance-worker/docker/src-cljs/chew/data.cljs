@@ -44,3 +44,13 @@
     ", ( [] , [] )"
     "]"])
 ])
+
+(def changes [
+  (chew.type/Change. 76900 1420588800 :USD
+    "UNIVERSITY OF TX DESC 150107 354847 YULIA VOROTYNTSEVA"
+    [:TagExpense :TagOther]
+    "")
+  (chew.type/Change. (- 76900) 1420588800 :USD
+    "UNIVERSITY OF TX DESC 150107 354847 YULIA VOROTYNTSEVA"
+    [:TagAsset :TagChecking1156 :TagVisa3725 :TagVisa5909 :TagUTDDesc :TagWellsFargo]
+    "")])
