@@ -1,6 +1,6 @@
 (ns chew.main
-  (:require [bidi.bidi] [chew.data] [clojure.string]
-            [goog.events] [hiccups.runtime])
+  (:require [bidi.bidi] [chew.data] [cljs-time.coerce] [cljs-time.format]
+            [clojure.string] [goog.events] [hiccups.runtime])
   (:require-macros [hiccups.core])
   (:import goog.History goog.history.EventType))
 
@@ -19,6 +19,14 @@
   :span {:style "white-space:nowrap"}
   (.toLocaleString (* 0.01 (:amount ch)) js/undefined
     (clj->js {:style "currency" :currency (:cur ch)}))))
+
+(defn date [unixtime]
+  (cljs-time.format/unparse
+    (cljs-time.format/formatter "yyyy-MM-dd")
+    (cljs-time.coerce/from-long (* 1000 unixtime))))
+
+(defn tag [t] (vector
+  :span {:class "label label-default"} (subs (str t) 4)))
 
 (def routes ["" {"" :home "/diag" :diag}])
 
@@ -43,10 +51,12 @@
            [:th {:class "text-right"} "Amount"]]]
        [:tbody (for [x chew.data/changes]
          [:tr
-           [:td (str (:time x))]
+           [:td (date (:time x))]
            [:td (if (empty? (:url x)) (:label x)
              [:a {:href (:url x)} (:label x)])]
-           [:td (str (:tags x))]
+           [:td
+             [:ul {:class "list-inline"}
+               (for [t (:tags x)] [:li (tag t)])]]
            [:td {:class "text-right"} (amount x)]])]]
      [:hr]
      [:p {:class "text-muted text-right"}
