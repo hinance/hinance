@@ -1,14 +1,16 @@
 (ns chew.main
-  (:require [bidi.bidi] [chew.data] [goog.events] [dommy.core])
+  (:require [bidi.bidi] [chew.data] [goog.events] [hiccups.runtime])
+  (:require-macros [hiccups.core])
   (:import goog.History goog.history.EventType))
 
-(defn set-html! [content]
-  (aset (js/document.getElementById "content") "innerHTML" content))
+(defn html! [content]
+  (aset (js/document.getElementById "content") "innerHTML"
+        (hiccups.core/html content)))
 
 (def handlers {
-  :home #(set-html! "<h1>It's home!</h1>")
-  :diag #(set-html! "<h1>It's diag!</h1>")
-  :page #(set-html! (str "<h1>It's page " (% :id) "!</h1>"))})
+  :home #(html! [:h1 "It's home!"])
+  :diag #(html! [:h1 "It's diag!"])
+  :page #(html! [:h1 "It's page " (% :id) "!"])})
 
 (def routes ["/" {"home" :home "diag" :diag ["page/" :id] :page}])
 
