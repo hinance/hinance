@@ -16,10 +16,9 @@
         :div {:class "col-md-12"} (concat (map #(list
           [:h1 (:title %) " (" (str (:warns %)) "):"]
           [:pre (clojure.string/join "\n" (:info %))]
-        ) chew.data/diag))]]]))
-  :page #(html! [:h1 "It's page " (% :id) "!"])})
+        ) chew.data/diag))]]]))})
 
-(def routes ["/" {"home" :home "diag" :diag ["page/" :id] :page}])
+(def routes ["" {"" :home "/diag" :diag}])
 
 (defn handle! [path] (let [match (bidi.bidi/match-route routes path)]
   ((handlers (match :handler)) (match :route-params))))
