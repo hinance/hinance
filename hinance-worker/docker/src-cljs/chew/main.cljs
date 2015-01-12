@@ -17,7 +17,7 @@
 
 (defn amount [ch] (vector
   :span {:style "white-space:nowrap"}
-  (.toLocaleString (* 0.01 (:amount ch)) "en-US"
+  (.toLocaleString (* 0.01 (:amount ch)) js/undefined
     (clj->js {:style "currency" :currency (:cur ch)}))))
 
 (def routes ["" {"" :home "/diag" :diag}])
