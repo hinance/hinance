@@ -20,8 +20,12 @@
 (def handlers {
   :home #(concat
     (if (== 0 (warns)) []
-      [[:a {:href (str "#" (bidi.bidi/path-for routes :diag))}
-        "There are " (str (warns)) " warnings"]])
+      [[:div {:class "alert alert-warning"}
+         [:strong "Warning!"]
+         " There are " (str (warns)) " validation errors ("
+         [:a {:href (str "#" (bidi.bidi/path-for routes :diag))}
+           "read full report"]
+         ")."]])
     [[:h1 "Changes:"]])
   :diag (fn [params] (concat (map #(list
       [:h1 (:title %) " (" (str (:warns %)) "):"]
