@@ -22,7 +22,10 @@ set -e
 ghc -O -XFlexibleInstances -o /tmp/$APP/chew /tmp/$APP/chew.src/src-hs/*.hs
 
 echo 'Chewing.'
-/tmp/$APP/chew > /var/lib/$APP/chew.hs
+echo -e "(ns chew.data (:require chew.type))\n\n\
+(def timestamp \"$(date +'%Y-%m-%d %H:%M %Z')\")" \
+  >/tmp/$APP/chew.src/src-cljs/chew/data.cljs
+/tmp/$APP/chew >>/tmp/$APP/chew.src/src-cljs/chew/data.cljs
 
 cd /tmp/$APP/chew.src
 lein cljsbuild once

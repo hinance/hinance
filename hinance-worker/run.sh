@@ -83,7 +83,6 @@ for BACKEND in $(cat /var/lib/$APP/backends.txt) ; do
   cat /var/lib/$APP/${BACKEND}_shops.hs >> /var/lib/$APP/shops_${DATE}.hs.part
 done
 
-echo "Chewing."
 run /usr/share/$APP/repo/$APP/docker/chew.sh
 wait $RUN_PID
 

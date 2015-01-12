@@ -14,18 +14,22 @@ import Text.Show.Pretty
 import Text.Printf
 
 main = do
-  putStrLn.concat $ intersperse "\n" diagnostics
+  putStrLn.concat $ intersperse "\n" $ [""] ++ diagnostics
   putStrLn.ppShow $ chgsfinal
 
-diagnostics = [
-  "-- Checks:", ppShow.concat.map (concat.map chkbalance.baccs).patched$banks,
-  "", printf "-- Changes without groups (%i):" (length nchgs), ppShow$nchgs,
-  "", printf "-- Unbalanced groups (%i):" (length ugrps), ppShow$ugrps,
-  "", printf "-- Partitions mismatch (%i):" (length mparts), ppShow$chkparts,
-  "", printf "-- Total changes (%i)" (length chgsfinal)
-  ] where nchgs = filter (not.grouped) chgsfinal
-          ugrps = unbalgrps chgsfinal
-          mparts = concatMap (\(a,b) -> a++b) chkparts
+diagnostics = concat [["(def diag ["],
+  (cljs "Checks" (length checks) checks),
+  (cljs "Changes without groups" (length nchgs) nchgs),
+  (cljs "Unbalanced groups" (length ugrps) ugrps),
+  (cljs "Partitions mismatch" (length mparts) chkparts),
+  ["])"]] where
+    nchgs = filter (not.grouped) chgsfinal
+    ugrps = unbalgrps chgsfinal
+    mparts = concatMap (\(a,b) -> a++b) chkparts
+    checks = concat.map (concat.map chkbalance.baccs).patched$banks
+    cljs s n xs = [printf "  (chew.type/Diag. \"%s\" %i [" s n] ++
+                   (map ((printf "    %s").show) (lines $ ppShow xs)) ++
+                   ["  ])"]
 
 chgsfinal = reverse.(sortBy (compare`on`ctime)).(concatMap addchanges)
                    .joinxfers.mergechgs$raw where

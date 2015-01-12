@@ -1,3 +1,5 @@
+;; TODO: remove this file
+
 (ns chew.data (:require chew.type))
 
 (def diag [
