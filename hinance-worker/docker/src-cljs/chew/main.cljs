@@ -28,13 +28,16 @@
 (defn tag [t] (vector
   :span {:class "label label-default"} (subs (str t) 4)))
 
-(def routes ["" {"" :home "/diag" :diag}])
+(def routes ["/" {"diag" :diag ["hist/" :ofs] :hist}])
+
+(defn ofs-chgs [ofs] (let [per-page 100]
+  (take per-page (drop (* ofs per-page) chew.data/changes))))
 
 (def handlers {
   :diag #(for [x chew.data/diag] (list
       [:h3 (:title x) " (" (str (:warns x)) "):"]
       [:pre (clojure.string/join "\n" (:info x))]))
-  :home #(concat
+  :hist #(concat
     (if (== 0 (warns)) []
       [[:div {:class "alert alert-warning"}
          [:strong "Warning!"]
@@ -49,7 +52,7 @@
            [:th "Description"]
            [:th "Tags"]
            [:th {:class "text-right"} "Amount"]]]
-       [:tbody (for [x chew.data/changes]
+       [:tbody (for [x (ofs-chgs (:ofs %))]
          [:tr
            [:td (date (:time x))]
            [:td (if (empty? (:url x)) (:label x)
