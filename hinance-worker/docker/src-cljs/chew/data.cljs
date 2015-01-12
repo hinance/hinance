@@ -54,3 +54,5 @@
     "UNIVERSITY OF TX DESC 150107 354847 YULIA VOROTYNTSEVA"
     [:TagAsset :TagChecking1156 :TagVisa3725 :TagVisa5909 :TagUTDDesc :TagWellsFargo]
     "http://www.utdallas.edu")])
+
+(def timestamp "2015-01-11 23:12 CST")

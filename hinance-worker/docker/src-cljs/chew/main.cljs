@@ -26,8 +26,7 @@
          [:a {:href (str "#" (bidi.bidi/path-for routes :diag))}
            "read full report"]
          ")."]])
-    [[:h1 "Changes:"]
-     [:table {:class "table table-striped"}
+    [[:table {:class "table table-striped"}
        [:thead
          [:tr
            [:th "Date"]
@@ -40,9 +39,12 @@
            [:td (if (empty? (:url x)) (:label x)
              [:a {:href (:url x)} (:label x)])]
            [:td (str (:tags x))]
-           [:td {:class "text-right"} (str (:amount x)) " " (:cur x)]])]]])
+           [:td {:class "text-right"} (str (:amount x)) " " (:cur x)]])]]
+     [:hr]
+     [:p {:class "text-muted text-right"}
+       "Generated on " chew.data/timestamp]])
   :diag #(for [x chew.data/diag] (list
-      [:h1 (:title x) " (" (str (:warns x)) "):"]
+      [:h3 (:title x) " (" (str (:warns x)) "):"]
       [:pre (clojure.string/join "\n" (:info x))]))})
 
 (defn handle! [path] (let [match (bidi.bidi/match-route routes path)]
