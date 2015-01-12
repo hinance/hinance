@@ -14,10 +14,9 @@ import Text.Show.Pretty
 import Text.Printf
 
 main = do
-  putStrLn.concat $ intersperse "\n" $ [""] ++ diagnostics
-  putStrLn.ppShow $ chgsfinal
+  putStrLn.concat $ intersperse "\n" $ concat $ [[""],diagscljs,[""],chgscljs]
 
-diagnostics = concat [["(def diag ["],
+diagscljs = concat [["(def diag ["],
   (cljs "Checks" (length checks) checks),
   (cljs "Changes without groups" (length nchgs) nchgs),
   (cljs "Unbalanced groups" (length ugrps) ugrps),
@@ -30,6 +29,18 @@ diagnostics = concat [["(def diag ["],
     cljs s n xs = [printf "  (chew.type/Diag. \"%s\" %i [" s n] ++
                    (map ((printf "    %s").show) (lines $ ppShow xs)) ++
                    ["  ])"]
+
+chgscljs = concat [["(def changes ["],(concat$map cljs chgsfinal),["])"]] where
+  cljs c = [printf "  (chew.type/Change. %s %i :%s"
+             (numcljs $ camount c) (ctime c) (show $ ccur c),
+            "    " ++ (show $ clabel c),
+            (printf "    [%s]" $ concat $ intersperse " " $
+              [printf ":%s" $ show t | t <- ctags c]),
+            printf "    %s)" (show $ curl c)]
+
+numcljs n
+  | n >= 0 = show n
+  | otherwise = printf "(- %s)" (show$abs n)
 
 chgsfinal = reverse.(sortBy (compare`on`ctime)).(concatMap addchanges)
                    .joinxfers.mergechgs$raw where
