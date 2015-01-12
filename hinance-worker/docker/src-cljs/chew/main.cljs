@@ -1,6 +1,6 @@
 (ns chew.main
-  (:require [bidi.bidi] [chew.data] [clojure.string] [goog.events]
-            [hiccups.runtime])
+  (:require [bidi.bidi] [chew.data] [clojure.string]
+            [goog.events] [hiccups.runtime])
   (:require-macros [hiccups.core])
   (:import goog.History goog.history.EventType))
 
@@ -15,9 +15,17 @@
     [:div {:class "row"}
       [:div {:class "col-md-12"} els]]))
 
+(defn amount [ch] (vector
+  :span {:style "white-space:nowrap"}
+  (.toLocaleString (* 0.01 (:amount ch)) "en-US"
+    (clj->js {:style "currency" :currency (:cur ch)}))))
+
 (def routes ["" {"" :home "/diag" :diag}])
 
 (def handlers {
+  :diag #(for [x chew.data/diag] (list
+      [:h3 (:title x) " (" (str (:warns x)) "):"]
+      [:pre (clojure.string/join "\n" (:info x))]))
   :home #(concat
     (if (== 0 (warns)) []
       [[:div {:class "alert alert-warning"}
@@ -39,13 +47,10 @@
            [:td (if (empty? (:url x)) (:label x)
              [:a {:href (:url x)} (:label x)])]
            [:td (str (:tags x))]
-           [:td {:class "text-right"} (str (:amount x)) " " (:cur x)]])]]
+           [:td {:class "text-right"} (amount x)]])]]
      [:hr]
      [:p {:class "text-muted text-right"}
-       "Generated on " chew.data/timestamp]])
-  :diag #(for [x chew.data/diag] (list
-      [:h3 (:title x) " (" (str (:warns x)) "):"]
-      [:pre (clojure.string/join "\n" (:info x))]))})
+       "Generated on " chew.data/timestamp]])})
 
 (defn handle! [path] (let [match (bidi.bidi/match-route routes path)]
   (html! (page ((handlers (match :handler)) (match :route-params))))))
