@@ -87,7 +87,7 @@ run /usr/share/$APP/repo/$APP/docker/chew.sh
 wait $RUN_PID
 
 cd /var/lib/$APP
-tar -czf data.tar.gz banks_*.hs.part shops_*.hs.part chew.hs
+tar -czf data.tar.gz banks_*.hs.part shops_*.hs.part
 cd /var/lib/$APP/report
 tar -czf /var/lib/$APP/report.tar.gz *
 cd /var/log/$APP
