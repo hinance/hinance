@@ -27,7 +27,7 @@
 (defn tag [t] (vector
   :span {:class "label label-default"} (subs (str t) 4)))
 
-(def routes ["/" {"diag" :diag ["hist/step/" :step "/ofs/" :ofs] :hist}])
+(def routes ["/" {"diag" :diag ["hist/step." :step "/ofs." :ofs] :hist}])
 
 (defn href [& args] (str "#" (apply bidi.bidi/path-for routes args)))
 
