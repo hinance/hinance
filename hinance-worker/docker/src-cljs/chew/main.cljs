@@ -49,10 +49,10 @@
        [:ul {:class "pager"}
          (if (pos? ofs)
            [:li {:class "previous"}
-             [:a {:href (href :hist :step step :ofs (dec ofs))} "Newer"]]
-           [:li {:class "previous disabled"} [:a "Newer"]])
+             [:a {:href (href :hist :step step :ofs (dec ofs))} "Older"]]
+           [:li {:class "previous disabled"} [:a "Older"]])
          [:li {:class "next"}
-           [:a {:href (href :hist :step step :ofs (inc ofs))} "Older"]]]]
+           [:a {:href (href :hist :step step :ofs (inc ofs))} "Newer"]]]]
      [:table {:class "table table-striped"}
        [:thead
          [:tr

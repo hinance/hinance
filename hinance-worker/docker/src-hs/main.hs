@@ -24,7 +24,7 @@ diagscljs = concat [["(def diag ["],
   (cljs "Partitions mismatch" (length mparts) chkparts),
   ["])"]] where
     nchgs = filter (not.grouped) chgsfinal
-    ugrps = unbalgrps chgsfinal
+    ugrps = unbalgrps $ filter grouped chgsfinal
     mparts = concatMap (\(a,b) -> a++b) chkparts
     checks = concat.map (concat.map chkbalance.baccs).patched$banks
     cljs s n xs = [printf "  (chew.type/Diag. \"%s\" %i [" s n] ++
@@ -43,8 +43,8 @@ numcljs n
   | n >= 0 = show n
   | otherwise = printf "(- %s)" (show$abs n)
 
-chgsfinal = reverse.(sortBy (compare`on`ctime)).(concatMap addchanges)
-                   .joinxfers.mergechgs$raw where
+chgsfinal = (sortBy (compare`on`ctime)).(concatMap addchanges)
+            .joinxfers.mergechgs$raw where
   raw = concat$(map changes.patched$banks)++(map changes.patched$shops)
 
 banks = map (mrgbacs.mrgbs) $ groupSortBy bid banksraw where
