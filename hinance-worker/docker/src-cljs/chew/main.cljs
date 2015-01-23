@@ -39,7 +39,7 @@
     (drop-while #(> tfrom (:time %)) chew.data/changes))))
 
 (defn diagram [step ofs len] (let
-  [margin-top 10 margin-bottom 10 margin-left 10 margin-right 10
+  [margin-left 5 margin-right 5 margin-top 5 margin-bottom 5
    cell-width 70 cell-space 10 bdr-round 8 bdr-col "#DDD" txt-col "#333"
    mark-space 10 mark-height 30 mark-ofs-x 35 mark-ofs-y 20
    cells-height 200
@@ -48,8 +48,6 @@
    total-height (+ margin-top cells-height cell-space cells-height
                    mark-space mark-height margin-bottom)]
   (vec (concat [:svg {:width (str total-width) :height (str total-height)}]
-    [[:rect {:width "100%" :height "100%" :fill "none" :stroke bdr-col
-             :rx (str bdr-round) :ry (str bdr-round)}]]
     (for [i (range len) :let [
           x (+ margin-left (* i (+ cell-width cell-space)))
           ty (+ margin-top (* 2 cells-height) cell-space mark-space)]]
@@ -90,7 +88,9 @@
          [:li {:class "next"}
            [:a {:href (href :hist :step step :ofs (inc ofs) :len len)}
             "Newer"]]]]
-     [:p {:class "text-center"} (diagram step ofs len)]
+     [:div {:class "panel panel-default"}
+       [:div {:class "panel-body text-center"}
+         (diagram step ofs len)]]
      [:span {:class "label label-default"} "default"]
      [:span {:class "label label-primary"} "primary"]
      [:span {:class "label label-info"} "info"]
