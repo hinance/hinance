@@ -35,7 +35,7 @@ chgscljs = concat [["(def changes ["],(concat$map cljs chgsfinal),["])"]] where
   cljs c = [printf "  (chew.type/Change. %s %i :%s"
              (numcljs $ camount c) (ctime c) (show $ ccur c),
             "    " ++ (show $ filter isAscii $ clabel c),
-            (printf "    [%s]" $ concat $ intersperse " " $
+            (printf "    #{%s}" $ concat $ intersperse " " $
               [printf ":%s" $ show t | t <- ctags c]),
             printf "    %s)" (show $ curl c)]
 

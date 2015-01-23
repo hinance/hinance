@@ -1,6 +1,7 @@
 (ns chew.main
-  (:require [bidi.bidi] [chew.data] [cljs.reader] [cljs-time.coerce]
-    [cljs-time.format] [clojure.string] [goog.events] [hiccups.runtime])
+  (:require [bidi.bidi] [chew.data] [chew.user] [cljs.reader]
+            [cljs-time.coerce] [cljs-time.format] [clojure.string]
+            [goog.events] [hiccups.runtime])
   (:require-macros [hiccups.core])
   (:import goog.History goog.history.EventType))
 
@@ -27,8 +28,8 @@
 (defn tag [t] (vector
   :span {:class "label label-default"} (subs (str t) 4)))
 
-(def routes ["/"
-  {"diag" :diag ["hist/step." :step "/ofs." :ofs "/len." :len] :hist}])
+(def routes ["/" {"diag" :diag
+  ["split." :split "/step." :step "/ofs." :ofs "/len." :len] :split}])
 
 (defn href [& args] (str "#" (apply bidi.bidi/path-for routes args)))
 
@@ -69,24 +70,28 @@
   :diag #(for [x chew.data/diag] (list
       [:h3 (:title x) " (" (str (:warns x)) "):"]
       [:pre (clojure.string/join "\n" (:info x))]))
-  :hist #(let [step (cljs.reader/read-string (:step %))
-               ofs (cljs.reader/read-string (:ofs %))
-               len (cljs.reader/read-string (:len %))] (concat
+  :split #(let [split (cljs.reader/read-string (:split %))
+                step (cljs.reader/read-string (:step %))
+                ofs (cljs.reader/read-string (:ofs %))
+                len (cljs.reader/read-string (:len %))] (concat
     (if (pos? (warns))
       [[:div {:class "alert alert-warning"}
          [:strong "Warning!"]
          " There are " (str (warns)) " validation errors ("
          [:a {:href (href :diag)} "read full report"]
          ")."]] [])
-    [[:nav
+    [[:h1 (:title (get chew.user/splits split))]
+     [:nav
        [:ul {:class "pager"}
          (if (pos? ofs)
            [:li {:class "previous"}
-             [:a {:href (href :hist :step step :ofs (dec ofs) :len len)}
+             [:a {:href (href :split :split split :step step
+                                     :ofs (dec ofs) :len len)}
               "Older"]]
            [:li {:class "previous disabled"} [:a "Older"]])
          [:li {:class "next"}
-           [:a {:href (href :hist :step step :ofs (inc ofs) :len len)}
+           [:a {:href (href :split :split split :step step
+                                   :ofs (inc ofs) :len len)}
             "Newer"]]]]
      [:div {:class "panel panel-default"}
        [:div {:class "panel-body text-center"}
