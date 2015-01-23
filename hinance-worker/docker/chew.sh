@@ -8,6 +8,7 @@ mkdir -p /tmp/$APP/chew.src/src-hs
 cp -t /tmp/$APP/chew.src/src-hs /etc/$APP/*.hs \
   /usr/share/$APP/repo/$APP/docker/src-hs/*
 cp -rt /tmp/$APP/chew.src /usr/share/$APP/repo/$APP/docker/{*.clj,src-cljs}
+cp /etc/$APP/*.cljs /tmp/$APP/chew.src/src-cljs/chew
 
 echo -e "module Hinance.Bank.Data where\nimport Hinance.Bank.Type\n\
 import Hinance.Currency\nbanksraw = []" >/tmp/$APP/chew.src/src-hs/bank_data.hs
