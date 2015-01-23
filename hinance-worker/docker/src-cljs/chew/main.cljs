@@ -66,6 +66,13 @@
                :x (str (+ x mark-ofs-x)) :y (str (+ ty mark-ofs-y))}
         (str (+ ofs i))]))))))
 
+(js/console.log (str (for [split chew.user/splits]
+  [(:title split)
+   (for [categ (:categs split)]
+    [(:title categ)
+     (apply + (map #(:amount %)
+       (filter #((:tag-filter categ) (:tags %)) chew.data/changes)))])])))
+
 (def handlers {
   :diag #(for [x chew.data/diag] (list
       [:h3 (:title x) " (" (str (:warns x)) "):"]
