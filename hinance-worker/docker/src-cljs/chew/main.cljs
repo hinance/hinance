@@ -4,8 +4,6 @@
   (:require-macros [hiccups.core])
   (:import goog.History goog.history.EventType))
 
-(def per-page 100)
-
 (defn html! [content]
   (aset (js/document.getElementById "content") "innerHTML" content))
 
@@ -29,17 +27,18 @@
 (defn tag [t] (vector
   :span {:class "label label-default"} (subs (str t) 4)))
 
-(def routes ["/" {"diag" :diag ["hist/" :ofs] :hist}])
+(def routes ["/" {"diag" :diag ["hist/step/" :step "/ofs/" :ofs] :hist}])
 
 (defn href [& args] (str "#" (apply bidi.bidi/path-for routes args)))
 
-(defn ofs-chgs [ofs] (take per-page (drop (* ofs per-page) chew.data/changes)))
+(defn ofs-chgs [step ofs] (take step (drop (* ofs step) chew.data/changes)))
 
 (def handlers {
   :diag #(for [x chew.data/diag] (list
       [:h3 (:title x) " (" (str (:warns x)) "):"]
       [:pre (clojure.string/join "\n" (:info x))]))
-  :hist #(let [ofs (cljs.reader/read-string (:ofs %))] (concat
+  :hist #(let [ofs (cljs.reader/read-string (:ofs %))
+               step (cljs.reader/read-string (:step %))] (concat
     (if (pos? (warns))
       [[:div {:class "alert alert-warning"}
          [:strong "Warning!"]
@@ -50,10 +49,10 @@
        [:ul {:class "pager"}
          (if (pos? ofs)
            [:li {:class "previous"}
-             [:a {:href (href :hist :ofs (dec ofs))} "Newer"]]
+             [:a {:href (href :hist :step step :ofs (dec ofs))} "Newer"]]
            [:li {:class "previous disabled"} [:a "Newer"]])
          [:li {:class "next"}
-           [:a {:href (href :hist :ofs (inc ofs))} "Older"]]]]
+           [:a {:href (href :hist :step step :ofs (inc ofs))} "Older"]]]]
      [:table {:class "table table-striped"}
        [:thead
          [:tr
@@ -61,7 +60,7 @@
            [:th "Description"]
            [:th "Tags"]
            [:th {:class "text-right"} "Amount"]]]
-       [:tbody (for [x (ofs-chgs ofs)]
+       [:tbody (for [x (ofs-chgs step ofs)]
          [:tr
            [:td (date (:time x))]
            [:td (if (empty? (:url x)) (:label x)
