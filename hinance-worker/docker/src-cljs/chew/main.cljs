@@ -27,18 +27,24 @@
 (defn tag [t] (vector
   :span {:class "label label-default"} (subs (str t) 4)))
 
-(def routes ["/" {"diag" :diag ["hist/step." :step "/ofs." :ofs] :hist}])
+(def routes ["/"
+  {"diag" :diag ["hist/step." :step "/ofs." :ofs "/len." :len] :hist}])
 
 (defn href [& args] (str "#" (apply bidi.bidi/path-for routes args)))
 
-(defn ofs-chgs [step ofs] (take step (drop (* ofs step) chew.data/changes)))
+(defn pick-chgs [step ofs len] (let
+  [tmin (:time (first chew.data/changes))
+   tfrom (+ tmin (* ofs step)) tto (+ tfrom (* len step))]
+  (take-while #(> tto (:time %))
+    (drop-while #(> tfrom (:time %)) chew.data/changes))))
 
 (def handlers {
   :diag #(for [x chew.data/diag] (list
       [:h3 (:title x) " (" (str (:warns x)) "):"]
       [:pre (clojure.string/join "\n" (:info x))]))
-  :hist #(let [ofs (cljs.reader/read-string (:ofs %))
-               step (cljs.reader/read-string (:step %))] (concat
+  :hist #(let [step (cljs.reader/read-string (:step %))
+               ofs (cljs.reader/read-string (:ofs %))
+               len (cljs.reader/read-string (:len %))] (concat
     (if (pos? (warns))
       [[:div {:class "alert alert-warning"}
          [:strong "Warning!"]
@@ -49,10 +55,12 @@
        [:ul {:class "pager"}
          (if (pos? ofs)
            [:li {:class "previous"}
-             [:a {:href (href :hist :step step :ofs (dec ofs))} "Older"]]
+             [:a {:href (href :hist :step step :ofs (dec ofs) :len len)}
+              "Older"]]
            [:li {:class "previous disabled"} [:a "Older"]])
          [:li {:class "next"}
-           [:a {:href (href :hist :step step :ofs (inc ofs))} "Newer"]]]]
+           [:a {:href (href :hist :step step :ofs (inc ofs) :len len)}
+            "Newer"]]]]
      [:table {:class "table table-striped"}
        [:thead
          [:tr
@@ -60,7 +68,7 @@
            [:th "Description"]
            [:th "Tags"]
            [:th {:class "text-right"} "Amount"]]]
-       [:tbody (for [x (ofs-chgs step ofs)]
+       [:tbody (for [x (pick-chgs step ofs len)]
          [:tr
            [:td (date (:time x))]
            [:td (if (empty? (:url x)) (:label x)
