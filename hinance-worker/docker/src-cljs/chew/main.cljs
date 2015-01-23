@@ -95,13 +95,12 @@
             "Newer"]]]]
      [:div {:class "panel panel-default"}
        [:div {:class "panel-body text-center"}
-         (diagram step ofs len)]]
-     [:span {:class "label label-default"} "default"]
-     [:span {:class "label label-primary"} "primary"]
-     [:span {:class "label label-info"} "info"]
-     [:span {:class "label label-success"} "success"]
-     [:span {:class "label label-warning"} "warning"]
-     [:span {:class "label label-danger"} "danger"]
+         (diagram step ofs len)
+         [:ul {:class "list-inline"}
+          (for [c (:categs (get chew.user/splits split))]
+           [:li [:span {:class "label" :style
+             (str "color:" (:fg-col c) ";background-color:" (:bg-col c))}
+             (:title c)]])]]]
      [:table {:class "table table-striped"}
        [:thead
          [:tr
