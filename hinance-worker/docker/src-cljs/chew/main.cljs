@@ -4,11 +4,10 @@
   (:require-macros [hiccups.core])
   (:import goog.History goog.history.EventType))
 
-(def per-page 20)
+(def per-page 100)
 
 (defn html! [content]
-  (aset (js/document.getElementById "content") "innerHTML"
-        (hiccups.core/html content)))
+  (aset (js/document.getElementById "content") "innerHTML" content))
 
 (defn warns [] (reduce + (map :warns chew.data/diag)))
 
@@ -75,9 +74,10 @@
      [:p {:class "text-muted text-right"}
        "Generated on " chew.data/timestamp]]))})
 
-(defn handle! [path] (let [match (bidi.bidi/match-route routes path)]
-  (html! (page ((handlers (match :handler)) (match :route-params))))))
+(def html-content (memoize (fn [path]
+  (let [m (bidi.bidi/match-route routes path)]
+    (hiccups.core/html (page ((handlers (m :handler)) (m :route-params))))))))
 
 (let [h (History.)]
-  (goog.events/listen h EventType.NAVIGATE #(handle! (.-token %)))
+  (goog.events/listen h EventType.NAVIGATE #(html! (html-content (.-token %))))
   (doto h (.setEnabled true)))
