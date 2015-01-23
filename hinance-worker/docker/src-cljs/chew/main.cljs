@@ -40,20 +40,32 @@
 
 (defn diagram [step ofs len] (let
   [margin-top 10 margin-bottom 10 margin-left 10 margin-right 10
-   cell-width 70 cell-space 5 bdr-round 8 bdr-col "#DDD"
+   cell-width 70 cell-space 10 bdr-round 8 bdr-col "#DDD" txt-col "#333"
+   mark-space 10 mark-height 30 mark-ofs-x 35 mark-ofs-y 20
    cells-height 200
    cells-width (- (* len (+ cell-width cell-space)) cell-space)
    total-width (+ margin-left cells-width margin-right)
-   total-height (+ margin-top cells-height margin-bottom)]
+   total-height (+ margin-top cells-height cell-space cells-height
+                   mark-space mark-height margin-bottom)]
   (vec (concat [:svg {:width (str total-width) :height (str total-height)}]
     [[:rect {:width "100%" :height "100%" :fill "none" :stroke bdr-col
              :rx (str bdr-round) :ry (str bdr-round)}]]
-    (for [i (range len)]
-      [:rect {:width (str cell-width) :height (str cells-height)
-              :rx (str bdr-round) :ry (str bdr-round) :stroke bdr-col
-              :fill "none"
-              :x (str (+ margin-left (* i (+ cell-width cell-space))))
-              :y (str margin-top)}])))))
+    (for [i (range len) :let [
+          x (+ margin-left (* i (+ cell-width cell-space)))
+          ty (+ margin-top (* 2 cells-height) cell-space mark-space)]]
+     (vector :g
+       [:rect {:width (str cell-width) :height (str cells-height) :fill "none"
+               :rx (str bdr-round) :ry (str bdr-round) :stroke bdr-col
+               :x (str x) :y (str margin-top)}]
+       [:rect {:width (str cell-width) :height (str cells-height) :fill "none"
+               :rx (str bdr-round) :ry (str bdr-round) :stroke bdr-col
+               :x (str x) :y (str (+ margin-top cells-height cell-space))}]
+       [:rect {:width (str cell-width) :height (str mark-height) :fill "none"
+               :rx (str bdr-round) :ry (str bdr-round) :stroke bdr-col
+               :x (str x) :y (str ty)}]
+       [:text {:text-anchor "middle" :fill txt-col
+               :x (str (+ x mark-ofs-x)) :y (str (+ ty mark-ofs-y))}
+        (str (+ ofs i))]))))))
 
 (def handlers {
   :diag #(for [x chew.data/diag] (list
@@ -78,7 +90,13 @@
          [:li {:class "next"}
            [:a {:href (href :hist :step step :ofs (inc ofs) :len len)}
             "Newer"]]]]
-     (diagram step ofs len)
+     [:p {:class "text-center"} (diagram step ofs len)]
+     [:span {:class "label label-default"} "default"]
+     [:span {:class "label label-primary"} "primary"]
+     [:span {:class "label label-info"} "info"]
+     [:span {:class "label label-success"} "success"]
+     [:span {:class "label label-warning"} "warning"]
+     [:span {:class "label label-danger"} "danger"]
      [:table {:class "table table-striped"}
        [:thead
          [:tr
