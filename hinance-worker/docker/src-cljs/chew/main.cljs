@@ -38,6 +38,23 @@
   (take-while #(> tto (:time %))
     (drop-while #(> tfrom (:time %)) chew.data/changes))))
 
+(defn diagram [step ofs len] (let
+  [margin-top 10 margin-bottom 10 margin-left 10 margin-right 10
+   cell-width 70 cell-space 5 bdr-round 8 bdr-col "#DDD"
+   cells-height 200
+   cells-width (- (* len (+ cell-width cell-space)) cell-space)
+   total-width (+ margin-left cells-width margin-right)
+   total-height (+ margin-top cells-height margin-bottom)]
+  (vec (concat [:svg {:width (str total-width) :height (str total-height)}]
+    [[:rect {:width "100%" :height "100%" :fill "none" :stroke bdr-col
+             :rx (str bdr-round) :ry (str bdr-round)}]]
+    (for [i (range len)]
+      [:rect {:width (str cell-width) :height (str cells-height)
+              :rx (str bdr-round) :ry (str bdr-round) :stroke bdr-col
+              :fill "none"
+              :x (str (+ margin-left (* i (+ cell-width cell-space))))
+              :y (str margin-top)}])))))
+
 (def handlers {
   :diag #(for [x chew.data/diag] (list
       [:h3 (:title x) " (" (str (:warns x)) "):"]
@@ -61,6 +78,7 @@
          [:li {:class "next"}
            [:a {:href (href :hist :step step :ofs (inc ofs) :len len)}
             "Newer"]]]]
+     (diagram step ofs len)
      [:table {:class "table table-striped"}
        [:thead
          [:tr
