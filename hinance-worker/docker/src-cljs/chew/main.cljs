@@ -74,11 +74,12 @@
     [:a {:xlink:href (href :split :split split :step step :ofs ofs
                        :len len :sel-ofs cofs :sel-cat icat)}
       [:rect (merge (if (and (= sel-ofs cofs) (= sel-cat icat))
-        {:stroke (cfg :sel-col) :stroke-width (str (cfg :sel-width))}
-        {:stroke (cfg :bdr-col)})
-        {:width (str (cfg :cell-width)) :height (str height)
-         :fill (:bg-col categ) :rx (str (cfg :bdr-round))
-         :ry (str (cfg :bdr-round)) :x "0" :y ((dir height) :y)})]
+        {:stroke (cfg :sel-col) :stroke-width (str (cfg :sel-width))
+         :height (str (- height (* 2 (cfg :sel-width))))
+         :y (+ ((dir height) :y) (cfg :sel-width))}
+        {:stroke (cfg :bdr-col) :height (str height) :y ((dir height) :y)})
+        {:width (str (cfg :cell-width)) :fill (:bg-col categ)
+         :rx (str (cfg :bdr-round)) :ry (str (cfg :bdr-round)) :x "0"})]
       [:text {:text-anchor "middle" :fill (:fg-col categ)
               :x (str (cfg :mark-ofs-x))
               :y (str (+ (cfg :mark-ofs-y) ((dir height) :y)))}
@@ -87,8 +88,8 @@
       [:g {:transform (str "translate(0," ((dir height) :next-y) ")")}
        (svg-stack split step ofs len sel-ofs sel-cat dir column irest)])))))
 
-(defn stack-up   [h] (hash-map :y (- 0 h) :next-y (- h)))
-(defn stack-down [h] (hash-map :y 0       :next-y h))
+(defn stack-up   [h] (hash-map :y (- h) :next-y (- h)))
+(defn stack-down [h] (hash-map :y 0     :next-y h))
 
 (def sum-split-amounts (memoize (fn [split step cofs]
   (apply + (for [categ (:categs (chew.user/splits split))
