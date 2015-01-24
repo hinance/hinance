@@ -54,9 +54,9 @@
    categ-amount (fn [categ cofs amount-ftr] (apply + (map #(:amount %) (filter
      #(and ((:tag-filter categ) (:tags %)) (amount-ftr (:amount %)))
      (pick-chgs step cofs 1)))))
-   categ-stack (fn self [dir items] (let
+   categ-stack (fn self [dir items] (if (empty? items) [:g] (let
      [[[amount categ] & irest] (seq items)]
-     (vector :g
+     (if (zero? amount) (self dir irest) (vector :g
        [:rect {:width (str cell-width) :height (str mark-height)
                :rx (str bdr-round) :ry (str bdr-round) :stroke bdr-col
                :fill (:bg-col categ) :x "0" :y (dir :y)}]
@@ -65,14 +65,15 @@
         (str amount)]
        (if (empty? irest) [:g]
          [:g {:transform (str "translate(0," (dir :next-y) ")")}
-          (self dir irest)]))))]
+          (self dir irest)]))))))]
   (vec (concat [:svg {:width (str total-width) :height (str total-height)}]
     (for [column (range len) :let [
           x (+ margin-left (* column (+ cell-width cell-space)))
           ty (+ margin-top (* 2 cells-height) cell-space mark-space)
           stack-items (fn [amount-ftr] (for
-            [categ (:categs (chew.user/splits split))]
-            [(categ-amount categ (+ ofs column) amount-ftr) categ]))]]
+            [categ (:categs (chew.user/splits split)) :let
+             [amount (categ-amount categ (+ ofs column) amount-ftr)]]
+            [(int (/ amount 100)) categ]))]]
      (vector :g
        [:g {:transform (str "translate(" x ","
               (+ margin-top cells-height) ")")}
