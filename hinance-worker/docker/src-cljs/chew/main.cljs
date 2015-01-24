@@ -65,32 +65,35 @@
                   (for [t (:tags x)] [:li (tag t)])]]
            [:td {:class "text-right"} (amount x)]])]]))))
 
+(defn svg-stack [split step ofs len sel-ofs sel-cat dir cofs items]
+  (js/console.log "svg-stack")
+  (if (empty? items) [:g] (let
+  [sel-col "#000" sel-width 5 bdr-round 8 bdr-col "#DDD" cell-width 70
+   mark-ofs-x 35 mark-ofs-y 20
+   [[amount height icat categ] & irest] (seq items)]
+  (vector :g
+    [:a {:xlink:href (href :split :split split :step step :ofs ofs
+                       :len len :sel-ofs cofs :sel-cat icat)}
+      [:rect (merge (if (and (= sel-ofs cofs) (= sel-cat icat))
+        {:stroke sel-col :stroke-width (str sel-width)}
+        {:stroke bdr-col})
+        {:width (str cell-width) :height (str height) :fill (:bg-col categ)
+         :rx (str bdr-round) :ry (str bdr-round)
+         :x "0" :y ((dir height) :y)})]
+      [:text {:text-anchor "middle" :fill (:fg-col categ)
+              :x (str mark-ofs-x) :y (str (+ mark-ofs-y ((dir height) :y)))}
+        (str amount)]]
+    (if (empty? irest) [:g]
+      [:g {:transform (str "translate(0," ((dir height) :next-y) ")")}
+       (svg-stack split step ofs len sel-ofs sel-cat dir cofs irest)])))))
+
 (defn split-diagram [split step ofs len sel-ofs sel-cat] (js/console.log "split-diagram") (let
   [margin-left 5 margin-right 5 margin-top 5 margin-bottom 5
    cell-width 70 cell-space 10 bdr-round 8 bdr-col "#DDD" txt-col "#333"
-   amount-scale 0.001 sel-col "#000" sel-width 5
+   amount-scale 0.001
    mark-space 10 mark-height 30 mark-ofs-x 35 mark-ofs-y 20
    stack-up   (fn [h] (hash-map :y (- 0 h) :next-y (- h)))
    stack-down (fn [h] (hash-map :y 0       :next-y h))
-   svg-stack (fn self [dir cofs items]
-     (js/console.log "svg-stack")
-     (if (empty? items) [:g] (let
-     [[[amount height icat categ] & irest] (seq items)]
-     (vector :g
-       [:a {:xlink:href (href :split :split split :step step :ofs ofs
-                          :len len :sel-ofs cofs :sel-cat icat)}
-         [:rect (merge (if (and (= sel-ofs cofs) (= sel-cat icat))
-           {:stroke sel-col :stroke-width (str sel-width)}
-           {:stroke bdr-col})
-           {:width (str cell-width) :height (str height) :fill (:bg-col categ)
-            :rx (str bdr-round) :ry (str bdr-round)
-            :x "0" :y ((dir height) :y)})]
-         [:text {:text-anchor "middle" :fill (:fg-col categ)
-                 :x (str mark-ofs-x) :y (str (+ mark-ofs-y ((dir height) :y)))}
-           (str amount)]]
-       (if (empty? irest) [:g]
-         [:g {:transform (str "translate(0," ((dir height) :next-y) ")")}
-          (self dir cofs irest)])))))
    stack-items (fn [column amount-ftr] (sort-by (comp Math/abs first) < (for
      [[icat categ] (map-indexed vector (:categs (chew.user/splits split))) :let
       [amount (categ-amount step categ (+ ofs column) amount-ftr)
@@ -113,7 +116,8 @@
      (vector :g
        [:g {:transform (str "translate(" x ","
               (+ margin-top cells-height-pos) ")")}
-        (svg-stack stack-up cofs (stack-items column pos?))]
+        (svg-stack split step ofs len sel-ofs sel-cat stack-up cofs
+          (stack-items column pos?))]
        [:rect {:width (str cell-width) :height (str mark-height) :fill "none"
                :rx (str bdr-round) :ry (str bdr-round) :stroke bdr-col
                :x (str x) :y (str mark-y)}]
@@ -122,7 +126,8 @@
         (str cofs)]
        [:g {:transform (str "translate(" x ","
               (+ mark-y mark-height mark-space) ")")}
-        (svg-stack stack-down cofs (stack-items column neg?))]))))))
+        (svg-stack split step ofs len sel-ofs sel-cat stack-down cofs
+          (stack-items column neg?))]))))))
 
 (def handlers {
   :diag #(for [x chew.data/diag] (list
