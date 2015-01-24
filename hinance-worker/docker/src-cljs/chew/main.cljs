@@ -40,24 +40,20 @@
 
 (defn href [& args] (str "#" (apply bidi.bidi/path-for routes args)))
 
-(defn pick-chgs [step ofs len] (js/console.log "pick-chgs") (let
+(defn pick-chgs [step ofs len] (let
   [tmin (:time (first chew.data/changes))
    tfrom (+ tmin (* ofs step)) tto (+ tfrom (* len step))]
   (take-while #(> tto (:time %))
     (drop-while #(> tfrom (:time %)) chew.data/changes))))
 
 (def categ-amounts (memoize (fn [step categ cofs]
-  (js/console.log "categ-amounts")
   (map :amount (filter #((:tag-filter categ) (:tags %))
                        (pick-chgs step cofs 1))))))
 
 (def categ-amount (memoize (fn [step categ cofs amount-ftr]
-  (js/console.log "categ-amount")
   (apply + (filter amount-ftr (categ-amounts step categ cofs))))))
 
-(def chgs-table (memoize (fn [split step sel-ofs sel-cat]
-  (js/console.log "chgs-table")
-  (hiccups.core/html
+(def chgs-table (memoize (fn [split step sel-ofs sel-cat] (hiccups.core/html
   [:table {:class "table table-striped"}
     [:thead [:tr [:th "Date"] [:th "Description"] [:th "Tags"]
                  [:th {:class "text-right"} "Amount"]]]
@@ -72,7 +68,6 @@
            [:td {:class "text-right"} (amount x)]])]]))))
 
 (defn svg-stack [split step ofs len sel-ofs sel-cat dir column items]
-  (js/console.log "svg-stack")
   (if (empty? items) [:g] (let
   [cofs (+ column ofs) [[amount height icat categ] & irest] (seq items)]
   (vector :g
@@ -103,7 +98,12 @@
      :when (not (zero? amount))]
     [(int (/ amount 100)) height icat categ])))
 
-(defn split-diagram [split step ofs len sel-ofs sel-cat] (js/console.log "split-diagram") (let
+(def svg-stack-render (memoize (fn
+  [dir amount-ftr split step ofs len sel-ofs sel-cat column]
+  (hiccups.core/html (svg-stack split step ofs len sel-ofs sel-cat dir column
+                       (stack-items split step ofs column amount-ftr))))))
+
+(defn split-diagram [split step ofs len sel-ofs sel-cat] (let
   [max-stack-height (fn [amount-ftr] (apply max (for [column (range len)]
      (apply + (map second (stack-items split step ofs column amount-ftr))))))
    cells-height-pos (max-stack-height pos?)
@@ -117,12 +117,15 @@
   (vec (concat [:svg {:width (str total-width) :height (str total-height)}]
     (for [column (range len) :let [
           x (+ (cfg :margin-left) (* column cell-wspace))
-          mark-y (+ (cfg :margin-top) cells-height-pos (cfg :mark-space))]]
+          mark-y (+ (cfg :margin-top) cells-height-pos (cfg :mark-space))
+          selected (= sel-ofs (+ column ofs))
+          sel-ofs-cached (if selected sel-ofs (- 1))
+          sel-cat-cached (if selected sel-cat (- 1))]]
      (vector :g
        [:g {:transform (str "translate(" x ","
               (+ (cfg :margin-top) cells-height-pos) ")")}
-        (svg-stack split step ofs len sel-ofs sel-cat stack-up column
-          (stack-items split step ofs column pos?))]
+        (svg-stack-render stack-up pos? split step ofs len sel-ofs-cached
+                          sel-cat-cached column)]
        [:rect {:width (str (cfg :cell-width)) :height (str (cfg :mark-height))
                :fill "none" :stroke (cfg :bdr-col) :rx (str (cfg :bdr-round))
                :ry (str (cfg :bdr-round)) :x (str x) :y (str mark-y)}]
@@ -132,14 +135,14 @@
         (str (+ ofs column))]
        [:g {:transform (str "translate(" x ","
               (+ mark-y (cfg :mark-height) (cfg :mark-space)) ")")}
-        (svg-stack split step ofs len sel-ofs sel-cat stack-down column
-          (stack-items split step ofs column neg?))]))))))
+        (svg-stack-render stack-down neg? split step ofs len sel-ofs-cached
+                          sel-cat-cached column)]))))))
 
 (def handlers {
   :diag #(for [x chew.data/diag] (list
       [:h3 (:title x) " (" (str (:warns x)) "):"]
       [:pre (clojure.string/join "\n" (:info x))]))
-  :split (fn [params] (js/console.log "handlers:split")
+  :split (fn [params]
           (let [split (cljs.reader/read-string (:split params))
                 step (cljs.reader/read-string (:step params))
                 ofs (cljs.reader/read-string (:ofs params))
