@@ -8,7 +8,7 @@
 (def cfg {
   :margin-left 5 :margin-right 5 :margin-top 5 :margin-bottom 5
   :sel-col "#000" :sel-width 5 :bdr-round 8 :bdr-col "#DDD"
-  :cell-width 70 :cell-space 10 :txt-col "#333" :amount-scale 250
+  :cell-width 70 :cell-space 10 :txt-col "#333" :amount-scale 400
   :mark-space 10 :mark-height 30 :mark-ofs-x 35 :mark-ofs-y 20})
 
 (defn html! [content]
