@@ -125,7 +125,8 @@
    total-height (+ (cfg :margin-top) cells-height-pos
                    (cfg :mark-space) (cfg :mark-height)
                    (cfg :mark-space) cells-height-neg (cfg :margin-bottom))]
-  (vec (concat [:svg {:width (str total-width) :height (str total-height)}]
+  (vec (concat [:svg {:width "100%"
+                      :viewbox (str 0 " " 0 " " total-width " " total-height)}]
     (for [column (range len) :let [
           x (+ (cfg :margin-left) (* column cell-wspace))
           mark-y (+ (cfg :margin-top) cells-height-pos (cfg :mark-space))
