@@ -5,6 +5,10 @@
   (:require-macros [hiccups.core])
   (:import goog.History goog.history.EventType))
 
+(def cfg {
+  :sel-col "#000" :sel-width 5 :bdr-round 8 :bdr-col "#DDD" :cell-width 70
+  :mark-ofs-x 35 :mark-ofs-y 20})
+
 (defn html! [content]
   (aset (js/document.getElementById "content") "innerHTML" content))
 
@@ -68,20 +72,19 @@
 (defn svg-stack [split step ofs len sel-ofs sel-cat dir cofs items]
   (js/console.log "svg-stack")
   (if (empty? items) [:g] (let
-  [sel-col "#000" sel-width 5 bdr-round 8 bdr-col "#DDD" cell-width 70
-   mark-ofs-x 35 mark-ofs-y 20
-   [[amount height icat categ] & irest] (seq items)]
+  [[[amount height icat categ] & irest] (seq items)]
   (vector :g
     [:a {:xlink:href (href :split :split split :step step :ofs ofs
                        :len len :sel-ofs cofs :sel-cat icat)}
       [:rect (merge (if (and (= sel-ofs cofs) (= sel-cat icat))
-        {:stroke sel-col :stroke-width (str sel-width)}
-        {:stroke bdr-col})
-        {:width (str cell-width) :height (str height) :fill (:bg-col categ)
-         :rx (str bdr-round) :ry (str bdr-round)
-         :x "0" :y ((dir height) :y)})]
+        {:stroke (cfg :sel-col) :stroke-width (str (cfg :sel-width))}
+        {:stroke (cfg :bdr-col)})
+        {:width (str (cfg :cell-width)) :height (str height)
+         :fill (:bg-col categ) :rx (str (cfg :bdr-round))
+         :ry (str (cfg :bdr-round)) :x "0" :y ((dir height) :y)})]
       [:text {:text-anchor "middle" :fill (:fg-col categ)
-              :x (str mark-ofs-x) :y (str (+ mark-ofs-y ((dir height) :y)))}
+              :x (str (cfg :mark-ofs-x))
+              :y (str (+ (cfg :mark-ofs-y) ((dir height) :y)))}
         (str amount)]]
     (if (empty? irest) [:g]
       [:g {:transform (str "translate(0," ((dir height) :next-y) ")")}
@@ -101,19 +104,19 @@
 
 (defn split-diagram [split step ofs len sel-ofs sel-cat] (js/console.log "split-diagram") (let
   [margin-left 5 margin-right 5 margin-top 5 margin-bottom 5
-   cell-width 70 cell-space 10 bdr-round 8 bdr-col "#DDD" txt-col "#333"
-   mark-space 10 mark-height 30 mark-ofs-x 35 mark-ofs-y 20
+   cell-space 10 txt-col "#333"
+   mark-space 10 mark-height 30 
    max-stack-height (fn [amount-ftr] (apply max (for [column (range len)]
      (apply + (map second (stack-items split step ofs column amount-ftr))))))
    cells-height-pos (max-stack-height pos?)
    cells-height-neg (max-stack-height neg?)
-   cells-width (- (* len (+ cell-width cell-space)) cell-space)
+   cells-width (- (* len (+ (cfg :cell-width) cell-space)) cell-space)
    total-width (+ margin-left cells-width margin-right)
    total-height (+ margin-top cells-height-pos mark-space mark-height
                    mark-space cells-height-neg margin-bottom)]
   (vec (concat [:svg {:width (str total-width) :height (str total-height)}]
     (for [column (range len) :let [
-          x (+ margin-left (* column (+ cell-width cell-space)))
+          x (+ margin-left (* column (+ (cfg :cell-width) cell-space)))
           mark-y (+ margin-top cells-height-pos mark-space)
           cofs (+ ofs column)]]
      (vector :g
@@ -121,11 +124,12 @@
               (+ margin-top cells-height-pos) ")")}
         (svg-stack split step ofs len sel-ofs sel-cat stack-up cofs
           (stack-items split step ofs column pos?))]
-       [:rect {:width (str cell-width) :height (str mark-height) :fill "none"
-               :rx (str bdr-round) :ry (str bdr-round) :stroke bdr-col
-               :x (str x) :y (str mark-y)}]
+       [:rect {:width (str (cfg :cell-width)) :height (str mark-height)
+               :fill "none" :stroke (cfg :bdr-col) :rx (str (cfg :bdr-round))
+               :ry (str (cfg :bdr-round)) :x (str x) :y (str mark-y)}]
        [:text {:text-anchor "middle" :fill txt-col
-               :x (str (+ x mark-ofs-x)) :y (str (+ mark-y mark-ofs-y))}
+               :x (str (+ x (cfg :mark-ofs-x)))
+               :y (str (+ mark-y (cfg :mark-ofs-y)))}
         (str cofs)]
        [:g {:transform (str "translate(" x ","
               (+ mark-y mark-height mark-space) ")")}
