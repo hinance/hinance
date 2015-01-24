@@ -54,7 +54,7 @@
    categ-amount (fn [categ cofs amount-ftr] (apply + (map #(:amount %) (filter
      #(and ((:tag-filter categ) (:tags %)) (amount-ftr (:amount %)))
      (pick-chgs step cofs 1)))))
-   categ-stack (fn self [dir items] (if (empty? items) [:g] (let
+   svg-stack (fn self [dir items] (if (empty? items) [:g] (let
      [[[amount height categ] & irest] (seq items)]
      (vector :g
        [:rect {:width (str cell-width) :height (str height)
@@ -65,21 +65,21 @@
         (str amount)]
        (if (empty? irest) [:g]
          [:g {:transform (str "translate(0," ((dir height) :next-y) ")")}
-          (self dir irest)])))))]
+          (self dir irest)])))))
+    stack-items (fn [column amount-ftr] (sort-by (comp Math/abs first) < (for
+      [categ (:categs (chew.user/splits split)) :let
+       [amount (categ-amount categ (+ ofs column) amount-ftr)
+        height (max mark-height (* amount-scale (Math/abs amount)))]
+       :when (not (zero? amount))]
+      [(int (/ amount 100)) height categ])))]
   (vec (concat [:svg {:width (str total-width) :height (str total-height)}]
     (for [column (range len) :let [
           x (+ margin-left (* column (+ cell-width cell-space)))
-          mark-y (+ margin-top cells-height mark-space)
-          stack-items (fn [amount-ftr] (sort-by (comp Math/abs first) < (for
-            [categ (:categs (chew.user/splits split)) :let
-             [amount (categ-amount categ (+ ofs column) amount-ftr)
-              height (max mark-height (* amount-scale (Math/abs amount)))]
-             :when (not (zero? amount))]
-            [(int (/ amount 100)) height categ])))]]
+          mark-y (+ margin-top cells-height mark-space)]]
      (vector :g
        [:g {:transform (str "translate(" x ","
               (+ margin-top cells-height) ")")}
-        (categ-stack stack-up (stack-items pos?))]
+        (svg-stack stack-up (stack-items column pos?))]
        [:rect {:width (str cell-width) :height (str mark-height) :fill "none"
                :rx (str bdr-round) :ry (str bdr-round) :stroke bdr-col
                :x (str x) :y (str mark-y)}]
@@ -88,7 +88,7 @@
         (str (+ ofs column))]
        [:g {:transform (str "translate(" x ","
               (+ mark-y mark-height mark-space) ")")}
-        (categ-stack stack-down (stack-items neg?))]
+        (svg-stack stack-down (stack-items column neg?))]
      ))))))
 
 (def handlers {
