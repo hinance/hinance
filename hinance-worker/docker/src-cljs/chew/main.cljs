@@ -29,7 +29,8 @@
   :span {:class "label label-default"} (subs (str t) 4)))
 
 (def routes ["/" {"diag" :diag
-  ["split." :split "/step." :step "/ofs." :ofs "/len." :len] :split}])
+  ["split." :split "/step." :step "/ofs." :ofs "/len." :len
+   "/sel-ofs." :sel-ofs "/sel-cat." :sel-cat] :split}])
 
 (defn href [& args] (str "#" (apply bidi.bidi/path-for routes args)))
 
@@ -39,7 +40,7 @@
   (take-while #(> tto (:time %))
     (drop-while #(> tfrom (:time %)) chew.data/changes))))
 
-(defn split-diagram [split step ofs len] (let
+(defn split-diagram [split step ofs len sel-ofs sel-cat] (let
   [margin-left 5 margin-right 5 margin-top 5 margin-bottom 5
    cell-width 70 cell-space 10 bdr-round 8 bdr-col "#DDD" txt-col "#333"
    amount-scale 0.001
@@ -50,7 +51,7 @@
      #(and ((:tag-filter categ) (:tags %)) (amount-ftr (:amount %)))
      (pick-chgs step cofs 1)))))
    svg-stack (fn self [dir items] (if (empty? items) [:g] (let
-     [[[amount height categ] & irest] (seq items)]
+     [[[amount height icat categ] & irest] (seq items)]
      (vector :g
        [:rect {:width (str cell-width) :height (str height)
                :rx (str bdr-round) :ry (str bdr-round) :stroke bdr-col
@@ -62,11 +63,11 @@
          [:g {:transform (str "translate(0," ((dir height) :next-y) ")")}
           (self dir irest)])))))
    stack-items (fn [column amount-ftr] (sort-by (comp Math/abs first) < (for
-     [categ (:categs (chew.user/splits split)) :let
+     [[icat categ] (map-indexed vector (:categs (chew.user/splits split))) :let
       [amount (categ-amount categ (+ ofs column) amount-ftr)
        height (max mark-height (* amount-scale (Math/abs amount)))]
       :when (not (zero? amount))]
-     [(int (/ amount 100)) height categ])))
+     [(int (/ amount 100)) height icat categ])))
    max-stack-height (fn [amount-ftr] (apply max (for [column (range len)]
      (apply + (map second (stack-items column amount-ftr))))))
    cells-height-pos (max-stack-height pos?)
@@ -91,8 +92,7 @@
         (str (+ ofs column))]
        [:g {:transform (str "translate(" x ","
               (+ mark-y mark-height mark-space) ")")}
-        (svg-stack stack-down (stack-items column neg?))]
-     ))))))
+        (svg-stack stack-down (stack-items column neg?))]))))))
 
 (def handlers {
   :diag #(for [x chew.data/diag] (list
@@ -101,7 +101,9 @@
   :split #(let [split (cljs.reader/read-string (:split %))
                 step (cljs.reader/read-string (:step %))
                 ofs (cljs.reader/read-string (:ofs %))
-                len (cljs.reader/read-string (:len %))] (concat
+                len (cljs.reader/read-string (:len %))
+                sel-ofs (cljs.reader/read-string (:sel-ofs %))
+                sel-cat (cljs.reader/read-string (:sel-cat %))] (concat
     (if (pos? (warns))
       [[:div {:class "alert alert-warning"}
          [:strong "Warning!"]
@@ -113,17 +115,17 @@
        [:ul {:class "pager"}
          (if (pos? ofs)
            [:li {:class "previous"}
-             [:a {:href (href :split :split split :step step
-                                     :ofs (dec ofs) :len len)}
+             [:a {:href (href :split :split split :step step :ofs (dec ofs)
+                         :len len :sel-ofs sel-ofs :sel-cat sel-cat)}
               "Older"]]
            [:li {:class "previous disabled"} [:a "Older"]])
          [:li {:class "next"}
-           [:a {:href (href :split :split split :step step
-                                   :ofs (inc ofs) :len len)}
+           [:a {:href (href :split :split split :step step :ofs (inc ofs)
+                       :len len :sel-ofs sel-ofs :sel-cat sel-cat)}
             "Newer"]]]]
      [:div {:class "panel panel-default"}
        [:div {:class "panel-body text-center"}
-         (split-diagram split step ofs len)
+         (split-diagram split step ofs len sel-ofs sel-cat)
          [:ul {:class "list-inline"}
           (for [c (:categs (get chew.user/splits split))]
            [:li [:span {:class "label" :style
