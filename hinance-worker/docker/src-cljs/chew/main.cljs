@@ -47,8 +47,8 @@
    cells-height 400
    cells-width (- (* len (+ cell-width cell-space)) cell-space)
    total-width (+ margin-left cells-width margin-right)
-   total-height (+ margin-top cells-height cell-space cells-height
-                   mark-space mark-height margin-bottom)
+   total-height (+ margin-top cells-height mark-space mark-height mark-space
+                   cells-height margin-bottom)
    stack-up   (fn [h] (hash-map :y (- 0 h) :next-y (- 0 h stack-space)))
    stack-down (fn [h] (hash-map :y 0       :next-y (+ h stack-space)))
    categ-amount (fn [categ cofs amount-ftr] (apply + (map #(:amount %) (filter
@@ -70,7 +70,7 @@
   (vec (concat [:svg {:width (str total-width) :height (str total-height)}]
     (for [column (range len) :let [
           x (+ margin-left (* column (+ cell-width cell-space)))
-          ty (+ margin-top (* 2 cells-height) cell-space mark-space)
+          mark-y (+ margin-top cells-height mark-space)
           stack-items (fn [amount-ftr] (sort-by (comp Math/abs first) < (for
             [categ (:categs (chew.user/splits split)) :let
              [amount (categ-amount categ (+ ofs column) amount-ftr)]]
@@ -79,15 +79,16 @@
        [:g {:transform (str "translate(" x ","
               (+ margin-top cells-height) ")")}
         (categ-stack stack-up (stack-items pos?))]
-       [:g {:transform (str "translate(" x ","
-              (+ margin-top cells-height cell-space) ")")}
-        (categ-stack stack-down (stack-items neg?))]
        [:rect {:width (str cell-width) :height (str mark-height) :fill "none"
                :rx (str bdr-round) :ry (str bdr-round) :stroke bdr-col
-               :x (str x) :y (str ty)}]
+               :x (str x) :y (str mark-y)}]
        [:text {:text-anchor "middle" :fill txt-col
-               :x (str (+ x mark-ofs-x)) :y (str (+ ty mark-ofs-y))}
-        (str (+ ofs column))]))))))
+               :x (str (+ x mark-ofs-x)) :y (str (+ mark-y mark-ofs-y))}
+        (str (+ ofs column))]
+       [:g {:transform (str "translate(" x ","
+              (+ mark-y mark-height mark-space) ")")}
+        (categ-stack stack-down (stack-items neg?))]
+     ))))))
 
 (def handlers {
   :diag #(for [x chew.data/diag] (list
