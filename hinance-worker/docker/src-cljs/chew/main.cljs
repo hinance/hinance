@@ -49,27 +49,29 @@
    total-width (+ margin-left cells-width margin-right)
    total-height (+ margin-top cells-height cell-space cells-height
                    mark-space mark-height margin-bottom)
-   categ-stack (fn self [coll] (let [[c & cs] (seq coll)] (vector :g
+   stack-up   {:y (- 0 mark-height) :next-y (- 0 mark-height stack-space)}
+   stack-down {:y 0                 :next-y (+ mark-height stack-space)}
+   categ-stack (fn self [dir coll] (let [[c & cs] (seq coll)] (vector :g
      [:rect {:width (str cell-width) :height (str mark-height)
             :rx (str bdr-round) :ry (str bdr-round) :stroke bdr-col
-            :fill (:bg-col c) :x "0" :y (str (- 0 mark-height))}]
+            :fill (:bg-col c) :x "0" :y (dir :y)}]
+     [:text {:text-anchor "middle" :fill (:fg-col c)
+             :x (str mark-ofs-x) :y (str (+ mark-ofs-y (dir :y)))}
+      "123"]
      (if (empty? cs) [:g]
-      [:g {:transform (str "translate(0," (- 0 mark-height stack-space) ")")}
-       (self cs)]))))]
+      [:g {:transform (str "translate(0," (dir :next-y) ")")}
+       (self dir cs)]))))]
   (vec (concat [:svg {:width (str total-width) :height (str total-height)}]
     (for [column (range len) :let [
           x (+ margin-left (* column (+ cell-width cell-space)))
           ty (+ margin-top (* 2 cells-height) cell-space mark-space)]]
      (vector :g
-       [:rect {:width (str cell-width) :height (str cells-height) :fill "none"
-               :rx (str bdr-round) :ry (str bdr-round) :stroke bdr-col
-               :x (str x) :y (str margin-top)}]
        [:g {:transform (str "translate(" x ","
-                                         (+ margin-top cells-height) ")")}
-        (categ-stack (:categs (chew.user/splits split)))]
-       [:rect {:width (str cell-width) :height (str cells-height) :fill "none"
-               :rx (str bdr-round) :ry (str bdr-round) :stroke bdr-col
-               :x (str x) :y (str (+ margin-top cells-height cell-space))}]
+              (+ margin-top cells-height) ")")}
+        (categ-stack stack-up (:categs (chew.user/splits split)))]
+       [:g {:transform (str "translate(" x ","
+              (+ margin-top cells-height cell-space) ")")}
+        (categ-stack stack-down (:categs (chew.user/splits split)))]
        [:rect {:width (str cell-width) :height (str mark-height) :fill "none"
                :rx (str bdr-round) :ry (str bdr-round) :stroke bdr-col
                :x (str x) :y (str ty)}]
