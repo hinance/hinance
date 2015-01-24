@@ -44,11 +44,6 @@
    cell-width 70 cell-space 10 bdr-round 8 bdr-col "#DDD" txt-col "#333"
    stack-space 0 amount-scale 0.001
    mark-space 10 mark-height 30 mark-ofs-x 35 mark-ofs-y 20
-   cells-height 400
-   cells-width (- (* len (+ cell-width cell-space)) cell-space)
-   total-width (+ margin-left cells-width margin-right)
-   total-height (+ margin-top cells-height mark-space mark-height mark-space
-                   cells-height margin-bottom)
    stack-up   (fn [h] (hash-map :y (- 0 h) :next-y (- 0 h stack-space)))
    stack-down (fn [h] (hash-map :y 0       :next-y (+ h stack-space)))
    categ-amount (fn [categ cofs amount-ftr] (apply + (map #(:amount %) (filter
@@ -66,19 +61,27 @@
        (if (empty? irest) [:g]
          [:g {:transform (str "translate(0," ((dir height) :next-y) ")")}
           (self dir irest)])))))
-    stack-items (fn [column amount-ftr] (sort-by (comp Math/abs first) < (for
-      [categ (:categs (chew.user/splits split)) :let
-       [amount (categ-amount categ (+ ofs column) amount-ftr)
-        height (max mark-height (* amount-scale (Math/abs amount)))]
-       :when (not (zero? amount))]
-      [(int (/ amount 100)) height categ])))]
+   stack-items (fn [column amount-ftr] (sort-by (comp Math/abs first) < (for
+     [categ (:categs (chew.user/splits split)) :let
+      [amount (categ-amount categ (+ ofs column) amount-ftr)
+       height (max mark-height (* amount-scale (Math/abs amount)))]
+      :when (not (zero? amount))]
+     [(int (/ amount 100)) height categ])))
+   max-stack-height (fn [amount-ftr] (apply max (for [column (range len)]
+     (apply + (map second (stack-items column amount-ftr))))))
+   cells-height-pos (max-stack-height pos?)
+   cells-height-neg (max-stack-height neg?)
+   cells-width (- (* len (+ cell-width cell-space)) cell-space)
+   total-width (+ margin-left cells-width margin-right)
+   total-height (+ margin-top cells-height-pos mark-space mark-height
+                   mark-space cells-height-neg margin-bottom)]
   (vec (concat [:svg {:width (str total-width) :height (str total-height)}]
     (for [column (range len) :let [
           x (+ margin-left (* column (+ cell-width cell-space)))
-          mark-y (+ margin-top cells-height mark-space)]]
+          mark-y (+ margin-top cells-height-pos mark-space)]]
      (vector :g
        [:g {:transform (str "translate(" x ","
-              (+ margin-top cells-height) ")")}
+              (+ margin-top cells-height-pos) ")")}
         (svg-stack stack-up (stack-items column pos?))]
        [:rect {:width (str cell-width) :height (str mark-height) :fill "none"
                :rx (str bdr-round) :ry (str bdr-round) :stroke bdr-col
