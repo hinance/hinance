@@ -42,10 +42,10 @@
 (defn split-diagram [split step ofs len] (let
   [margin-left 5 margin-right 5 margin-top 5 margin-bottom 5
    cell-width 70 cell-space 10 bdr-round 8 bdr-col "#DDD" txt-col "#333"
-   stack-space 0 amount-scale 0.001
+   amount-scale 0.001
    mark-space 10 mark-height 30 mark-ofs-x 35 mark-ofs-y 20
-   stack-up   (fn [h] (hash-map :y (- 0 h) :next-y (- 0 h stack-space)))
-   stack-down (fn [h] (hash-map :y 0       :next-y (+ h stack-space)))
+   stack-up   (fn [h] (hash-map :y (- 0 h) :next-y (- h)))
+   stack-down (fn [h] (hash-map :y 0       :next-y h))
    categ-amount (fn [categ cofs amount-ftr] (apply + (map #(:amount %) (filter
      #(and ((:tag-filter categ) (:tags %)) (amount-ftr (:amount %)))
      (pick-chgs step cofs 1)))))
