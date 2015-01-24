@@ -110,7 +110,7 @@
          " There are " (str (warns)) " validation errors ("
          [:a {:href (href :diag)} "read full report"]
          ")."]] [])
-    [[:h1 (:title (get chew.user/splits split))]
+    [[:h1 (:title (chew.user/splits split))]
      [:nav
        [:ul {:class "pager"}
          (if (pos? ofs)
@@ -127,26 +127,22 @@
        [:div {:class "panel-body text-center"}
          (split-diagram split step ofs len sel-ofs sel-cat)
          [:ul {:class "list-inline"}
-          (for [c (:categs (get chew.user/splits split))]
+          (for [c (:categs (chew.user/splits split))]
            [:li [:span {:class "label" :style
              (str "color:" (:fg-col c) ";background-color:" (:bg-col c))}
              (:title c)]])]]]
      [:table {:class "table table-striped"}
-       [:thead
-         [:tr
-           [:th "Date"]
-           [:th "Description"]
-           [:th "Tags"]
-           [:th {:class "text-right"} "Amount"]]]
-       [:tbody (for [x (pick-chgs step ofs len)]
-         [:tr
-           [:td (date (:time x))]
-           [:td (if (empty? (:url x)) (:label x)
-             [:a {:href (:url x)} (:label x)])]
-           [:td
-             [:ul {:class "list-inline"}
-               (for [t (:tags x)] [:li (tag t)])]]
-           [:td {:class "text-right"} (amount x)]])]]
+       [:thead [:tr [:th "Date"] [:th "Description"] [:th "Tags"]
+                    [:th {:class "text-right"} "Amount"]]]
+       [:tbody (for [x (pick-chgs step sel-ofs 1)
+         :when ((:tag-filter ((:categs (chew.user/splits split)) sel-cat))
+                (:tags x))]
+         [:tr [:td (date (:time x))]
+              [:td (if (empty? (:url x)) (:label x)
+                [:a {:href (:url x)} (:label x)])]
+              [:td [:ul {:class "list-inline"}
+                     (for [t (:tags x)] [:li (tag t)])]]
+              [:td {:class "text-right"} (amount x)]])]]
      [:hr]
      [:p {:class "text-muted text-right"}
        "Generated on " chew.data/timestamp]]))})
