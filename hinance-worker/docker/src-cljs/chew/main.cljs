@@ -95,17 +95,17 @@
 (defn stack-up   [h] (hash-map :y (- 0 h) :next-y (- h)))
 (defn stack-down [h] (hash-map :y 0       :next-y h))
 
-(defn stack-items [split step ofs column amount-ftr]
+(defn stack-items [split step cofs amount-ftr]
   (sort-by (comp Math/abs first) < (for
     [[icat categ] (map-indexed vector (:categs (chew.user/splits split))) :let
-     [amount (categ-amount step categ (+ ofs column) amount-ftr)
+     [amount (categ-amount step categ cofs amount-ftr)
       height (max (cfg :mark-height) (* (cfg :amount-scale)(Math/abs amount)))]
      :when (not (zero? amount))]
     [(int (/ amount 100)) height icat categ])))
 
 (defn split-diagram [split step ofs len sel-ofs sel-cat] (js/console.log "split-diagram") (let
   [max-stack-height (fn [amount-ftr] (apply max (for [column (range len)]
-     (apply + (map second (stack-items split step ofs column amount-ftr))))))
+     (apply + (map second (stack-items split step(+ ofs column)amount-ftr))))))
    cells-height-pos (max-stack-height pos?)
    cells-height-neg (max-stack-height neg?)
    cell-wspace (+ (cfg :cell-width) (cfg :cell-space))
@@ -123,7 +123,7 @@
        [:g {:transform (str "translate(" x ","
               (+ (cfg :margin-top) cells-height-pos) ")")}
         (svg-stack split step ofs len sel-ofs sel-cat stack-up cofs
-          (stack-items split step ofs column pos?))]
+          (stack-items split step cofs pos?))]
        [:rect {:width (str (cfg :cell-width)) :height (str (cfg :mark-height))
                :fill "none" :stroke (cfg :bdr-col) :rx (str (cfg :bdr-round))
                :ry (str (cfg :bdr-round)) :x (str x) :y (str mark-y)}]
@@ -134,7 +134,7 @@
        [:g {:transform (str "translate(" x ","
               (+ mark-y (cfg :mark-height) (cfg :mark-space)) ")")}
         (svg-stack split step ofs len sel-ofs sel-cat stack-down cofs
-          (stack-items split step ofs column neg?))]))))))
+          (stack-items split step cofs neg?))]))))))
 
 (def handlers {
   :diag #(for [x chew.data/diag] (list
