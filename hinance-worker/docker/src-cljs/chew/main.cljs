@@ -39,23 +39,34 @@
   (take-while #(> tto (:time %))
     (drop-while #(> tfrom (:time %)) chew.data/changes))))
 
-(defn diagram [step ofs len] (let
+(defn split-diagram [split step ofs len] (let
   [margin-left 5 margin-right 5 margin-top 5 margin-bottom 5
    cell-width 70 cell-space 10 bdr-round 8 bdr-col "#DDD" txt-col "#333"
+   stack-space 0
    mark-space 10 mark-height 30 mark-ofs-x 35 mark-ofs-y 20
    cells-height 200
    cells-width (- (* len (+ cell-width cell-space)) cell-space)
    total-width (+ margin-left cells-width margin-right)
    total-height (+ margin-top cells-height cell-space cells-height
-                   mark-space mark-height margin-bottom)]
+                   mark-space mark-height margin-bottom)
+   categ-stack (fn self [coll] (let [[c & cs] (seq coll)] (vector :g
+     [:rect {:width (str cell-width) :height (str mark-height)
+            :rx (str bdr-round) :ry (str bdr-round) :stroke bdr-col
+            :fill (:bg-col c) :x "0" :y (str (- 0 mark-height))}]
+     (if (empty? cs) [:g]
+      [:g {:transform (str "translate(0," (- 0 mark-height stack-space) ")")}
+       (self cs)]))))]
   (vec (concat [:svg {:width (str total-width) :height (str total-height)}]
-    (for [i (range len) :let [
-          x (+ margin-left (* i (+ cell-width cell-space)))
+    (for [column (range len) :let [
+          x (+ margin-left (* column (+ cell-width cell-space)))
           ty (+ margin-top (* 2 cells-height) cell-space mark-space)]]
      (vector :g
        [:rect {:width (str cell-width) :height (str cells-height) :fill "none"
                :rx (str bdr-round) :ry (str bdr-round) :stroke bdr-col
                :x (str x) :y (str margin-top)}]
+       [:g {:transform (str "translate(" x ","
+                                         (+ margin-top cells-height) ")")}
+        (categ-stack (:categs (chew.user/splits split)))]
        [:rect {:width (str cell-width) :height (str cells-height) :fill "none"
                :rx (str bdr-round) :ry (str bdr-round) :stroke bdr-col
                :x (str x) :y (str (+ margin-top cells-height cell-space))}]
@@ -64,7 +75,7 @@
                :x (str x) :y (str ty)}]
        [:text {:text-anchor "middle" :fill txt-col
                :x (str (+ x mark-ofs-x)) :y (str (+ ty mark-ofs-y))}
-        (str (+ ofs i))]))))))
+        (str (+ ofs column))]))))))
 
 (js/console.log (str (for [split chew.user/splits]
   [(:title split)
@@ -102,7 +113,7 @@
             "Newer"]]]]
      [:div {:class "panel panel-default"}
        [:div {:class "panel-body text-center"}
-         (diagram step ofs len)
+         (split-diagram split step ofs len)
          [:ul {:class "list-inline"}
           (for [c (:categs (get chew.user/splits split))]
            [:li [:span {:class "label" :style
