@@ -8,7 +8,7 @@
 (def cfg {
   :margin-left 5 :margin-right 5 :margin-top 5 :margin-bottom 5
   :sel-col "#000" :sel-width 5 :bdr-round 8 :bdr-col "#DDD"
-  :cell-width 70 :cell-space 10 :txt-col "#333" :amount-scale 0.001
+  :cell-width 70 :cell-space 10 :txt-col "#333" :amount-scale 250
   :mark-space 10 :mark-height 30 :mark-ofs-x 35 :mark-ofs-y 20})
 
 (defn html! [content]
@@ -90,22 +90,32 @@
 (defn stack-up   [h] (hash-map :y (- 0 h) :next-y (- h)))
 (defn stack-down [h] (hash-map :y 0       :next-y h))
 
-(defn stack-items [split step ofs column amount-ftr]
+(def sum-split-amounts (memoize (fn [split step cofs]
+  (apply + (for [categ (:categs (chew.user/splits split))
+                 amount (categ-amounts step categ cofs)] (Math/abs amount))))))
+
+(def max-split-amount (memoize (fn [split step ofs len]
+  (apply max (for [i (range len)] (sum-split-amounts split step (+ ofs i)))))))
+
+(defn stack-items [split step ofs len column amount-ftr]
   (sort-by (comp Math/abs first) < (for
     [[icat categ] (map-indexed vector (:categs (chew.user/splits split))) :let
-     [amount (categ-amount step categ (+ ofs column) amount-ftr)
-      height (max (cfg :mark-height) (* (cfg :amount-scale)(Math/abs amount)))]
+     [mamount (max-split-amount split step ofs len)
+      scale (/ (cfg :amount-scale) (if (zero? mamount) 1 mamount))
+      amount (categ-amount step categ (+ ofs column) amount-ftr)
+      height (max (cfg :mark-height) (* scale (Math/abs amount)))]
      :when (not (zero? amount))]
     [(int (/ amount 100)) height icat categ])))
 
 (def svg-stack-render (memoize (fn
   [dir amount-ftr split step ofs len sel-ofs sel-cat column]
   (hiccups.core/html (svg-stack split step ofs len sel-ofs sel-cat dir column
-                       (stack-items split step ofs column amount-ftr))))))
+                       (stack-items split step ofs len column amount-ftr))))))
 
 (defn split-diagram [split step ofs len sel-ofs sel-cat] (let
   [max-stack-height (fn [amount-ftr] (apply max (for [column (range len)]
-     (apply + (map second (stack-items split step ofs column amount-ftr))))))
+     (apply + (map second (stack-items split step ofs len column
+                                       amount-ftr))))))
    cells-height-pos (max-stack-height pos?)
    cells-height-neg (max-stack-height neg?)
    cell-wspace (+ (cfg :cell-width) (cfg :cell-space))
