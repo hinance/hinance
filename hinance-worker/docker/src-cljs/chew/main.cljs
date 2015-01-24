@@ -42,29 +42,30 @@
 (defn split-diagram [split step ofs len] (let
   [margin-left 5 margin-right 5 margin-top 5 margin-bottom 5
    cell-width 70 cell-space 10 bdr-round 8 bdr-col "#DDD" txt-col "#333"
-   stack-space 0
+   stack-space 0 amount-scale 0.1
    mark-space 10 mark-height 30 mark-ofs-x 35 mark-ofs-y 20
-   cells-height 200
+   cells-height 400
    cells-width (- (* len (+ cell-width cell-space)) cell-space)
    total-width (+ margin-left cells-width margin-right)
    total-height (+ margin-top cells-height cell-space cells-height
                    mark-space mark-height margin-bottom)
-   stack-up   {:y (- 0 mark-height) :next-y (- 0 mark-height stack-space)}
-   stack-down {:y 0                 :next-y (+ mark-height stack-space)}
+   stack-up   (fn [h] (hash-map :y (- 0 h) :next-y (- 0 h stack-space)))
+   stack-down (fn [h] (hash-map :y 0       :next-y (+ h stack-space)))
    categ-amount (fn [categ cofs amount-ftr] (apply + (map #(:amount %) (filter
      #(and ((:tag-filter categ) (:tags %)) (amount-ftr (:amount %)))
      (pick-chgs step cofs 1)))))
    categ-stack (fn self [dir items] (if (empty? items) [:g] (let
-     [[[amount categ] & irest] (seq items)]
+     [[[amount categ] & irest] (seq items)
+      height (max mark-height (* amount-scale (Math/abs amount)))]
      (if (zero? amount) (self dir irest) (vector :g
-       [:rect {:width (str cell-width) :height (str mark-height)
+       [:rect {:width (str cell-width) :height (str height)
                :rx (str bdr-round) :ry (str bdr-round) :stroke bdr-col
-               :fill (:bg-col categ) :x "0" :y (dir :y)}]
+               :fill (:bg-col categ) :x "0" :y ((dir height) :y)}]
        [:text {:text-anchor "middle" :fill (:fg-col categ)
-               :x (str mark-ofs-x) :y (str (+ mark-ofs-y (dir :y)))}
+               :x (str mark-ofs-x) :y (str (+ mark-ofs-y ((dir height) :y)))}
         (str amount)]
        (if (empty? irest) [:g]
-         [:g {:transform (str "translate(0," (dir :next-y) ")")}
+         [:g {:transform (str "translate(0," ((dir height) :next-y) ")")}
           (self dir irest)]))))))]
   (vec (concat [:svg {:width (str total-width) :height (str total-height)}]
     (for [column (range len) :let [
