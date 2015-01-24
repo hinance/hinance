@@ -66,21 +66,22 @@
   (vec (concat [:svg {:width (str total-width) :height (str total-height)}]
     (for [column (range len) :let [
           x (+ margin-left (* column (+ cell-width cell-space)))
-          ty (+ margin-top (* 2 cells-height) cell-space mark-space)]]
+          ty (+ margin-top (* 2 cells-height) cell-space mark-space)
+          categ-amount (fn [categ amount-filter] (apply + (map #(:amount %)
+            (filter #(and ((:tag-filter categ) (:tags %))
+                          (amount-filter (:amount %)))
+                    (pick-chgs step (+ ofs column) 1)))))]]
      (vector :g
        [:g {:transform (str "translate(" x ","
               (+ margin-top cells-height) ")")}
         (categ-stack stack-up (for
-          [categ (:categs (chew.user/splits split)) :let
-            [amount (apply + (map #(:amount %) (filter
-              #(and ((:tag-filter categ) (:tags %)) (pos? (:amount %)))
-              (pick-chgs step (+ ofs column) 1))))]]
-          [amount categ]))]
+          [categ (:categs (chew.user/splits split))]
+          [(categ-amount categ pos?) categ]))]
        [:g {:transform (str "translate(" x ","
               (+ margin-top cells-height cell-space) ")")}
         (categ-stack stack-down (for
           [categ (:categs (chew.user/splits split))]
-          [(- 123) categ]))]
+          [(categ-amount categ neg?) categ]))]
        [:rect {:width (str cell-width) :height (str mark-height) :fill "none"
                :rx (str bdr-round) :ry (str bdr-round) :stroke bdr-col
                :x (str x) :y (str ty)}]
