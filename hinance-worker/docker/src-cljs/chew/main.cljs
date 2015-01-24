@@ -42,7 +42,7 @@
 (defn split-diagram [split step ofs len] (let
   [margin-left 5 margin-right 5 margin-top 5 margin-bottom 5
    cell-width 70 cell-space 10 bdr-round 8 bdr-col "#DDD" txt-col "#333"
-   stack-space 0 amount-scale 0.1
+   stack-space 0 amount-scale 0.001
    mark-space 10 mark-height 30 mark-ofs-x 35 mark-ofs-y 20
    cells-height 400
    cells-width (- (* len (+ cell-width cell-space)) cell-space)
@@ -55,9 +55,8 @@
      #(and ((:tag-filter categ) (:tags %)) (amount-ftr (:amount %)))
      (pick-chgs step cofs 1)))))
    categ-stack (fn self [dir items] (if (empty? items) [:g] (let
-     [[[amount categ] & irest] (seq items)
-      height (max mark-height (* amount-scale (Math/abs amount)))]
-     (if (zero? amount) (self dir irest) (vector :g
+     [[[amount height categ] & irest] (seq items)]
+     (vector :g
        [:rect {:width (str cell-width) :height (str height)
                :rx (str bdr-round) :ry (str bdr-round) :stroke bdr-col
                :fill (:bg-col categ) :x "0" :y ((dir height) :y)}]
@@ -66,15 +65,17 @@
         (str amount)]
        (if (empty? irest) [:g]
          [:g {:transform (str "translate(0," ((dir height) :next-y) ")")}
-          (self dir irest)]))))))]
+          (self dir irest)])))))]
   (vec (concat [:svg {:width (str total-width) :height (str total-height)}]
     (for [column (range len) :let [
           x (+ margin-left (* column (+ cell-width cell-space)))
           mark-y (+ margin-top cells-height mark-space)
           stack-items (fn [amount-ftr] (sort-by (comp Math/abs first) < (for
             [categ (:categs (chew.user/splits split)) :let
-             [amount (categ-amount categ (+ ofs column) amount-ftr)]]
-            [(int (/ amount 100)) categ])))]]
+             [amount (categ-amount categ (+ ofs column) amount-ftr)
+              height (max mark-height (* amount-scale (Math/abs amount)))]
+             :when (not (zero? amount))]
+            [(int (/ amount 100)) height categ])))]]
      (vector :g
        [:g {:transform (str "translate(" x ","
               (+ margin-top cells-height) ")")}
