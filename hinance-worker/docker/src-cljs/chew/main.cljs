@@ -70,10 +70,10 @@
     (for [column (range len) :let [
           x (+ margin-left (* column (+ cell-width cell-space)))
           ty (+ margin-top (* 2 cells-height) cell-space mark-space)
-          stack-items (fn [amount-ftr] (for
+          stack-items (fn [amount-ftr] (sort-by (comp Math/abs first) < (for
             [categ (:categs (chew.user/splits split)) :let
              [amount (categ-amount categ (+ ofs column) amount-ftr)]]
-            [(int (/ amount 100)) categ]))]]
+            [(int (/ amount 100)) categ])))]]
      (vector :g
        [:g {:transform (str "translate(" x ","
               (+ margin-top cells-height) ")")}
@@ -87,13 +87,6 @@
        [:text {:text-anchor "middle" :fill txt-col
                :x (str (+ x mark-ofs-x)) :y (str (+ ty mark-ofs-y))}
         (str (+ ofs column))]))))))
-
-(js/console.log (str (for [split chew.user/splits]
-  [(:title split)
-   (for [categ (:categs split)]
-    [(:title categ)
-     (apply + (map #(:amount %)
-       (filter #((:tag-filter categ) (:tags %)) chew.data/changes)))])])))
 
 (def handlers {
   :diag #(for [x chew.data/diag] (list
