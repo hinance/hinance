@@ -51,6 +51,9 @@
                    mark-space mark-height margin-bottom)
    stack-up   {:y (- 0 mark-height) :next-y (- 0 mark-height stack-space)}
    stack-down {:y 0                 :next-y (+ mark-height stack-space)}
+   categ-amount (fn [categ cofs amount-ftr] (apply + (map #(:amount %) (filter
+     #(and ((:tag-filter categ) (:tags %)) (amount-ftr (:amount %)))
+     (pick-chgs step cofs 1)))))
    categ-stack (fn self [dir items] (let
      [[[amount categ] & irest] (seq items)]
      (vector :g
@@ -67,21 +70,16 @@
     (for [column (range len) :let [
           x (+ margin-left (* column (+ cell-width cell-space)))
           ty (+ margin-top (* 2 cells-height) cell-space mark-space)
-          categ-amount (fn [categ amount-filter] (apply + (map #(:amount %)
-            (filter #(and ((:tag-filter categ) (:tags %))
-                          (amount-filter (:amount %)))
-                    (pick-chgs step (+ ofs column) 1)))))]]
+          stack-items (fn [amount-ftr] (for
+            [categ (:categs (chew.user/splits split))]
+            [(categ-amount categ (+ ofs column) amount-ftr) categ]))]]
      (vector :g
        [:g {:transform (str "translate(" x ","
               (+ margin-top cells-height) ")")}
-        (categ-stack stack-up (for
-          [categ (:categs (chew.user/splits split))]
-          [(categ-amount categ pos?) categ]))]
+        (categ-stack stack-up (stack-items pos?))]
        [:g {:transform (str "translate(" x ","
               (+ margin-top cells-height cell-space) ")")}
-        (categ-stack stack-down (for
-          [categ (:categs (chew.user/splits split))]
-          [(categ-amount categ neg?) categ]))]
+        (categ-stack stack-down (stack-items neg?))]
        [:rect {:width (str cell-width) :height (str mark-height) :fill "none"
                :rx (str bdr-round) :ry (str bdr-round) :stroke bdr-col
                :x (str x) :y (str ty)}]
