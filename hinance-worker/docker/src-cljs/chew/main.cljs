@@ -34,23 +34,47 @@
 
 (defn href [& args] (str "#" (apply bidi.bidi/path-for routes args)))
 
-(defn pick-chgs [step ofs len] (let
+(defn pick-chgs [step ofs len] (js/console.log "pick-chgs") (let
   [tmin (:time (first chew.data/changes))
    tfrom (+ tmin (* ofs step)) tto (+ tfrom (* len step))]
   (take-while #(> tto (:time %))
     (drop-while #(> tfrom (:time %)) chew.data/changes))))
 
-(defn split-diagram [split step ofs len sel-ofs sel-cat] (let
+(def categ-amounts (memoize (fn [step categ cofs]
+  (js/console.log "categ-amounts")
+  (map :amount (filter #((:tag-filter categ) (:tags %))
+                       (pick-chgs step cofs 1))))))
+
+(def categ-amount (memoize (fn [step categ cofs amount-ftr]
+  (js/console.log "categ-amount")
+  (apply + (filter amount-ftr (categ-amounts step categ cofs))))))
+
+(def chgs-table (memoize (fn [split step sel-ofs sel-cat]
+  (js/console.log "chgs-table")
+  (hiccups.core/html
+  [:table {:class "table table-striped"}
+    [:thead [:tr [:th "Date"] [:th "Description"] [:th "Tags"]
+                 [:th {:class "text-right"} "Amount"]]]
+    [:tbody (for [x (pick-chgs step sel-ofs 1)
+      :when ((:tag-filter ((:categs (chew.user/splits split)) sel-cat))
+             (:tags x))]
+      [:tr [:td (date (:time x))]
+           [:td (if (empty? (:url x)) (:label x)
+             [:a {:href (:url x)} (:label x)])]
+           [:td [:ul {:class "list-inline"}
+                  (for [t (:tags x)] [:li (tag t)])]]
+           [:td {:class "text-right"} (amount x)]])]]))))
+
+(defn split-diagram [split step ofs len sel-ofs sel-cat] (js/console.log "split-diagram") (let
   [margin-left 5 margin-right 5 margin-top 5 margin-bottom 5
    cell-width 70 cell-space 10 bdr-round 8 bdr-col "#DDD" txt-col "#333"
    amount-scale 0.001 sel-col "#000" sel-width 5
    mark-space 10 mark-height 30 mark-ofs-x 35 mark-ofs-y 20
    stack-up   (fn [h] (hash-map :y (- 0 h) :next-y (- h)))
    stack-down (fn [h] (hash-map :y 0       :next-y h))
-   categ-amount (fn [categ cofs amount-ftr] (apply + (map #(:amount %) (filter
-     #(and ((:tag-filter categ) (:tags %)) (amount-ftr (:amount %)))
-     (pick-chgs step cofs 1)))))
-   svg-stack (fn self [dir cofs items] (if (empty? items) [:g] (let
+   svg-stack (fn self [dir cofs items]
+     (js/console.log "svg-stack")
+     (if (empty? items) [:g] (let
      [[[amount height icat categ] & irest] (seq items)]
      (vector :g
        [:a {:xlink:href (href :split :split split :step step :ofs ofs
@@ -69,7 +93,7 @@
           (self dir cofs irest)])))))
    stack-items (fn [column amount-ftr] (sort-by (comp Math/abs first) < (for
      [[icat categ] (map-indexed vector (:categs (chew.user/splits split))) :let
-      [amount (categ-amount categ (+ ofs column) amount-ftr)
+      [amount (categ-amount step categ (+ ofs column) amount-ftr)
        height (max mark-height (* amount-scale (Math/abs amount)))]
       :when (not (zero? amount))]
      [(int (/ amount 100)) height icat categ])))
@@ -104,12 +128,13 @@
   :diag #(for [x chew.data/diag] (list
       [:h3 (:title x) " (" (str (:warns x)) "):"]
       [:pre (clojure.string/join "\n" (:info x))]))
-  :split #(let [split (cljs.reader/read-string (:split %))
-                step (cljs.reader/read-string (:step %))
-                ofs (cljs.reader/read-string (:ofs %))
-                len (cljs.reader/read-string (:len %))
-                sel-ofs (cljs.reader/read-string (:sel-ofs %))
-                sel-cat (cljs.reader/read-string (:sel-cat %))] (concat
+  :split (fn [params] (js/console.log "handlers:split")
+          (let [split (cljs.reader/read-string (:split params))
+                step (cljs.reader/read-string (:step params))
+                ofs (cljs.reader/read-string (:ofs params))
+                len (cljs.reader/read-string (:len params))
+                sel-ofs (cljs.reader/read-string (:sel-ofs params))
+                sel-cat (cljs.reader/read-string (:sel-cat params))] (concat
     (if (pos? (warns))
       [[:div {:class "alert alert-warning"}
          [:strong "Warning!"]
@@ -137,21 +162,10 @@
            [:li [:span {:class "label" :style
              (str "color:" (:fg-col c) ";background-color:" (:bg-col c))}
              (:title c)]])]]]
-     [:table {:class "table table-striped"}
-       [:thead [:tr [:th "Date"] [:th "Description"] [:th "Tags"]
-                    [:th {:class "text-right"} "Amount"]]]
-       [:tbody (for [x (pick-chgs step sel-ofs 1)
-         :when ((:tag-filter ((:categs (chew.user/splits split)) sel-cat))
-                (:tags x))]
-         [:tr [:td (date (:time x))]
-              [:td (if (empty? (:url x)) (:label x)
-                [:a {:href (:url x)} (:label x)])]
-              [:td [:ul {:class "list-inline"}
-                     (for [t (:tags x)] [:li (tag t)])]]
-              [:td {:class "text-right"} (amount x)]])]]
+     (chgs-table split step sel-ofs sel-cat)
      [:hr]
      [:p {:class "text-muted text-right"}
-       "Generated on " chew.data/timestamp]]))})
+       "Generated on " chew.data/timestamp]])))})
 
 (def html-content (memoize (fn [path]
   (let [m (bidi.bidi/match-route routes path)]
