@@ -11,8 +11,7 @@
   :cell-width 70 :cell-space 10 :txt-col "#333" :amount-scale 400
   :mark-space 10 :mark-height 30 :mark-ofs-x 35 :mark-ofs-y 20})
 
-(def routes ["" {"" :root "/" {
-  "diag" :diag
+(def routes ["" {"" :root "/" {"diag" :diag ["group." :group] :group
   ["split." :split "/step." :step "/ofs." :ofs "/len." :len
    "/sel-ofs." :sel-ofs "/sel-cat." :sel-cat] :split}}])
 
@@ -71,16 +70,21 @@
   (apply + (map :amount (filter #((:tag-filter categ) (:tags %))
                          chew.data/changes))))))
 
+(def group-index (into (hash-map) (map-indexed (fn [i g] (vector g (str i)))
+  (apply sorted-set (map :group chew.data/changes)))))
+
+(def index-group (clojure.set/map-invert group-index))
+
 (defn chgs-table [changes] (vector
   :table {:class "table table-striped"}
-    [:thead [:tr [:th "Date"] [:th "Description"] [:th "Tags"]
+    [:thead [:tr [:th "Date"] [:th "Description"] [:th "Tags"] [:th "Group"]
                  [:th {:class "text-right"} "Amount"]]]
     [:tbody (for [x changes]
       [:tr [:td (date (:time x))]
-           [:td (if (empty? (:url x)) (:label x)
-             [:a {:href (:url x)} (:label x)])]
-           [:td [:ul {:class "list-inline"}
-                  (for [t (:tags x)] [:li (tag t)])]]
+           [:td (if (empty?(:url x)) (:label x) [:a{:href(:url x)}(:label x)])]
+           [:td [:ul {:class "list-inline"} (for [t (:tags x)] [:li (tag t)])]]
+           [:td [:a {:href (href :group :group (group-index (:group x)))}
+                 (str (group-index (:group x)))]]
            [:td {:class "text-right"} (amount x)]])]))
 
 (def chgs-split-table (memoize (fn [split step sel-ofs sel-cat]
@@ -172,10 +176,14 @@
                           sel-cat-cached column)]))))))
 
 (def handlers {
+  :root #(vector :h3 "Welcome!")
   :diag #(for [x chew.data/diag] (list
       [:h3 (:title x) " (" (str (:warns x)) "):"]
       [:pre (clojure.string/join "\n" (:info x))]))
-  :root #(vector :h3 "Welcome!")
+  :group (fn [params] (seq [
+    [:h3 (str "Group: " (index-group (params :group)))]
+    (chgs-table (filter #(= (group-index (:group %)) (params :group))
+      chew.data/changes))]))
   :split (fn [params]
           (let [split (cljs.reader/read-string (:split params))
                 step (cljs.reader/read-string (:step params))
