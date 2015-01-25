@@ -5,21 +5,40 @@
   (:require-macros [hiccups.core])
   (:import goog.History goog.history.EventType))
 
-(def cfg {
+(def cfg {:len-default 16
   :margin-left 5 :margin-right 5 :margin-top 5 :margin-bottom 5
   :sel-col "#000" :sel-width 5 :bdr-round 8 :bdr-col "#DDD"
   :cell-width 70 :cell-space 10 :txt-col "#333" :amount-scale 400
   :mark-space 10 :mark-height 30 :mark-ofs-x 35 :mark-ofs-y 20})
+
+(def routes ["/" {"diag" :diag
+  ["split." :split "/step." :step "/ofs." :ofs "/len." :len
+   "/sel-ofs." :sel-ofs "/sel-cat." :sel-cat] :split}])
 
 (defn html! [content]
   (aset (js/document.getElementById "content") "innerHTML" content))
 
 (defn warns [] (reduce + (map :warns chew.data/diag)))
 
-(defn page [els] (vector
+(defn href [& args] (str "#" (apply bidi.bidi/path-for routes args)))
+
+(defn chgs-time-span [] (- (:time (last chew.data/changes))
+                           (:time (first chew.data/changes))))
+
+(defn nav [splitn handler params] (let
+  [split (chew.user/splits splitn) len (cfg :len-default)
+   step (Math/ceil (/ (+ 1 (chgs-time-span)) len))]
+  (if (and (= handler :split) (= (str splitn) (params :split)))
+    [:li {:class "active"} [:a (:title split)]]
+    [:li [:a {:href (href :split :split splitn :step step :ofs 0
+                :len len :sel-ofs 0 :sel-cat 0)} (:title split)]])))
+
+(defn page [handler params content] (vector
   :div {:class "container"}
-    [:div {:class "row"}
-      [:div {:class "col-md-12"} els]]))
+    [:ul {:class "nav nav-pills"}
+      (for [[splitn _] (map-indexed vector chew.user/splits)]
+       (nav splitn handler params))]
+    [:div {:class "row"} [:div {:class "col-md-12"} content]]))
 
 (defn amount [ch] (vector
   :span {:style "white-space:nowrap"}
@@ -33,12 +52,6 @@
 
 (defn tag [t] (vector
   :span {:class "label label-default"} (subs (str t) 4)))
-
-(def routes ["/" {"diag" :diag
-  ["split." :split "/step." :step "/ofs." :ofs "/len." :len
-   "/sel-ofs." :sel-ofs "/sel-cat." :sel-cat] :split}])
-
-(defn href [& args] (str "#" (apply bidi.bidi/path-for routes args)))
 
 (defn pick-chgs [step ofs len] (let
   [tmin (:time (first chew.data/changes))
@@ -171,8 +184,7 @@
          " There are " (str (warns)) " validation errors ("
          [:a {:href (href :diag)} "read full report"]
          ")."]] [])
-    [[:h1 (:title (chew.user/splits split))]
-     [:nav
+    [[:nav
        [:ul {:class "pager"}
          (if (pos? ofs)
            [:li {:class "previous"}
@@ -198,8 +210,9 @@
        "Generated on " chew.data/timestamp]])))})
 
 (def html-content (memoize (fn [path]
-  (let [m (bidi.bidi/match-route routes path)]
-    (hiccups.core/html (page ((handlers (m :handler)) (m :route-params))))))))
+  (let [m (bidi.bidi/match-route routes path)
+        h (m :handler) ps (m :route-params)]
+    (hiccups.core/html (page h ps ((handlers h) ps)))))))
 
 (let [h (History.)]
   (goog.events/listen h EventType.NAVIGATE #(html! (html-content (.-token %))))
