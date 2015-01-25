@@ -53,6 +53,10 @@
 (def categ-amount (memoize (fn [step categ cofs amount-ftr]
   (apply + (filter amount-ftr (categ-amounts step categ cofs))))))
 
+(def categ-amount-total (memoize (fn [categ]
+  (apply + (map :amount (filter #((:tag-filter categ) (:tags %))
+                         chew.data/changes))))))
+
 (def chgs-table (memoize (fn [split step sel-ofs sel-cat] (hiccups.core/html
   [:table {:class "table table-striped"}
     [:thead [:tr [:th "Date"] [:th "Description"] [:th "Tags"]
@@ -187,7 +191,7 @@
           (for [c (:categs (chew.user/splits split))]
            [:li [:span {:class "label" :style
              (str "color:" (:fg-col c) ";background-color:" (:bg-col c))}
-             (:title c)]])]]]
+             (str (:title c) ": " (int (* 0.01 (categ-amount-total c))))]])]]]
      (chgs-table split step sel-ofs sel-cat)
      [:hr]
      [:p {:class "text-muted text-right"}
