@@ -11,9 +11,10 @@
   :cell-width 70 :cell-space 10 :txt-col "#333" :amount-scale 400
   :mark-space 10 :mark-height 30 :mark-ofs-x 35 :mark-ofs-y 20})
 
-(def routes ["/" {"diag" :diag
+(def routes ["" {"" :root "/" {
+  "diag" :diag
   ["split." :split "/step." :step "/ofs." :ofs "/len." :len
-   "/sel-ofs." :sel-ofs "/sel-cat." :sel-cat] :split}])
+   "/sel-ofs." :sel-ofs "/sel-cat." :sel-cat] :split}}])
 
 (defn html! [content]
   (aset (js/document.getElementById "content") "innerHTML" content))
@@ -171,6 +172,7 @@
   :diag #(for [x chew.data/diag] (list
       [:h3 (:title x) " (" (str (:warns x)) "):"]
       [:pre (clojure.string/join "\n" (:info x))]))
+  :root #(vector :h3 "Welcome!")
   :split (fn [params]
           (let [split (cljs.reader/read-string (:split params))
                 step (cljs.reader/read-string (:step params))
