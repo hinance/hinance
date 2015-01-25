@@ -71,19 +71,22 @@
   (apply + (map :amount (filter #((:tag-filter categ) (:tags %))
                          chew.data/changes))))))
 
-(def chgs-table (memoize (fn [split step sel-ofs sel-cat] (hiccups.core/html
-  [:table {:class "table table-striped"}
+(defn chgs-table [changes] (vector
+  :table {:class "table table-striped"}
     [:thead [:tr [:th "Date"] [:th "Description"] [:th "Tags"]
                  [:th {:class "text-right"} "Amount"]]]
-    [:tbody (for [x (pick-chgs step sel-ofs 1)
-      :when ((:tag-filter ((:categs (chew.user/splits split)) sel-cat))
-             (:tags x))]
+    [:tbody (for [x changes]
       [:tr [:td (date (:time x))]
            [:td (if (empty? (:url x)) (:label x)
              [:a {:href (:url x)} (:label x)])]
            [:td [:ul {:class "list-inline"}
                   (for [t (:tags x)] [:li (tag t)])]]
-           [:td {:class "text-right"} (amount x)]])]]))))
+           [:td {:class "text-right"} (amount x)]])]))
+
+(def chgs-split-table (memoize (fn [split step sel-ofs sel-cat]
+  (hiccups.core/html (chgs-table (filter
+    #((:tag-filter ((:categs (chew.user/splits split)) sel-cat)) (:tags %))
+    (pick-chgs step sel-ofs 1)))))))
 
 (defn svg-stack [split step ofs len sel-ofs sel-cat dir column items]
   (if (empty? items) [:g] (let
@@ -206,7 +209,7 @@
            [:li [:span {:class "label" :style
              (str "color:" (:fg-col c) ";background-color:" (:bg-col c))}
              (str (:title c) ": " (int (* 0.01 (categ-amount-total c))))]])]]]
-     (chgs-table split step sel-ofs sel-cat)
+     (chgs-split-table split step sel-ofs sel-cat)
      [:hr]
      [:p {:class "text-muted text-right"}
        "Generated on " chew.data/timestamp]])))})
