@@ -1,8 +1,0 @@
-4c4
-< pkgver=2.42.1
----
-> pkgver=2.43.0
-15c15
-< md5sums=('628be3f9426c0ec973d421fd08854552')
----
-> md5sums=('bf2b46caa5c1ea4b68434809c695d69b')

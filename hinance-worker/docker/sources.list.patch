@@ -1,8 +1,0 @@
-6c6
-< http://updates.weboob.org/%(version)s/main/
----
-> #http://updates.weboob.org/%(version)s/main/
-11c11
-< #file:///home/rom1/src/weboob/modules/
----
-> file:///usr/share/hinance-worker/weboob/modules/
