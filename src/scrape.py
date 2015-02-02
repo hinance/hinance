@@ -15,6 +15,7 @@ class MyApp(Application):
     banks = []
     shops = []
     for backend in self.load_backends().values():
+      print 'Scraping backend %s' % backend.name
       if backend.has_caps(CapBank):
         banks += [
           u'  ++ [' ] + [
