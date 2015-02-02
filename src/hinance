@@ -13,6 +13,7 @@ for NAME in user_{data,tag}.hs user.cljs ; do
   FULL="$HOME/.hinance/$NAME"
   if [[ ! -e "$FULL" ]] ; then
     echo "File \"$FULL\" is required to continue."
+    exit 1
   fi
 done
 
