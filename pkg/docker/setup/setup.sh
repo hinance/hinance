@@ -18,7 +18,7 @@ echo "Server = " \
      > /etc/pacman.d/mirrorlist
 pacman -Syyuu --noconfirm
 
-pacman -S --noconfirm --needed base base-devel cabal-install firefox \
+pacman -S --noconfirm --needed base base-devel cabal-install firefox ghc \
                                git mupdf xorg-server-xvfb
 
 # aur
