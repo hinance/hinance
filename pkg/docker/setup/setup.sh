@@ -45,6 +45,12 @@ patch PKGBUILD /hinance-docker/setup/weboob-git/PKGBUILD.patch
 makepkg -s --asroot --noconfirm
 pacman -U --noconfirm weboob-git-2402b546-1-x86_64.pkg.tar.xz
 
+# leiningen
+cd /hinance-docker/aur/leiningen
+makepkg -s --asroot --noconfirm
+pacman -U --noconfirm leiningen-1\:2.5.0-1-any.pkg.tar.xz
+LEIN_ROOT=1 lein version
+
 #
 # Install Haskell stuff.
 #
@@ -52,27 +58,5 @@ pacman -U --noconfirm weboob-git-2402b546-1-x86_64.pkg.tar.xz
 cabal update
 cabal install pretty-show-1.6.8 regex-tdfa-1.2.0
 
-#
-# Install Clojure stuff.
-#
-
-curl https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein \
-  > /usr/bin/lein
-chmod a+x /usr/bin/lein
-lein
-
-#
-# Removing unneeded stuff.
-#
-
 paccache -rk0
-
-#
-# Checking out Weboob repo.
-#
-
-mkdir -p /usr/share/$APP/weboob
-git clone git://git.symlink.me/pub/oleg/weboob.git /usr/share/$APP/weboob
-cd /usr/share/$APP/weboob
-git checkout 0484d0d
-
+rm -rf /hinance-docker/aur
