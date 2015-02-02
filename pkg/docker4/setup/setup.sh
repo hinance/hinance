@@ -2,6 +2,12 @@
 
 set -e
 
-pacman -S --noconfirm --needed ghc
-cabal update
-cabal install --jobs=50 cblrepo-0.13
+pacman -S --noconfirm --needed ghc sudo
+
+# habs
+git clone https://github.com/archhaskell/habs /hinance-docker/habs
+cd /hinance-docker/habs
+git checkout $HABS_TAG
+useradd -m user
+chown -R user:user /hinance-docker/habs
+sudo -iu user /hinance-docker/setup/setup-habs.sh
