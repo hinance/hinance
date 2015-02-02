@@ -27,12 +27,12 @@ diagscljs = concat [["(def diag ["],
     ugrps = unbalgrps $ filter grouped chgsfinal
     mparts = concatMap (\(a,b) -> a++b) chkparts
     checks = concat.map (concat.map chkbalance.baccs).patched$banks
-    cljs s n xs = [printf "  (chew.type/Diag. \"%s\" %i [" s n] ++
+    cljs s n xs = [printf "  (hinance.type/Diag. \"%s\" %i [" s n] ++
                    (map ((printf "    %s").show) (lines $ ppShow xs)) ++
                    ["  ])"]
 
 chgscljs = concat [["(def changes ["],(concat$map cljs chgsfinal),["])"]] where
-  cljs c = [printf "  (chew.type/Change. %s %i :%s"
+  cljs c = [printf "  (hinance.type/Change. %s %i :%s"
              (numcljs $ camount c) (ctime c) (show $ ccur c),
             "    " ++ (show $ filter isAscii $ clabel c),
             "    " ++ (show $ filter isAscii $ cgroup c),

@@ -47,4 +47,4 @@ echo -e "(ns hinance.data (:require hinance.type))\n\n\
 cd "$DIR/tmp"
 lein cljsbuild once
 
-cp -t "$DIR/out" "$DIR/tmp/hinance.js" /var/lib/hinance/hinance.html
+cp -t "$DIR/out" "$DIR/tmp/hinance.js" /usr/lib/hinance/hinance.html
