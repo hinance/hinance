@@ -36,7 +36,7 @@ cat {"$HOME/.hinance","$DIR/out"}/banks*.hs.part >> "$DIR/tmp/hs/bank_data.hs"
 cat {"$HOME/.hinance","$DIR/out"}/shops*.hs.part >> "$DIR/tmp/hs/shop_data.hs"
 set -e
 
-ghc -O -XFlexibleInstances -o "$DIR/tmp/hinance-hs" "$DIR/tmp/hs/*.hs"
+ghc -O -XFlexibleInstances -o "$DIR/tmp/hinance-hs" "$DIR"/tmp/hs/*.hs
 
 echo 'Generating report source.'
 echo -e "(ns hinance.data (:require hinance.type))\n\n\
