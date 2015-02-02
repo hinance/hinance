@@ -35,6 +35,7 @@ cd /hinance-docker/habs
 git checkout $HABS_TAG
 CBLREPO=${HOME}/.cabal/bin/cblrepo
 $CBLREPO sync
+# FIXME: need to run this as a regular user, otherwise it throws error...
 $CBLREPO pkgbuild $($CBLREPO build base|tail -n +2)
 
 # python2-elementtidy
@@ -67,9 +68,9 @@ pacman -U --noconfirm leiningen-1\:2.5.0-1-any.pkg.tar.xz
 LEIN_ROOT=1 lein version
 
 # ghc
-#cd /hinance-docker/habs/ghc
-#makepkg -s --asroot --noconfirm
-#pacman -U --noconfirm ghc-7.8.3-1-x86_64.pkg.tar.gz
+cd /hinance-docker/habs/ghc
+makepkg -s --asroot --noconfirm
+pacman -U --noconfirm ghc-7.8.3-1-x86_64.pkg.tar.gz
 
 # haskell-haskell-lexer
 #cd /hinance-docker/habs/haskell-haskell-lexer
