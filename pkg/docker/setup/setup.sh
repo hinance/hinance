@@ -36,8 +36,7 @@ git checkout $HABS_TAG
 useradd -m user -G wheel
 chmod +w /etc/sudoers
 echo '%wheel ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
-chown -R user:user /hinance-docker/habs
-chown -R user:user /hinance-docker/aur
+chown -R user:user /hinance-docker
 
 sudo -iu user /hinance-docker/setup/setup-pkgs.sh
 
