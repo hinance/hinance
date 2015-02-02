@@ -1,6 +1,6 @@
 # Maintainer: Oleg Plakhotniuk <olegus8@gmail.com>
 pkgname=hinance
-pkgver=0-2-0-dev
+pkgver=0.0.0dev
 pkgrel=1
 pkgdesc="Personal finance application for hackers."
 arch=('any')
@@ -9,8 +9,12 @@ license=('MIT')
 depends=()
 makedepends=('git')
 source=("git+https://github.com/olegus8/hinance#tag=${pkgver}")
-md5sums=() #generate with 'makepkg -g'
+md5sums=('SKIP')
 
 package() {
-	echo "$srcdir/$pkgname-$pkgver"
+    cd "$srcdir/$pkgname"
+    mkdir -p "${pkgdir}"/usr/{bin,lib/hinance}
+    ln -s /usr/lib/hinance/hinance "${pkgdir}"/usr/bin/hinance
+    cp -rt "${pkgdir}"/usr/lib/hinance src/* 
+    install -D -m644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
 }
