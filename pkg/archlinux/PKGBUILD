@@ -1,0 +1,16 @@
+# Maintainer: Oleg Plakhotniuk <olegus8@gmail.com>
+pkgname=hinance
+pkgver=0-2-0-dev
+pkgrel=1
+pkgdesc="Personal finance application for hackers."
+arch=('any')
+url="https://github.com/olegus8/hinance"
+license=('MIT')
+depends=()
+makedepends=('git')
+source=("git+https://github.com/olegus8/hinance#tag=${pkgver}")
+md5sums=() #generate with 'makepkg -g'
+
+package() {
+	echo "$srcdir/$pkgname-$pkgver"
+}
