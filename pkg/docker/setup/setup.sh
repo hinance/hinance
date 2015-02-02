@@ -39,9 +39,11 @@ patch PKGBUILD /hinance-docker/setup/python2-selenium/PKGBUILD.patch
 makepkg -s --asroot --noconfirm
 pacman -U --noconfirm python2-selenium-2.43.0-1-x86_64.pkg.tar.xz
 
-# weboob
+# weboob-git
 cd /hinance-docker/aur/weboob-git
-
+patch PKGBUILD /hinance-docker/setup/weboob-git/PKGBUILD.patch
+makepkg -s --asroot --noconfirm
+pacman -U --noconfirm weboob-git-2402b546-1-x86_64.pkg.tar.xz
 
 #
 # Install Haskell stuff.
