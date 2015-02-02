@@ -9,8 +9,8 @@ cabal update
 cabal install cblrepo-0.13
 cd /hinance-docker/habs
 $CBLREPO sync
-$CBLREPO pkgbuild haskell-lexer pretty-show mtl text parsec \
-                  regex-base regex-tdfa
+$CBLREPO pkgbuild haskell-lexer pretty-show,1.6.8 mtl text parsec \
+                  regex-base regex-tdfa,1.2.0
 rm -rf $HOME/.{cabal,ghc}
 sudo pacman -Rs cabal-install
 
