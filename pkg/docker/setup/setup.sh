@@ -34,6 +34,7 @@ git clone https://github.com/archhaskell/habs /hinance-docker/habs
 cd /hinance-docker/habs
 git checkout $HABS_TAG
 CBLREPO=${HOME}/.cabal/bin/cblrepo
+$CBLREPO sync
 $CBLREPO pkgbuild $($CBLREPO build base|tail -n +2)
 
 # python2-elementtidy
