@@ -19,7 +19,7 @@ echo "Server = " \
 pacman -Syyuu --noconfirm
 
 pacman -S --noconfirm --needed base base-devel cabal-install firefox ghc \
-                               git mupdf xorg-server-xvfb
+                               git mupdf sudo xorg-server-xvfb
 
 # aur
 curl -O http://pkgbuild.com/git/aur-mirror.git/snapshot/aur-mirror-$AUR_TAG.tar.xz
@@ -28,15 +28,12 @@ mv aur-mirror-$AUR_TAG /hinance-docker/aur
 rm aur-mirror-$AUR_TAG.tar.xz
 
 # habs
-cabal update
-cabal install cblrepo-0.13
 git clone https://github.com/archhaskell/habs /hinance-docker/habs
 cd /hinance-docker/habs
 git checkout $HABS_TAG
-CBLREPO=${HOME}/.cabal/bin/cblrepo
-$CBLREPO sync
-# FIXME: need to run this as a regular user, otherwise it throws error...
-$CBLREPO pkgbuild $($CBLREPO build base|tail -n +2)
+useradd -m user
+chown -R user:user /hinance-docker/habs
+sudo -iu user /hinance-docker/setup/setup-habs.sh
 
 # python2-elementtidy
 cd /hinance-docker/aur/python2-elementtidy
@@ -73,19 +70,19 @@ makepkg -s --asroot --noconfirm
 pacman -U --noconfirm ghc-7.8.3-1-x86_64.pkg.tar.gz
 
 # haskell-haskell-lexer
-#cd /hinance-docker/habs/haskell-haskell-lexer
-#makepkg -s --asroot --noconfirm
-#pacman -U --noconfirm haskell-haskell-lexer-1.0-4-x86_64.pkg.tar.gz
+cd /hinance-docker/habs/haskell-haskell-lexer
+makepkg -s --asroot --noconfirm
+pacman -U --noconfirm haskell-haskell-lexer-1.0-4-x86_64.pkg.tar.gz
 
 # haskell-pretty-show
-#cd /hinance-docker/habs/haskell-pretty-show
-#makepkg -s --asroot --noconfirm
-#pacman -U --noconfirm haskell-pretty-show-1.6.8-2-x86_64.pkg.tar.gz
+cd /hinance-docker/habs/haskell-pretty-show
+makepkg -s --asroot --noconfirm
+pacman -U --noconfirm haskell-pretty-show-1.6.8-2-x86_64.pkg.tar.gz
 
 # haskell-regex-tdfa
-#cd /hinance-docker/habs/haskell-regex-tdfa
-#makepkg -s --asroot --noconfirm
-#pacman -U --noconfirm haskell-regex-tdfa-1.2.0-63-x86_64.pkg.tar.gz
+cd /hinance-docker/habs/haskell-regex-tdfa
+makepkg -s --asroot --noconfirm
+pacman -U --noconfirm haskell-regex-tdfa-1.2.0-63-x86_64.pkg.tar.gz
 
-#paccache -rk0
-#rm -rf /hinance-docker/{aur,habs}
+paccache -rk0
+rm -rf /hinance-docker/{aur,habs}
