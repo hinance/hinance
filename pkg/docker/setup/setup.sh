@@ -66,24 +66,24 @@ pacman -U --noconfirm leiningen-1\:2.5.0-1-any.pkg.tar.xz
 LEIN_ROOT=1 lein version
 
 # ghc
-cd /hinance-docker/habs/ghc
-makepkg -s --asroot --noconfirm
-pacman -U --noconfirm ghc-7.8.3-1-x86_64.pkg.tar.gz
+#cd /hinance-docker/habs/ghc
+#makepkg -s --asroot --noconfirm
+#pacman -U --noconfirm ghc-7.8.3-1-x86_64.pkg.tar.gz
 
 # haskell-haskell-lexer
-cd /hinance-docker/habs/haskell-haskell-lexer
-makepkg -s --asroot --noconfirm
-pacman -U --noconfirm haskell-haskell-lexer-1.0-4-x86_64.pkg.tar.gz
+#cd /hinance-docker/habs/haskell-haskell-lexer
+#makepkg -s --asroot --noconfirm
+#pacman -U --noconfirm haskell-haskell-lexer-1.0-4-x86_64.pkg.tar.gz
 
 # haskell-pretty-show
-cd /hinance-docker/habs/haskell-pretty-show
-makepkg -s --asroot --noconfirm
-pacman -U --noconfirm haskell-pretty-show-1.6.8-2-x86_64.pkg.tar.gz
+#cd /hinance-docker/habs/haskell-pretty-show
+#makepkg -s --asroot --noconfirm
+#pacman -U --noconfirm haskell-pretty-show-1.6.8-2-x86_64.pkg.tar.gz
 
 # haskell-regex-tdfa
-cd /hinance-docker/habs/haskell-regex-tdfa
-makepkg -s --asroot --noconfirm
-pacman -U --noconfirm haskell-regex-tdfa-1.2.0-63-x86_64.pkg.tar.gz
+#cd /hinance-docker/habs/haskell-regex-tdfa
+#makepkg -s --asroot --noconfirm
+#pacman -U --noconfirm haskell-regex-tdfa-1.2.0-63-x86_64.pkg.tar.gz
 
 #paccache -rk0
 #rm -rf /hinance-docker/{aur,habs}
