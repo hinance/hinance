@@ -58,35 +58,35 @@ sudo pacman -U --noconfirm haskell-regex-tdfa-1.2.0-1-x86_64.pkg.tar.xz
 # python2-elementtidy
 cd /hinance-docker/aur/python2-elementtidy
 makepkg -sc --noconfirm
-pacman -U --noconfirm python2-elementtidy-1.0-1-x86_64.pkg.tar.xz
+sudo pacman -U --noconfirm python2-elementtidy-1.0-1-x86_64.pkg.tar.xz
 
 # python2-html2text
 cd /hinance-docker/aur/python2-html2text
 makepkg -sc --noconfirm
-pacman -U --noconfirm python2-html2text-2014.9.25-2-any.pkg.tar.xz
+sudo pacman -U --noconfirm python2-html2text-2014.9.25-2-any.pkg.tar.xz
 
 # python2-selenium
 # TODO: remove this patch when the package is updated
 cd /hinance-docker/aur/python2-selenium
 patch PKGBUILD /hinance-docker/setup/python2-selenium/PKGBUILD.patch
 makepkg -sc --noconfirm
-pacman -U --noconfirm python2-selenium-2.43.0-1-x86_64.pkg.tar.xz
+sudo pacman -U --noconfirm python2-selenium-2.43.0-1-x86_64.pkg.tar.xz
 
 # weboob-git
 cd /hinance-docker/aur/weboob-git
 patch PKGBUILD /hinance-docker/setup/weboob-git/PKGBUILD.patch
 makepkg -sc --noconfirm
-pacman -U --noconfirm weboob-git-2402b546-1-x86_64.pkg.tar.xz
+sudo pacman -U --noconfirm weboob-git-2402b546-1-x86_64.pkg.tar.xz
 
 # leiningen
 cd /hinance-docker/aur/leiningen
 makepkg -sc --noconfirm
-pacman -U --noconfirm leiningen-1\:2.5.0-1-any.pkg.tar.xz
+sudo pacman -U --noconfirm leiningen-1\:2.5.0-1-any.pkg.tar.xz
 
 # hinance
 # TODO: use aur package
 cd /hinance-docker/setup/hinance
 makepkg -sc --noconfirm
-pacman -U --noconfirm hinance-0.0.0dev-1-any.pkg.tar.xz
+sudo pacman -U --noconfirm hinance-0.0.0dev-1-any.pkg.tar.xz
 
 #TODO: run hinance once to pull all lein dependencies
