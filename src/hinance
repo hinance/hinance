@@ -4,15 +4,15 @@ set -e
 
 DIR="$(pwd)"
 
-if [[ -e tmp || -e log || -e out ]] ; then
-  echo "Directories \"tmp\", \"log\" and \"out\" must be deleted."
+for NAME in tmp log out ; do
+if [[ -e $NAME ]] ; then
+  echo "Directory \"$NAME\" must be deleted to continue."
   exit 1
 fi
 
 for NAME in user_{data,tag}.hs user.cljs ; do
-  FULL="$HOME/.hinance/$NAME"
-  if [[ ! -e "$FULL" ]] ; then
-    echo "File \"$FULL\" is required to continue."
+  if [[ ! -e $NAME ]] ; then
+    echo "File \"$NAME\" is required to continue."
     exit 1
   fi
 done
@@ -22,9 +22,9 @@ cd "$DIR/out"
 python2 /usr/lib/hinance/scrape.py -addv --logging-file "$DIR/log/scrape.log"
 
 mkdir -p "$DIR/tmp/hs"
-cp -t "$DIR/tmp/hs" "$HOME"/.hinance/*.hs /usr/lib/hinance/hs/*
+cp -t "$DIR/tmp/hs" "$DIR"/*.hs /usr/lib/hinance/hs/*
 cp -rt "$DIR/tmp" /usr/lib/hinance/{*.clj,cljs}
-cp "$HOME"/.hinance/*.cljs "$DIR"/tmp/cljs/hinance
+cp "$DIR"/*.cljs "$DIR"/tmp/cljs/hinance
 
 echo -e "module Hinance.Bank.Data where\nimport Hinance.Bank.Type\n\
 import Hinance.Currency\nbanksraw = []" >"$DIR/tmp/hs/bank_data.hs"
@@ -32,8 +32,8 @@ echo -e "module Hinance.Shop.Data where\nimport Hinance.Shop.Type\n\
 import Hinance.Currency\nshopsraw = []" >"$DIR/tmp/hs/shop_data.hs"
 
 set +e
-cat {"$HOME/.hinance","$DIR/out"}/banks*.hs.part >> "$DIR/tmp/hs/bank_data.hs"
-cat {"$HOME/.hinance","$DIR/out"}/shops*.hs.part >> "$DIR/tmp/hs/shop_data.hs"
+cat "$DIR"/{,out/}banks*.hs.part >> "$DIR/tmp/hs/bank_data.hs"
+cat "$DIR"/{,out/}shops*.hs.part >> "$DIR/tmp/hs/shop_data.hs"
 set -e
 
 ghc -O -XFlexibleInstances -o "$DIR/tmp/hinance-hs" "$DIR"/tmp/hs/*.hs

@@ -89,4 +89,5 @@ cd /hinance-docker/setup/hinance
 makepkg -sc --noconfirm
 sudo pacman -U --noconfirm hinance-0.0.0dev-1-any.pkg.tar.xz
 
-#TODO: run hinance once to pull all lein dependencies
+cd /hinance-docker/setup
+hinance
