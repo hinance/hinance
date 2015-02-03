@@ -28,7 +28,7 @@ sudo pacman -U --noconfirm haskell-haskell-lexer-1.0-4-x86_64.pkg.tar.xz
 # haskell-pretty-show
 cd /hinance-docker/habs/haskell-pretty-show
 makepkg -sc --noconfirm
-sudo pacman -U --noconfirm haskell-pretty-show-1.6.8-2-x86_64.pkg.tar.xz
+sudo pacman -U --noconfirm haskell-pretty-show-1.6.8-1-x86_64.pkg.tar.xz
 
 # haskell-mtl
 cd /hinance-docker/habs/haskell-mtl
