@@ -18,7 +18,7 @@ sudo pacman -Rs --noconfirm cabal-install
 # ghc
 cd /hinance-docker/habs/ghc
 makepkg -sc --noconfirm
-sudo pacman -U --noconfirm ghc-7.8.3-1-x86_64.pkg.tar.gz
+sudo pacman -U --noconfirm ghc-7.8.3-1-x86_64.pkg.tar.xz
 
 # haskell-haskell-lexer
 cd /hinance/docker/habs/haskell-haskell-lexer
