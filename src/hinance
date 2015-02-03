@@ -5,10 +5,11 @@ set -e
 DIR="$(pwd)"
 
 for NAME in tmp log out ; do
-if [[ -e $NAME ]] ; then
-  echo "Directory \"$NAME\" must be deleted to continue."
-  exit 1
-fi
+  if [[ -e $NAME ]] ; then
+    echo "Directory \"$NAME\" must be deleted to continue."
+    exit 1
+  fi
+done
 
 for NAME in user_{data,tag}.hs user.cljs ; do
   if [[ ! -e $NAME ]] ; then
