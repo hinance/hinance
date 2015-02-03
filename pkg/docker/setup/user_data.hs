@@ -1,9 +1,10 @@
 module Hinance.User.Data where
+import Hinance.User.Tag
 import Hinance.User.Type
 import Hinance.Bank.Type
 import Hinance.Shop.Type
 
-addtagged _ = []
+addtagged _ = [] :: [Tag]
 canxfer _ _ = False
 canmerge _ _ = False
 tagparts = []
