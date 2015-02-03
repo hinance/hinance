@@ -23,12 +23,12 @@ sudo pacman -U --noconfirm ghc-7.8.3-1-x86_64.pkg.tar.xz
 # haskell-haskell-lexer
 cd /hinance-docker/habs/haskell-haskell-lexer
 makepkg -sc --noconfirm
-sudo pacman -U --noconfirm haskell-haskell-lexer-1.0-4-x86_64.pkg.tar.gz
+sudo pacman -U --noconfirm haskell-haskell-lexer-1.0-4-x86_64.pkg.tar.xz
 
 # haskell-pretty-show
 cd /hinance-docker/habs/haskell-pretty-show
 makepkg -sc --noconfirm
-sudo pacman -U --noconfirm haskell-pretty-show-1.6.8-2-x86_64.pkg.tar.gz
+sudo pacman -U --noconfirm haskell-pretty-show-1.6.8-2-x86_64.pkg.tar.xz
 
 # haskell-mtl
 cd /hinance-docker/habs/haskell-mtl
@@ -53,7 +53,7 @@ sudo pacman -U --noconfirm haskell-regex-base-0.93.2-57-x86_64.pkg.tar.xz
 # haskell-regex-tdfa
 cd /hinance-docker/habs/haskell-regex-tdfa
 makepkg -sc --noconfirm
-sudo pacman -U --noconfirm haskell-regex-tdfa-1.2.0-63-x86_64.pkg.tar.gz
+sudo pacman -U --noconfirm haskell-regex-tdfa-1.2.0-63-x86_64.pkg.tar.xz
 
 # python2-elementtidy
 cd /hinance-docker/aur/python2-elementtidy
