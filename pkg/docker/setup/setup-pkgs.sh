@@ -13,7 +13,7 @@ $CBLREPO add pretty-show,1.6.8 regex-tdfa,1.2.0
 $CBLREPO pkgbuild haskell-lexer pretty-show mtl text parsec \
                   regex-base regex-tdfa
 rm -rf $HOME/.{cabal,ghc}
-sudo pacman -Rs cabal-install
+sudo pacman -Rs --noconfirm cabal-install
 
 # ghc
 cd /hinance-docker/habs/ghc
