@@ -10,7 +10,7 @@ canmerge _ _ = False
 tagparts = []
 
 instance Taggable (Bank, BankAcc, BankTrans) where
-  tagged _ _ = True
+  tagged _ _ = False
 
 instance Taggable (Shop, ShopOrder, String) where
   tagged _ _ = False
