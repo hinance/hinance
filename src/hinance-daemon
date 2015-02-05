@@ -1,0 +1,34 @@
+#!/bin/sh
+
+set -e
+
+if [ "#$" -ne 3 ]; then
+  echo "Usage: hinance-daemon <input-dir> <report-dir> <archive-dir>"
+fi
+
+INPDIR=$1
+REPDIR=$2
+ARCDIR=$3
+
+. $INPDIR/config.sh
+
+if [ "$XVFB_DISPLAY" ]; then
+  export DISPLAY=$XVFB_DISPLAY
+  Xvfb &
+fi
+
+while true ; do
+  DATE=$(date +"%Y_%m_%d_%H_%M")
+  echo "Fetching data on $DATE"
+  mkdir -p $ARCDIR/$DATE
+  cp $INPDIR/* $ARCDIR/$DATE
+  cd $ARCDIR/$DATE
+  chmod 600 backends
+  export WEBOOB_BACKENDS=$ARCDIR/$DATE/backends
+  set +e; hinance; cp out/* $REPDIR; set -e
+  if [ "$XVFB_DISPLAY" ]; then
+    set +e; pkill -9 firefox; set -e
+  fi
+  echo "Sleeping for $WAIT_HOURS hours."
+  sleep $((3600*$WAIT_HOURS))
+done
