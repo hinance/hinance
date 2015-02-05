@@ -10,6 +10,7 @@ fi
 INPDIR=$1
 REPDIR=$2
 ARCDIR=$3
+CURDIR=$(pwd)
 
 mkdir -p "$REPDIR" "$ARCDIR"
 
@@ -21,6 +22,7 @@ if [ "$XVFB_DISPLAY" ]; then
 fi
 
 while true ; do
+  cd "$CURDIR"
   DATE=$(date +"%Y_%m_%d_%H_%M")
   echo "Fetching data on $DATE"
   mkdir -p "$ARCDIR"/$DATE
