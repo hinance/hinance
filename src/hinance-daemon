@@ -2,13 +2,15 @@
 
 set -e
 
-if [ "#$" -ne 3 ]; then
+if [ "$#" -ne 3 ]; then
   echo "Usage: hinance-daemon <input-dir> <report-dir> <archive-dir>"
 fi
 
 INPDIR=$1
 REPDIR=$2
 ARCDIR=$3
+
+mkdir -p "$REPDIR" "$ARCDIR"
 
 . $INPDIR/config.sh
 
@@ -20,12 +22,12 @@ fi
 while true ; do
   DATE=$(date +"%Y_%m_%d_%H_%M")
   echo "Fetching data on $DATE"
-  mkdir -p $ARCDIR/$DATE
-  cp $INPDIR/* $ARCDIR/$DATE
-  cd $ARCDIR/$DATE
+  mkdir -p "$ARCDIR"/$DATE
+  cp "$INPDIR"/* "$ARCDIR"/$DATE
+  cd "$ARCDIR"/$DATE
   chmod 600 backends
-  export WEBOOB_BACKENDS=$ARCDIR/$DATE/backends
-  set +e; hinance; cp out/* $REPDIR; set -e
+  export WEBOOB_BACKENDS="$ARCDIR"/$DATE/backends
+  set +e; hinance; cp out/* "$REPDIR"; set -e
   if [ "$XVFB_DISPLAY" ]; then
     set +e; pkill -9 firefox; set -e
   fi
