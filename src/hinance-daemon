@@ -4,6 +4,7 @@ set -e
 
 if [ "$#" -ne 3 ]; then
   echo "Usage: hinance-daemon <input-dir> <report-dir> <archive-dir>"
+  exit 1
 fi
 
 INPDIR=$1
@@ -12,7 +13,7 @@ ARCDIR=$3
 
 mkdir -p "$REPDIR" "$ARCDIR"
 
-. $INPDIR/config.sh
+. "$INPDIR"/config.sh
 
 if [ "$XVFB_DISPLAY" ]; then
   export DISPLAY=$XVFB_DISPLAY
