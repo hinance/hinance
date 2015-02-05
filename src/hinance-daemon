@@ -4,13 +4,13 @@ set -e
 
 if [ "$#" -ne 3 ]; then
   echo "Usage: hinance-daemon <input-dir> <report-dir> <archive-dir>"
+  echo "All paths must be absolute."
   exit 1
 fi
 
 INPDIR=$1
 REPDIR=$2
 ARCDIR=$3
-CURDIR=$(pwd)
 
 mkdir -p "$REPDIR" "$ARCDIR"
 
@@ -18,11 +18,10 @@ mkdir -p "$REPDIR" "$ARCDIR"
 
 if [ "$XVFB_DISPLAY" ]; then
   export DISPLAY=$XVFB_DISPLAY
-  Xvfb &
+  Xvfb $XVFB_DISPLAY &
 fi
 
 while true ; do
-  cd "$CURDIR"
   DATE=$(date +"%Y_%m_%d_%H_%M")
   echo "Fetching data on $DATE"
   mkdir -p "$ARCDIR"/$DATE
