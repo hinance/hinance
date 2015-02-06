@@ -26,7 +26,7 @@ diagscljs = concat [["(def diag ["],
     nchgs = filter (not.grouped) chgsfinal
     ugrps = unbalgrps $ filter grouped chgsfinal
     mparts = concatMap (\(a,b) -> a++b) chkparts
-    checks = concat.map (concat.map chkbalance.baccs).patched$banks
+    checks = concatMap (concatMap chkbalance.baccs) banks
     cljs s n xs = [printf "  (hinance.type/Diag. \"%s\" %i [" s n] ++
                    (map ((printf "    %s").show) (lines $ ppShow xs)) ++
                    ["  ])"]
@@ -46,15 +46,15 @@ numcljs n
 
 chgsfinal = (sortBy (compare`on`ctime)).(concatMap addchanges)
             .joinxfers.mergechgs$raw where
-  raw = concat$(map changes.patched$banks)++(map changes.patched$shops)
+  raw = concat $ (map changes banks) ++ (map changes shops)
 
-banks = map (mrgbacs.mrgbs) $ groupSortBy bid banksraw where
+banks = patched $ map (mrgbacs.mrgbs) $ groupSortBy bid banksraw where
   mrgbs = foldl1 (\a x -> x{baccs = (baccs a) ++ (baccs x)})
   mrgbacs b = b{baccs = map mrgacs $ groupSortBy baid $ baccs b}
   mrgacs acs = newest{batrans = merge $ map batrans acs} where
     newest = maximumBy (on compare (bttime.head.batrans)) acs
 
-shops = map mrgss $ groupSortBy sid $ shopsraw where
+shops = patched $ map mrgss $ groupSortBy sid $ shopsraw where
   mrgss (s:ss) = s{sorders = merge $ map sorders (s:ss)}
 
 tags x = filter (tagged x) [minBound::Tag ..]
