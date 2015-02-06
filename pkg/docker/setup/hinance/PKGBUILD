@@ -8,6 +8,7 @@ url="https://github.com/olegus8/hinance"
 license=('MIT')
 depends=('haskell-pretty-show' 'haskell-regex-tdfa'
          'leiningen' 'python2' 'weboob')
+optdepends=('xorg-server-xvfb: for headless selenium scraping')
 makedepends=('git')
 source=("git+https://github.com/olegus8/hinance#tag=${pkgver}")
 md5sums=('SKIP')
@@ -16,6 +17,7 @@ package() {
     cd "$srcdir/$pkgname"
     mkdir -p "${pkgdir}"/usr/{bin,lib/hinance}
     ln -s /usr/lib/hinance/hinance "${pkgdir}"/usr/bin/hinance
+    ln -s /usr/lib/hinance/hinance-daemon "${pkgdir}"/usr/bin/hinance-daemon
     cp -r src/* "${pkgdir}"/usr/lib/hinance
     install -D -m644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
 }
