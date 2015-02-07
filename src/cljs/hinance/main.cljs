@@ -38,7 +38,9 @@
     [:ul {:class "nav nav-pills"}
       (for [[splitn _] (map-indexed vector hinance.user/splits)]
        (nav splitn handler params))]
-    [:div {:class "row"} [:div {:class "col-md-12"} content]]))
+    [:div {:class "row"} [:div {:class "col-md-12"} content
+       [:hr] [:p {:class "text-muted text-right"}
+         "Generated on " hinance.data/timestamp]]]))
 
 (defn amount [ch] (vector
   :span {:style "white-space:nowrap"}
@@ -217,10 +219,7 @@
            [:li [:span {:class "label" :style
              (str "color:" (:fg-col c) ";background-color:" (:bg-col c))}
              (str (:title c) ": " (int (* 0.01 (categ-amount-total c))))]])]]]
-     (chgs-split-table split step sel-ofs sel-cat)
-     [:hr]
-     [:p {:class "text-muted text-right"}
-       "Generated on " hinance.data/timestamp]])))})
+     (chgs-split-table split step sel-ofs sel-cat)])))})
 
 (def html-content (memoize (fn [path]
   (let [m (bidi.bidi/match-route routes path)
