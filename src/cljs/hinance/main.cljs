@@ -45,10 +45,9 @@
        [:hr] [:p {:class "text-muted text-right"}
          "Generated on " hinance.data/timestamp]]]))
 
-(defn amount [ch] (vector
-  :span {:style "white-space:nowrap"}
-  (.toLocaleString (* 0.01 (:amount ch)) js/undefined
-    (clj->js {:style "currency" :currency (:cur ch)}))))
+(defn amount-str [number cur] (vector :span {:style "white-space:nowrap"}
+  (.toLocaleString (* 0.01 number) js/undefined
+    (clj->js {:style "currency" :currency cur}))))
 
 (defn date [unixtime]
   (cljs-time.format/unparse
@@ -90,7 +89,7 @@
            [:td [:ul {:class "list-inline"} (for [t (:tags x)] [:li (tag t)])]]
            [:td [:a {:href (href :group :group (group-index (:group x)))}
                  (str (group-index (:group x)))]]
-           [:td {:class "text-right"} (amount x)]])]))
+           [:td {:class "text-right"} (amount-str (:amount x) (:cur x))]])]))
 
 (def chgs-split-table (memoize (fn [split step sel-ofs sel-cat]
   (hiccups.core/html (chgs-table (filter
@@ -181,7 +180,17 @@
                           sel-cat-cached column)]))))))
 
 (def handlers {
-  :home #(vector :h3 "Welcome!")
+  :home #(vector
+    :table {:class "table table-striped"}
+      [:thead [:tr [:th "Account"] [:th "Balance"] [:th "Credit Limit"]
+                   [:th {:class "text-right"} "Payment Date"]]]
+      [:tbody (for [x hinance.data/baccs :when (pos? (:limit x))]
+        [:tr [:td (:label x)]
+             [:td (amount-str (:balance x) (:cur x))]
+             [:td (amount-str (:limit x) (:cur x))]
+             [:td {:class "text-right"} (if (pos? (:paytime x))
+               (date (:paytime x))
+               [:span {:class "label label-default"} "cannot retrieve"])]])])
   :diag #(for [x hinance.data/diag] (list
       [:h3 (:title x) " (" (str (:warns x)) "):"]
       [:pre (clojure.string/join "\n" (:info x))]))
