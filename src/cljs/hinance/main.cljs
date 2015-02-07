@@ -181,6 +181,8 @@
 
 (def handlers {
   :home #(vector
+    ; TODO: Remove credit stuff from hinance altogether.
+    ;       Move it to boobank or something.
     :table {:class "table table-striped"}
       [:thead [:tr [:th "Account"] [:th "Balance"] [:th "Credit Limit"]
         [:th "Minimum Payment"] [:th {:class "text-right"} "Payment Date"]]]
