@@ -33,9 +33,9 @@ diagscljs = concat [["(def diag ["],
 
 baccscljs = concat [["(def baccs ["], (concatMap cljsb banks), ["])"]] where
   cljsb b = concatMap cljsa (baccs b)
-  cljsa a = [printf "  (hinance.type/BankAcc. %s %s %i :%s"
+  cljsa a = [printf "  (hinance.type/BankAcc. %s %s %i %s :%s"
              (numcljs $ babalance a) (numcljs $ balimit a)
-             (bapaytime a) (show $ bacurrency a),
+             (bapaytime a) (numcljs $ bapaymin a) (show $ bacurrency a),
             "    " ++ (show $ filter isAscii $ balabel a) ++ ")"]
 
 chgscljs = concat [["(def changes ["],(concatMap cljs chgsfinal),["])"]] where

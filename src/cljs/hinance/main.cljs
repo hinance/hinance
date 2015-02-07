@@ -183,15 +183,16 @@
   :home #(vector
     :table {:class "table table-striped"}
       [:thead [:tr [:th "Account"] [:th "Balance"] [:th "Credit Limit"]
-                   [:th {:class "text-right"} "Payment Date"]]]
+        [:th "Minimum Payment"] [:th {:class "text-right"} "Payment Date"]]]
       [:tbody (for [x (sort-by :paytime < hinance.data/baccs)
                     :when (pos? (:limit x))]
         [:tr [:td (:label x)]
              [:td (amount-str (:balance x) (:cur x))]
              [:td (amount-str (:limit x) (:cur x))]
+             [:td (amount-str (:paymin x) (:cur x))]
              [:td {:class "text-right"} (if (pos? (:paytime x))
                (date (:paytime x))
-               [:span {:class "label label-danger"} "cannot retrieve"])]])])
+               [:span {:class "label label-danger"} "not available"])]])])
   :diag #(for [x hinance.data/diag] (list
       [:h3 (:title x) " (" (str (:warns x)) "):"]
       [:pre (clojure.string/join "\n" (:info x))]))
