@@ -25,7 +25,7 @@
 (defn chgs-time-span [] (- (:time (last hinance.data/changes))
                            (:time (first hinance.data/changes))))
 
-(defn nav [splitn handler params] (let
+(defn nav-split [splitn handler params] (let
   [split (hinance.user/splits splitn) len (cfg :len-default)
    step (Math/ceil (/ (+ 1 (chgs-time-span)) len))]
   (if (and (= handler :split) (= (str splitn) (params :split)))
@@ -33,11 +33,15 @@
     [:li [:a {:href (href :split :split splitn :step step :ofs 0
                 :len len :sel-ofs 0 :sel-cat 0)} (:title split)]])))
 
+(defn nav [title dest handler] (if (= dest handler)
+  [:li {:class "active"} [:a title]]
+  [:li [:a {:href (href :root)} title]]))
+
 (defn page [handler params content] (vector
   :div {:class "container"}
-    [:ul {:class "nav nav-pills"}
+    [:ul {:class "nav nav-pills"} (nav "Home" :root handler)
       (for [[splitn _] (map-indexed vector hinance.user/splits)]
-       (nav splitn handler params))]
+       (nav-split splitn handler params))]
     [:div {:class "row"} [:div {:class "col-md-12"} content
        [:hr] [:p {:class "text-muted text-right"}
          "Generated on " hinance.data/timestamp]]]))
