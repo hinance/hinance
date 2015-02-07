@@ -11,7 +11,7 @@
   :cell-width 70 :cell-space 10 :txt-col "#333" :amount-scale 400
   :mark-space 10 :mark-height 30 :mark-ofs-x 35 :mark-ofs-y 20})
 
-(def routes ["" {"" :root "/" {"diag" :diag ["group." :group] :group
+(def routes ["" {"" :home "/" {"diag" :diag ["group." :group] :group
   ["split." :split "/step." :step "/ofs." :ofs "/len." :len
    "/sel-ofs." :sel-ofs "/sel-cat." :sel-cat] :split}}])
 
@@ -34,12 +34,11 @@
                 :len len :sel-ofs 0 :sel-cat 0)} (:title split)]])))
 
 (defn nav [title dest handler] (if (= dest handler)
-  [:li {:class "active"} [:a title]]
-  [:li [:a {:href (href :root)} title]]))
+  [:li {:class "active"} [:a title]] [:li [:a {:href (href dest)} title]]))
 
 (defn page [handler params content] (vector
   :div {:class "container"}
-    [:ul {:class "nav nav-pills"} (nav "Home" :root handler)
+    [:ul {:class "nav nav-pills"} (nav "Home" :home handler)
       (for [[splitn _] (map-indexed vector hinance.user/splits)]
        (nav-split splitn handler params))]
     [:div {:class "row"} [:div {:class "col-md-12"} content
@@ -182,7 +181,7 @@
                           sel-cat-cached column)]))))))
 
 (def handlers {
-  :root #(vector :h3 "Welcome!")
+  :home #(vector :h3 "Welcome!")
   :diag #(for [x hinance.data/diag] (list
       [:h3 (:title x) " (" (str (:warns x)) "):"]
       [:pre (clojure.string/join "\n" (:info x))]))
