@@ -59,8 +59,8 @@ class MyApp(Application):
         u', balabel = %s' % tostr(a.label),
         u', babalance = %i' % tocent(a.balance),
         u', bacurrency = %s' % a.currency,
-        u', balimit = %i' % tocent(a.cardlimit, -1),
-        u', bapaytime = %i' % totime(a.paydate, -1),
+        u', balimit = %i' % tocent(a.cardlimit, 0),
+        u', bapaytime = %i' % totime(a.paydate, 0),
         u', batrans ='] + [
         u'  %s' % s for s in r_list(batrans)] + [
         u'}'])
