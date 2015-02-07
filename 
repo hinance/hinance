@@ -1,0 +1,530 @@
+PKGBUILD(5)                      Pacman Manual                     PKGBUILD(5)
+
+
+
+NNAAMMEE
+       PKGBUILD - Arch Linux package build description file
+
+SSYYNNOOPPSSIISS
+       PKGBUILD
+
+DDEESSCCRRIIPPTTIIOONN
+       This manual page describes general rules about PKGBUILDs. Once a
+       PKGBUILD is written, the actual package is built using makepkg and
+       installed with pacman.
+
+           NNoottee
+           An example PKGBUILD, useful for reference, is located in
+           _/_u_s_r_/_s_h_a_r_e_/_p_a_c_m_a_n along with other example files such as a
+           ChangeLog and an install script. You can copy the provided
+           PKGBUILD.proto file to a new package build directory and make
+           customizations to suit your needs.
+
+OOPPTTIIOONNSS AANNDD DDIIRREECCTTIIVVEESS
+       The following is a list of standard options and directives available
+       for use in a PKGBUILD. These are all understood and interpreted by
+       makepkg, and most of them will be directly transferred to the built
+       package.
+
+       If you need to create any custom variables for use in your build
+       process, it is recommended to prefix their name with an __ (underscore).
+       This will prevent any possible name clashes with internal makepkg
+       variables. For example, to store the base kernel version in a variable,
+       use something similar to $_basekernver.
+
+       ppkkggnnaammee ((aarrrraayy))
+           Either the name of the package or an array of names for split
+           packages. Valid characters for members of this array are
+           alphanumerics, and any of the following characters: “@ . _ + -”.
+           Additionally, names are not allowed to start with hyphens or dots.
+
+       ppkkggvveerr
+           The version of the software as released from the author (e.g.,
+           _2_._7_._1). The variable is not allowed to contain colons or hyphens.
+
+           The pkgver variable can be automatically updated by providing a
+           pkgver() function in the PKGBUILD that outputs the new package
+           version. This is run after downloading and extracting the sources
+           so can use those files in determining the new pkgver. This is most
+           useful when used with sources from version control systems (see
+           below).
+
+       ppkkggrreell
+           This is the release number specific to the Arch Linux release. This
+           allows package maintainers to make updates to the package’s
+           configure flags, for example. This is typically set to _1 for each
+           new upstream software release and incremented for intermediate
+           PKGBUILD updates. The variable is not allowed to contain hyphens.
+
+       ppkkggddeesscc
+           This should be a brief description of the package and its
+           functionality. Try to keep the description to one line of text and
+           not use the package’s name.
+
+       eeppoocchh
+           Used to force the package to be seen as newer than any previous
+           versions with a lower epoch, even if the version number would
+           normally not trigger such an upgrade. This value is required to be
+           a positive integer; the default value if left unspecified is _0.
+           This is useful when the version numbering scheme of a package
+           changes (or is alphanumeric), breaking normal version comparison
+           logic. See ppaaccmmaann(8) for more information on version comparisons.
+
+       uurrll
+           This field contains a URL that is associated with the software
+           being packaged. Typically the project’s website.
+
+       lliicceennssee ((aarrrraayy))
+           This field specifies the license(s) that apply to the package.
+           Commonly used licenses can be found in _/_u_s_r_/_s_h_a_r_e_/_l_i_c_e_n_s_e_s_/_c_o_m_m_o_n.
+           If you see the package’s license there, simply reference it in the
+           license field (e.g., license=('GPL')). If the package provides a
+           license not available in _/_u_s_r_/_s_h_a_r_e_/_l_i_c_e_n_s_e_s_/_c_o_m_m_o_n, then you
+           should include it in the package itself and set license=('custom')
+           or license=('custom:LicenseName'). The license should be placed in
+           _$_p_k_g_d_i_r_/_u_s_r_/_s_h_a_r_e_/_l_i_c_e_n_s_e_s_/_$_p_k_g_n_a_m_e_/ when building the package. If
+           multiple licenses are applicable, list all of them: license=('GPL'
+           'FDL').
+
+       iinnssttaallll
+           Specifies a special install script that is to be included in the
+           package. This file should reside in the same directory as the
+           PKGBUILD, and will be copied into the package by makepkg. It does
+           not need to be included in the source array (e.g.,
+           install=$pkgname.install).
+
+       cchhaannggeelloogg
+           Specifies a changelog file that is to be included in the package.
+           This file should reside in the same directory as the PKGBUILD, and
+           will be copied into the package by makepkg. It does not need to be
+           included in the source array (e.g., changelog=$pkgname.changelog).
+
+       ssoouurrccee ((aarrrraayy))
+           An array of source files required to build the package. Source
+           files must either reside in the same directory as the PKGBUILD, or
+           be a fully-qualified URL that makepkg can use to download the file.
+           To make the PKGBUILD as useful as possible, use the $pkgname and
+           $pkgver variables if possible when specifying the download
+           location. Compressed files will be extracted automatically unless
+           found in the noextract array described below.
+
+           It is also possible to change the name of the downloaded file,
+           which is helpful with weird URLs and for handling multiple source
+           files with the same name. The syntax is: source=('filename::url').
+
+           makepkg also supports building developmental versions of packages
+           using sources downloaded from version control systems (VCS). For
+           more information, see Using VCS Sources below.
+
+           Files in the source array with extensions .sig, .sign or .asc are
+           recognized by makepkg as PGP signatures and will be automatically
+           used to verify the integrity of the corresponding source file.
+
+       nnooeexxttrraacctt ((aarrrraayy))
+           An array of filenames corresponding to those from the source array.
+           Files listed here will not be extracted with the rest of the source
+           files. This is useful for packages that use compressed data
+           directly.
+
+       mmdd55ssuummss ((aarrrraayy))
+           This array contains an MD5 hash for every source file specified in
+           the source array (in the same order). makepkg will use this to
+           verify source file integrity during subsequent builds. If _S_K_I_P is
+           put in the array in place of a normal hash, the integrity check for
+           that source file will be skipped. To easily generate md5sums, run
+           “makepkg -g >> PKGBUILD”. If desired, move the md5sums line to an
+           appropriate location.
+
+       sshhaa11ssuummss,, sshhaa225566ssuummss,, sshhaa338844ssuummss,, sshhaa551122ssuummss ((aarrrraayyss))
+           Alternative integrity checks that makepkg supports; these all
+           behave similar to the md5sums option described above. To enable use
+           and generation of these checksums, be sure to set up the
+           INTEGRITY_CHECK option in mmaakkeeppkkgg..ccoonnff(5).
+
+       ggrroouuppss ((aarrrraayy))
+           An array of symbolic names that represent groups of packages,
+           allowing you to install multiple packages by requesting a single
+           target. For example, one could install all KDE packages by
+           installing the _k_d_e group.
+
+       aarrcchh ((aarrrraayy))
+           Defines on which architectures the given package is available
+           (e.g., arch=('i686' 'x86_64')). Packages that contain no
+           architecture specific files should use arch=('any').
+
+       bbaacckkuupp ((aarrrraayy))
+           An array of filenames, without preceding slashes, that should be
+           backed up if the package is removed or upgraded. This is commonly
+           used for packages placing configuration files in /etc. See Handling
+           Config Files in ppaaccmmaann(8) for more information.
+
+       ddeeppeennddss ((aarrrraayy))
+           An array of packages this package depends on to run. Entries in
+           this list should be surrounded with single quotes and contain at
+           least the package name. Entries can also include a version
+           requirement of the form _n_a_m_e_<_>_v_e_r_s_i_o_n, where <> is one of five
+           comparisons: >= (greater than or equal to), <= (less than or equal
+           to), = (equal to), > (greater than), or < (less than).
+
+           If the dependency name appears to be a library (ends with .so),
+           makepkg will try to find a binary that depends on the library in
+           the built package and append the version needed by the binary.
+           Appending the version yourself disables auto detection.
+
+       mmaakkeeddeeppeennddss ((aarrrraayy))
+           An array of packages this package depends on to build but are not
+           needed at runtime. Packages in this list follow the same format as
+           depends.
+
+       cchheecckkddeeppeennddss ((aarrrraayy))
+           An array of packages this package depends on to run its test suite
+           but are not needed at runtime. Packages in this list follow the
+           same format as depends. These dependencies are only considered when
+           the check() function is present and is to be run by makepkg.
+
+       ooppttddeeppeennddss ((aarrrraayy))
+           An array of packages (and accompanying reasons) that are not
+           essential for base functionality, but may be necessary to make full
+           use of the contents of this package. optdepends are currently for
+           informational purposes only and are not utilized by pacman during
+           dependency resolution. The format for specifying optdepends is:
+
+               optdepends=('fakeroot: for makepkg usage as normal user')
+
+       ccoonnfflliiccttss ((aarrrraayy))
+           An array of packages that will conflict with this package (i.e.
+           they cannot both be installed at the same time). This directive
+           follows the same format as depends. Versioned conflicts are
+           supported using the operators as described in depends.
+
+       pprroovviiddeess ((aarrrraayy))
+           An array of “virtual provisions” this package provides. This allows
+           a package to provide dependencies other than its own package name.
+           For example, the dcron package can provide _c_r_o_n, which allows
+           packages to depend on _c_r_o_n rather than _d_c_r_o_n _O_R _f_c_r_o_n.
+
+           Versioned provisions are also possible, in the _n_a_m_e_=_v_e_r_s_i_o_n format.
+           For example, dcron can provide _c_r_o_n_=_2_._0 to satisfy the _c_r_o_n_>_=_2_._0
+           dependency of other packages. Provisions involving the > and <
+           operators are invalid as only specific versions of a package may be
+           provided.
+
+           If the provision name appears to be a library (ends with .so),
+           makepkg will try to find the library in the built package and
+           append the correct version. Appending the version yourself disables
+           auto detection.
+
+       rreeppllaacceess ((aarrrraayy))
+           An array of packages this package should replace. This can be used
+           to handle renamed/combined packages. For example, if the _j_2_r_e
+           package is renamed to _j_r_e, this directive allows future upgrades to
+           continue as expected even though the package has moved. Versioned
+           replaces are supported using the operators as described in depends.
+
+           Sysupgrade is currently the only pacman operation that utilizes
+           this field. A normal sync or upgrade will not use its value.
+
+       ooppttiioonnss ((aarrrraayy))
+           This array allows you to override some of makepkg’s default
+           behavior when building packages. To set an option, just include the
+           option name in the options array. To reverse the default behavior,
+           place an “!” at the front of the option. Only specify the options
+           you specifically want to override, the rest will be taken from
+           mmaakkeeppkkgg..ccoonnff(5).  NNOOTTEE::_f_o_r_c_e is a now-removed option in favor of
+           the top level _e_p_o_c_h variable.
+
+           ssttrriipp
+               Strip symbols from binaries and libraries. If you frequently
+               use a debugger on programs or libraries, it may be helpful to
+               disable this option.
+
+           ddooccss
+               Save doc directories. If you wish to delete doc directories,
+               specify !docs in the array.
+
+           lliibbttooooll
+               Leave libtool (.la) files in packages. Specify !libtool to
+               remove them.
+
+           ssttaattiicclliibbss
+               Leave static library (.a) files in packages. Specify
+               !staticlibs to remove them.
+
+           eemmppttyyddiirrss
+               Leave empty directories in packages.
+
+           zziippmmaann
+               Compress man and info pages with gzip.
+
+           uuppxx
+               Compress binary executable files using UPX.
+
+           ccccaacchhee
+               Allow the use of ccache during build. More useful in its
+               negative form !ccache with select packages that have problems
+               building with ccache.
+
+           ddiissttcccc
+               Allow the use of distcc during build. More useful in its
+               negative form !distcc with select packages that have problems
+               building with distcc.
+
+           bbuuiillddffllaaggss
+               Allow the use of user-specific buildflags (CPPFLAGS, CFLAGS,
+               CXXFLAGS, LDFLAGS) during build as specified in
+               mmaakkeeppkkgg..ccoonnff(5). More useful in its negative form !buildflags
+               with select packages that have problems building with custom
+               buildflags.
+
+           mmaakkeeffllaaggss
+               Allow the use of user-specific makeflags during build as
+               specified in mmaakkeeppkkgg..ccoonnff(5). More useful in its negative form
+               !makeflags with select packages that have problems building
+               with custom makeflags such as -j2 (or higher).
+
+           ddeebbuugg
+               Add the user-specified debug flags (DEBUG_CFLAGS,
+               DEBUG_CXXFLAGS) to their counterpart buildflags as specified in
+               mmaakkeeppkkgg..ccoonnff(5). When used in combination with the ‘strip’
+               option, a separate package containing the debug symbols is
+               created.
+
+PPAACCKKAAGGIINNGG FFUUNNCCTTIIOONNSS
+       In addition to the above directives, PKGBUILDs require a set of
+       functions that provide instructions to build and install the package.
+       As a minimum, the PKGBUILD must contain a package() function which
+       installs all the package’s files into the packaging directory, with
+       optional prepare(), build() and check() being used to create those
+       files from source.
+
+       ppaacckkaaggee(()) FFuunnccttiioonn
+           The package() function is used to install files into the directory
+           that will become the root directory of the built package and is run
+           after all the optional functions listed below. When specified in
+           combination with the fakeroot BUILDENV option in mmaakkeeppkkgg..ccoonnff(5),
+           fakeroot usage will be limited to running the packaging stage. All
+           other functions will be run as the user calling makepkg.
+
+       pprreeppaarree(()) FFuunnccttiioonn
+           An optional prepare() function can be specified in which operations
+           that are to be run in order to prepare the sources for building
+           (such as patching) are performed. This function is run after the
+           source extraction and before the build() function and is skipped
+           when source extraction is skipped.
+
+       bbuuiilldd(()) FFuunnccttiioonn
+           The optional build() function is use to compile and/or adjust the
+           source files in preparation to be installed by the package()
+           function. This is directly sourced and executed by makepkg, so
+           anything that bash or the system has available is available for use
+           here. Be sure any exotic commands used are covered by makedepends.
+
+           If you create any variables of your own in the build function, it
+           is recommended to use the bash local keyword to scope the variable
+           to inside the build function.
+
+       cchheecckk(()) FFuunnccttiioonn
+           An optional check() function can be specified in which a package’s
+           test-suite may be run. This function is run between the build() and
+           package() functions. Be sure any exotic commands used are covered
+           by checkdepends.
+
+       All of the above variables such as $pkgname and $pkgver are available
+       for use in the build function. In addition, makepkg defines the
+       following variables for use during the build and install process:
+
+       ssrrccddiirr
+           This contains the directory where makepkg extracts, or copies, all
+           source files.
+
+       ppkkggddiirr
+           This contains the directory where makepkg bundles the installed
+           package (this directory will become the root directory of your
+           built package). This variable should only be used in the package()
+           function.
+
+       ssttaarrttddiirr
+           This contains the absolute path to the directory where the PKGBUILD
+           is located, which is usually the output of $(pwd) when makepkg is
+           started. Use of this variable is deprecated and strongly
+           discouraged.
+
+PPAACCKKAAGGEE SSPPLLIITTTTIINNGG
+       makepkg supports building multiple packages from a single PKGBUILD.
+       This is achieved by assigning an array of package names to the pkgname
+       directive. Each split package uses a corresponding packaging function
+       with name package_foo(), where foo is the name of the split package.
+
+       All options and directives for the split packages default to the global
+       values given in the PKGBUILD. Nevertheless, the following ones can be
+       overridden within each split package’s packaging function: pkgver,
+       pkgrel, epoch, pkgdesc, arch, url, license, groups, depends,
+       optdepends, provides, conflicts, replaces, backup, options, install and
+       changelog.
+
+       An optional global directive is available when building a split
+       package:
+
+       ppkkggbbaassee
+           The name used to refer to the group of packages in the output of
+           makepkg and in the naming of source-only tarballs. If not
+           specified, the first element in the pkgname array is used. The
+           variable is not allowed to begin with a hyphen.
+
+IINNSSTTAALLLL//UUPPGGRRAADDEE//RREEMMOOVVEE SSCCRRIIPPTTIINNGG
+       Pacman has the ability to store and execute a package-specific script
+       when it installs, removes, or upgrades a package. This allows a package
+       to configure itself after installation and perform an opposite action
+       upon removal.
+
+       The exact time the script is run varies with each operation, and should
+       be self-explanatory. Note that during an upgrade operation, none of the
+       install or remove scripts will be called.
+
+       Scripts are passed either one or two “full version strings”, where a
+       full version string is either _p_k_g_v_e_r_-_p_k_g_r_e_l or _e_p_o_c_h_:_p_k_g_v_e_r_-_p_k_g_r_e_l if
+       epoch is non-zero.
+
+       pprree__iinnssttaallll
+           Run right before files are extracted. One argument is passed: new
+           package full version string.
+
+       ppoosstt__iinnssttaallll
+           Run right after files are extracted. One argument is passed: new
+           package full version string.
+
+       pprree__uuppggrraaddee
+           Run right before files are extracted. Two arguments are passed in
+           this order: new package full version string, old package full
+           version string.
+
+       ppoosstt__uuppggrraaddee
+           Run after files are extracted. Two arguments are passed in this
+           order: new package full version string, old package full version
+           string.
+
+       pprree__rreemmoovvee
+           Run right before files are removed. One argument is passed: old
+           package full version string.
+
+       ppoosstt__rreemmoovvee
+           Run right after files are removed. One argument is passed: old
+           package full version string.
+
+       To use this feature, create a file such as _p_k_g_n_a_m_e_._i_n_s_t_a_l_l and put it
+       in the same directory as the PKGBUILD script. Then use the install
+       directive:
+
+           install=pkgname.install
+
+       The install script does not need to be specified in the source array. A
+       template install file is available in _/_u_s_r_/_s_h_a_r_e_/_p_a_c_m_a_n as
+       _p_r_o_t_o_._i_n_s_t_a_l_l for reference with all of the available functions
+       defined.
+
+UUSSIINNGG VVCCSS SSOOUURRCCEESS
+       Building a developmental version of a package using sources from a
+       version control system (VCS) is enabled by specifying the source in the
+       form source=('folder::url#fragment'). Currently makepkg supports the
+       bzr, git, hg and svn protocols.
+
+       The source URL is divided into three components:
+
+       ffoollddeerr
+           (optional) Specifies an alternate folder name for makepkg to
+           download the VCS source into.
+
+       uurrll
+           The url to the VCS repo. This must include the the vcs in the URL
+           protocol for makepkg to recognize this as a VCS source. If the
+           protocol does not include the VCS name, it can be added by
+           prefixing the URL with vcs+. For example, using a git repository
+           over http would have a source URL in the form git+http://....
+
+       ffrraaggmmeenntt
+           (optional) Allows specifying a revision number or branch for
+           makepkg to checkout from the VCS. For example, to checkout a given
+           revision, the source line would have the format
+           source=(url#revision=123). The available fragments depends on the
+           VCS being used:
+
+           bbzzrr
+               revision (see 'bzr help revisionspec' for details)
+
+           ggiitt
+               branch, commit, tag
+
+           hhgg
+               branch, revision, tag
+
+           ssvvnn
+               revision
+
+EEXXAAMMPPLLEE
+       The following is an example PKGBUILD for the _p_a_t_c_h package. For more
+       examples, look through the build files of your distribution’s packages.
+       For those using Arch Linux, consult the ABS tree.
+
+           # Maintainer: Joe User <joe.user@example.com>
+
+           pkgname=patch
+           pkgver=2.5.4
+           pkgrel=3
+           pkgdesc="A utility to apply patch files to original sources"
+           arch=('i686' 'x86_64')
+           url="https://www.gnu.org/software/patch/patch.html"
+           license=('GPL')
+           groups=('base-devel')
+           depends=('glibc' 'ed')
+           source=(ftp://ftp.gnu.org/gnu/$pkgname/$pkgname-$pkgver.tar.gz)
+           md5sums=('ee5ae84d115f051d87fcaaef3b4ae782')
+
+           build() {
+             cd "$srcdir"/$pkgname-$pkgver
+             ./configure --prefix=/usr
+             make
+           }
+
+           package() {
+             cd "$srcdir"/$pkgname-$pkgver
+             make prefix="$pkgdir"/usr install
+           }
+
+SSEEEE AALLSSOO
+       mmaakkeeppkkgg(8), ppaaccmmaann(8), mmaakkeeppkkgg..ccoonnff(5)
+
+       See the pacman website at https://www.archlinux.org/pacman/ for current
+       information on pacman and its related tools.
+
+BBUUGGSS
+       Bugs? You must be kidding, there are no bugs in this software. But if
+       we happen to be wrong, send us an email with as much detail as possible
+       to pacman-dev@archlinux.org.
+
+AAUUTTHHOORRSS
+       Current maintainers:
+
+       ·   Allan McRae <allan@archlinux.org>
+
+       ·   Dan McGee <dan@archlinux.org>
+
+       ·   Dave Reisner <dreisner@archlinux.org>
+
+       Past major contributors:
+
+       ·   Judd Vinet <jvinet@zeroflux.org>
+
+       ·   Aurelien Foret <aurelien@archlinux.org>
+
+       ·   Aaron Griffin <aaron@archlinux.org>
+
+       ·   Xavier Chantry <shiningxc@gmail.com>
+
+       ·   Nagy Gabor <ngaba@bibl.u-szeged.hu>
+
+       For additional contributors, use git shortlog -s on the pacman.git
+       repository.
+
+
+
+Pacman 4.1.2                      2013-06-18                       PKGBUILD(5)

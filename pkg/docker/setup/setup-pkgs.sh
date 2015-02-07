@@ -75,6 +75,7 @@ sudo pacman -U --noconfirm python2-selenium-2.43.0-1-x86_64.pkg.tar.xz
 # weboob-git
 cd /hinance-docker/aur/weboob-git
 patch PKGBUILD /hinance-docker/setup/weboob-git/PKGBUILD.patch
+cp /hinance-docker/setup/weboob-git/weboob-issue1717.patch .
 makepkg -sc --noconfirm
 sudo pacman -U --noconfirm weboob-git-2402b546-1-x86_64.pkg.tar.xz
 
