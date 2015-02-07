@@ -15,6 +15,6 @@
 > source=("$pkgname"::"git://git.symlink.me/pub/weboob/devel.git#commit=$pkgver"
 >         weboob-issue1717.patch)
 > sha256sums=('SKIP'
->             'cc801f355d310383a8dc4874310c8fadc088268dddd680e615d533255000da91')
+>             'a46a7c8a653283ac9215b343479aa7ab6f69fcac641ac929dbbf9479e444c0d5')
 51a48
 >    git apply ${srcdir}/weboob-issue1717.patch
