@@ -14,8 +14,8 @@ import Hinance.User.Data
 import Text.Show.Pretty
 import Text.Printf
 
-main = do
-  putStrLn.concat $ intersperse "\n" $ concat $ [[""],diagscljs,[""],chgscljs]
+main = do putStrLn.concat $ intersperse "\n" $ concat $ xs where
+  xs = [[""],diagscljs, [""],baccscljs, [""],chgscljs]
 
 diagscljs = concat [["(def diag ["],
   (cljs "Checks" (length checks) checks),
@@ -31,7 +31,14 @@ diagscljs = concat [["(def diag ["],
                    (map ((printf "    %s").show) (lines $ ppShow xs)) ++
                    ["  ])"]
 
-chgscljs = concat [["(def changes ["],(concat$map cljs chgsfinal),["])"]] where
+baccscljs = concat [["(def baccs ["], (concatMap cljsb banks), ["])"]] where
+  cljsb b = concatMap cljsa (baccs b)
+  cljsa a = [printf "  (hinance.type/BankAcc. %s %s %i :%s"
+             (numcljs $ babalance a) (numcljs $ balimit a)
+             (bapaytime a) (show $ bacurrency a),
+            "    " ++ (show $ filter isAscii $ balabel a) ++ ")"]
+
+chgscljs = concat [["(def changes ["],(concatMap cljs chgsfinal),["])"]] where
   cljs c = [printf "  (hinance.type/Change. %s %i :%s"
              (numcljs $ camount c) (ctime c) (show $ ccur c),
             "    " ++ (show $ filter isAscii $ clabel c),
