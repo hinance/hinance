@@ -19,7 +19,7 @@ echo "Server = " \
 pacman -Syyuu --noconfirm
 
 pacman -S --noconfirm --needed base base-devel cabal-install firefox ghc \
-                               git happy mupdf sudo xorg-server-xvfb
+                git happy mupdf python2-prettytable sudo xorg-server-xvfb
 
 # aur
 curl -O http://pkgbuild.com/git/aur-mirror.git/snapshot/aur-mirror-$AUR_TAG.tar.xz

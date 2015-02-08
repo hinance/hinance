@@ -38,7 +38,7 @@
 
 (defn page [handler params content] (vector
   :div {:class "container"}
-    [:ul {:class "nav nav-pills"} (nav "Home" :home handler)
+    [:ul {:class "nav nav-pills"}
       (for [[splitn _] (map-indexed vector hinance.user/splits)]
        (nav-split splitn handler params))]
     [:div {:class "row"} [:div {:class "col-md-12"} content
@@ -180,21 +180,7 @@
                           sel-cat-cached column)]))))))
 
 (def handlers {
-  :home #(vector
-    ; TODO: Remove credit stuff from hinance altogether.
-    ;       Move it to boobank or something.
-    :table {:class "table table-striped"}
-      [:thead [:tr [:th "Account"] [:th "Balance"] [:th "Credit Limit"]
-        [:th "Minimum Payment"] [:th {:class "text-right"} "Payment Date"]]]
-      [:tbody (for [x (sort-by :paytime < hinance.data/baccs)
-                    :when (pos? (:limit x))]
-        [:tr [:td (:label x)]
-             [:td (amount-str (:balance x) (:cur x))]
-             [:td (amount-str (:limit x) (:cur x))]
-             [:td (amount-str (:paymin x) (:cur x))]
-             [:td {:class "text-right"} (if (pos? (:paytime x))
-               (date (:paytime x))
-               [:span {:class "label label-danger"} "not available"])]])])
+  :home #(vector :h1 "Welcome!")
   :diag #(for [x hinance.data/diag] (list
       [:h3 (:title x) " (" (str (:warns x)) "):"]
       [:pre (clojure.string/join "\n" (:info x))]))
