@@ -1,5 +1,4 @@
 from weboob.tools.application.base import Application
-from weboob.capabilities.base import NotLoaded
 from weboob.capabilities.bank import CapBank
 from weboob.capabilities.shop import CapShop
 from datetime import datetime
@@ -59,9 +58,6 @@ class MyApp(Application):
         u', balabel = %s' % tostr(a.label),
         u', babalance = %i' % tocent(a.balance),
         u', bacurrency = %s' % a.currency,
-        u', balimit = %i' % tocent(a.cardlimit, 0),
-        u', bapaytime = %i' % totime(a.paydate, 0),
-        u', bapaymin = %i' % tocent(a.paymin, 0),
         u', batrans ='] + [
         u'  %s' % s for s in r_list(batrans)] + [
         u'}'])
@@ -130,12 +126,11 @@ def r_list(xss):
     u']'
   ]
 
-def tocent(d, notloaded=None):
-  return notloaded if d == NotLoaded else int(d*100)
+def tocent(d):
+  return int(d*100)
 
-def totime(dt, notloaded=None):
-  return notloaded if dt == NotLoaded \
-    else int((dt - datetime(1970, 1, 1)).total_seconds())
+def totime(dt):
+  return int((dt - datetime(1970, 1, 1)).total_seconds())
 
 def tostr(s):
   return u'"' + s.encode('unicode_escape') \
