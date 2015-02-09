@@ -1,20 +1,15 @@
 5c5
 < pkgver=0.j-62-g944c5f9
 ---
-> pkgver=45de52d8
-41,48c41,44
+> pkgver=63eed107
+41c41
 < source=("$pkgname"::'git://git.symlink.me/pub/weboob/devel.git')
-< sha256sums=('SKIP')
+---
+> source=("$pkgname"::"git://git.symlink.me/pub/weboob/devel.git#commit=$pkgver")
+43,48d42
 < 
 < pkgver() {
 <     cd ${srcdir}/${pkgname}
 <     local ver="$(git describe --long)"
 <     printf "%s" "${ver//-/.}"
 < }
----
-> source=("$pkgname"::"git://git.symlink.me/pub/weboob/devel.git#commit=$pkgver"
->         weboob-issue1717.patch)
-> sha256sums=('SKIP'
->             'a46a7c8a653283ac9215b343479aa7ab6f69fcac641ac929dbbf9479e444c0d5')
-51a48
->    git apply ${srcdir}/weboob-issue1717.patch
