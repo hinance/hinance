@@ -75,7 +75,8 @@
                          hinance.data/chgsact))))))
 
 (def group-index (into (hash-map) (map-indexed (fn [i g] (vector g (str i)))
-  (apply sorted-set (map :group hinance.data/chgsact)))))
+  (apply sorted-set (map :group
+    (concat hinance.data/chgsact hinance.data/chgsplan))))))
 
 (def index-group (clojure.set/map-invert group-index))
 
@@ -186,8 +187,14 @@
       [:pre (clojure.string/join "\n" (:info x))]))
   :group (fn [params] (seq [
     [:h3 (str "Group: " (index-group (params :group)))]
-    (chgs-table (filter #(= (group-index (:group %)) (params :group))
-      hinance.data/chgsact))]))
+    [:div {:class "panel panel-default"}
+      [:div {:class "panel-heading"} [:h3 {:class "panel-title"} "Actual"]]
+      (chgs-table (filter #(= (group-index (:group %)) (params :group))
+        hinance.data/chgsact))]
+    [:div {:class "panel panel-default"}
+      [:div {:class "panel-heading"} [:h3 {:class "panel-title"} "Planned"]]
+      (chgs-table (filter #(= (group-index (:group %)) (params :group))
+        hinance.data/chgsplan))]]))
   :split (fn [params]
           (let [split (cljs.reader/read-string (:split params))
                 step (cljs.reader/read-string (:step params))
