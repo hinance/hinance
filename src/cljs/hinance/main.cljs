@@ -242,16 +242,16 @@
          (split-diagram :chgsact true split step ofs len sel-ofs sel-cat)
          (split-labels :chgsact split)]]
      [:div {:class "panel panel-default"}
-       [:div {:class "panel-heading"} [:h3 {:class "panel-title"} "Planned"]]
-       [:div {:class "panel-body text-center"}
-         (split-diagram :chgsplan true split step ofs len sel-ofs sel-cat)
-         (split-labels :chgsplan split)]]
-     [:div {:class "panel panel-default"}
        [:div {:class "panel-heading"} [:h3 {:class "panel-title"}
          "Actual - Planned ="]]
        [:div {:class "panel-body text-center"}
          (split-diagram :chgsdiff false split step ofs len sel-ofs sel-cat)
          (split-labels :chgsdiff split)]]
+     [:div {:class "panel panel-default"}
+       [:div {:class "panel-heading"} [:h3 {:class "panel-title"} "Planned"]]
+       [:div {:class "panel-body text-center"}
+         (split-diagram :chgsplan true split step ofs len sel-ofs sel-cat)
+         (split-labels :chgsplan split)]]
      [:div {:class "panel panel-default"}
        [:div {:class "panel-heading"} [:h3 {:class "panel-title"} "Actual"]]
        (chgs-split-table :chgsact split step sel-ofs sel-cat)]
