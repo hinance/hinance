@@ -153,8 +153,10 @@
   [max-stack-height (fn [amount-ftr sum-ftr] (apply max (for[column(range len)]
      (apply + (map second (stack-items chgsid split step ofs len column
                                        amount-ftr sum-ftr))))))
-   cells-height-pos (max-stack-height pos? non-zero?)
-   cells-height-neg (max-stack-height neg? non-zero?)
+   pos-ftrs (if posneg [pos? non-zero?] [non-zero? pos?])
+   neg-ftrs (if posneg [neg? non-zero?] [non-zero? neg?])
+   cells-height-pos (apply max-stack-height pos-ftrs)
+   cells-height-neg (apply max-stack-height neg-ftrs)
    cell-wspace (+ (cfg :cell-width) (cfg :cell-space))
    cells-width (- (* len cell-wspace) (cfg :cell-space))
    total-width (+ (cfg :margin-left) cells-width (cfg :margin-right))
@@ -172,8 +174,8 @@
      (vector :g
        [:g {:transform (str "translate(" x ","
               (+ (cfg :margin-top) cells-height-pos) ")")}
-        (svg-stack-render chgsid stack-up pos? non-zero? split step ofs len
-                          sel-ofs-cached sel-cat-cached column)]
+        (apply svg-stack-render (concat [chgsid stack-up] pos-ftrs
+          [split step ofs len sel-ofs-cached sel-cat-cached column]))]
        [:rect {:width (str (cfg :cell-width)) :height (str (cfg :mark-height))
                :fill "none" :stroke (cfg :bdr-col) :rx (str (cfg :bdr-round))
                :ry (str (cfg :bdr-round)) :x (str x) :y (str mark-y)}]
@@ -183,8 +185,8 @@
         (str (+ ofs column))]
        [:g {:transform (str "translate(" x ","
               (+ mark-y (cfg :mark-height) (cfg :mark-space)) ")")}
-        (svg-stack-render chgsid stack-down neg? non-zero? split step ofs len
-                          sel-ofs-cached sel-cat-cached column)]))))))
+        (apply svg-stack-render (concat [chgsid stack-down] neg-ftrs
+          [split step ofs len sel-ofs-cached sel-cat-cached column]))]))))))
 
 (defn split-labels [chgsid split] (vector
   :ul {:class "list-inline"}
