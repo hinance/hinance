@@ -52,7 +52,7 @@ chgsact = (sortBy (compare`on`ctime)).(concatMap addchanges)
             .joinxfers.mergechgs$raw where
   raw = concat $ (map changes banks) ++ (map changes shops)
 
-chgsplan = chgsact --TODO
+chgsplan = (sortBy (compare`on`ctime)).planned $ chgsact
 
 banks = patched $ map (mrgbacs.mrgbs) $ groupSortBy bid banksraw where
   mrgbs = foldl1 (\a x -> x{baccs = (baccs a) ++ (baccs x)})
@@ -132,10 +132,6 @@ instance Mergeable BankTrans where
 instance Mergeable ShopOrder where
   mtime = sotime
   meq = (==) `on` soid
-
-data Change = Change {camount::Integer, ctime::Integer, clabel::String,
-  ccur::Currency, curl::String, cgroup::String, ctags::[Tag]}
-  deriving (Read, Show, Ord, Eq)
 
 class Changeable a where
   changes :: a -> [Change]
