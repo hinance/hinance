@@ -214,6 +214,7 @@
                        :len len :sel-ofs sel-ofs :sel-cat sel-cat)}
             "Newer"]]]]
      [:div {:class "panel panel-default"}
+       [:div {:class "panel-heading"} [:h3 {:class "panel-title"} "Actual"]]
        [:div {:class "panel-body text-center"}
          (split-diagram split step ofs len sel-ofs sel-cat)
          [:ul {:class "list-inline"}
@@ -221,7 +222,9 @@
            [:li [:span {:class "label" :style
              (str "color:" (:fg-col c) ";background-color:" (:bg-col c))}
              (str (:title c) ": " (int (* 0.01 (categ-amount-total c))))]])]]]
-     (chgs-split-table split step sel-ofs sel-cat)])))})
+     [:div {:class "panel panel-default"}
+       [:div {:class "panel-heading"} [:h3 {:class "panel-title"} "Actual"]]
+       (chgs-split-table split step sel-ofs sel-cat)]])))})
 
 (def html-content (memoize (fn [path]
   (let [m (bidi.bidi/match-route routes path)
