@@ -52,7 +52,9 @@ chgsact = (sortBy (compare`on`ctime)).(concatMap addchanges)
             .joinxfers.mergechgs$raw where
   raw = concat $ (map changes banks) ++ (map changes shops)
 
-chgsplan = (sortBy (compare`on`ctime)).planned $ chgsact
+chgsplan=(sortBy (compare`on`ctime)) . (++ ps) . concat
+  . (filter$(< planfrom).ctime.head) . (groupSortBy cgroup) $ chgsact where
+  ps = takeWhile ((<= planto).ctime) $ dropWhile ((>= planfrom).ctime) planned
 
 banks = patched $ map (mrgbacs.mrgbs) $ groupSortBy bid banksraw where
   mrgbs = foldl1 (\a x -> x{baccs = (baccs a) ++ (baccs x)})
