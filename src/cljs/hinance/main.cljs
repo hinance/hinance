@@ -132,27 +132,29 @@
   (apply max (for [i (range len)] (sum-split-amounts chgsid split step
                                    (+ ofs i)))))))
 
-(defn stack-items [chgsid split step ofs len column amount-ftr]
+(defn stack-items [chgsid split step ofs len column amount-ftr sum-ftr]
   (sort-by (comp Math/abs first) < (for
     [[icat categ](map-indexed vector(:categs (hinance.user/splits split))) :let
      [mamount (max-split-amount chgsid split step ofs len)
       scale (/ (cfg :amount-scale) (if (zero? mamount) 1 mamount))
       amount (categ-amount chgsid step categ (+ ofs column) amount-ftr)
       height (max (cfg :mark-height) (* scale (Math/abs amount)))]
-     :when (not (zero? amount))]
+     :when (sum-ftr amount)]
     [(int (/ amount 100)) height icat categ])))
 
 (def svg-stack-render (memoize (fn
-  [chgsid dir amount-ftr split step ofs len sel-ofs sel-cat column]
+  [chgsid dir amount-ftr sum-ftr split step ofs len sel-ofs sel-cat column]
   (hiccups.core/html (svg-stack split step ofs len sel-ofs sel-cat dir column
-                (stack-items chgsid split step ofs len column amount-ftr))))))
+         (stack-items chgsid split step ofs len column amount-ftr sum-ftr))))))
 
-(defn split-diagram [chgsid split step ofs len sel-ofs sel-cat] (let
-  [max-stack-height (fn [amount-ftr] (apply max (for [column (range len)]
+(defn non-zero? [x] (not (zero? x)))
+
+(defn split-diagram [chgsid posneg split step ofs len sel-ofs sel-cat] (let
+  [max-stack-height (fn [amount-ftr sum-ftr] (apply max (for[column(range len)]
      (apply + (map second (stack-items chgsid split step ofs len column
-                                       amount-ftr))))))
-   cells-height-pos (max-stack-height pos?)
-   cells-height-neg (max-stack-height neg?)
+                                       amount-ftr sum-ftr))))))
+   cells-height-pos (max-stack-height pos? non-zero?)
+   cells-height-neg (max-stack-height neg? non-zero?)
    cell-wspace (+ (cfg :cell-width) (cfg :cell-space))
    cells-width (- (* len cell-wspace) (cfg :cell-space))
    total-width (+ (cfg :margin-left) cells-width (cfg :margin-right))
@@ -170,7 +172,7 @@
      (vector :g
        [:g {:transform (str "translate(" x ","
               (+ (cfg :margin-top) cells-height-pos) ")")}
-        (svg-stack-render chgsid stack-up pos? split step ofs len
+        (svg-stack-render chgsid stack-up pos? non-zero? split step ofs len
                           sel-ofs-cached sel-cat-cached column)]
        [:rect {:width (str (cfg :cell-width)) :height (str (cfg :mark-height))
                :fill "none" :stroke (cfg :bdr-col) :rx (str (cfg :bdr-round))
@@ -181,7 +183,7 @@
         (str (+ ofs column))]
        [:g {:transform (str "translate(" x ","
               (+ mark-y (cfg :mark-height) (cfg :mark-space)) ")")}
-        (svg-stack-render chgsid stack-down neg? split step ofs len
+        (svg-stack-render chgsid stack-down neg? non-zero? split step ofs len
                           sel-ofs-cached sel-cat-cached column)]))))))
 
 (defn split-labels [chgsid split] (vector
@@ -235,18 +237,18 @@
      [:div {:class "panel panel-default"}
        [:div {:class "panel-heading"} [:h3 {:class "panel-title"} "Actual"]]
        [:div {:class "panel-body text-center"}
-         (split-diagram :chgsact split step ofs len sel-ofs sel-cat)
+         (split-diagram :chgsact true split step ofs len sel-ofs sel-cat)
          (split-labels :chgsact split)]]
      [:div {:class "panel panel-default"}
        [:div {:class "panel-heading"} [:h3 {:class "panel-title"} "Planned"]]
        [:div {:class "panel-body text-center"}
-         (split-diagram :chgsplan split step ofs len sel-ofs sel-cat)
+         (split-diagram :chgsplan true split step ofs len sel-ofs sel-cat)
          (split-labels :chgsplan split)]]
      [:div {:class "panel panel-default"}
        [:div {:class "panel-heading"} [:h3 {:class "panel-title"}
          "Actual - Planned ="]]
        [:div {:class "panel-body text-center"}
-         (split-diagram :chgsdiff split step ofs len sel-ofs sel-cat)
+         (split-diagram :chgsdiff false split step ofs len sel-ofs sel-cat)
          (split-labels :chgsdiff split)]]
      [:div {:class "panel panel-default"}
        [:div {:class "panel-heading"} [:h3 {:class "panel-title"} "Actual"]]
