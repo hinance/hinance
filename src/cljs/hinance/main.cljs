@@ -15,6 +15,8 @@
   ["split." :split "/step." :step "/ofs." :ofs "/len." :len
    "/sel-ofs." :sel-ofs "/sel-cat." :sel-cat] :split}}])
 
+(def lookup {:chgsact hinance.data/chgsact :chgsplan hinance.data/chgsplan})
+
 (defn html! [content]
   (aset (js/document.getElementById "content") "innerHTML" content))
 
@@ -57,22 +59,21 @@
 (defn tag [t] (vector
   :span {:class "label label-default"} (subs (str t) 4)))
 
-(defn pick-chgs [step ofs len] (let
-  [tmin (:time (first hinance.data/chgsact))
+(defn pick-chgs [changes step ofs len] (let
+  [tmin (:time (first changes))
    tfrom (+ tmin (* ofs step)) tto (+ tfrom (* len step))]
-  (take-while #(> tto (:time %))
-    (drop-while #(> tfrom (:time %)) hinance.data/chgsact))))
+  (take-while #(> tto (:time %)) (drop-while #(> tfrom (:time %)) changes))))
 
-(def categ-amounts (memoize (fn [step categ cofs]
+(def categ-amounts (memoize (fn [chgsid step categ cofs]
   (map :amount (filter #((:tag-filter categ) (:tags %))
-                       (pick-chgs step cofs 1))))))
+                       (pick-chgs (lookup chgsid) step cofs 1))))))
 
-(def categ-amount (memoize (fn [step categ cofs amount-ftr]
-  (apply + (filter amount-ftr (categ-amounts step categ cofs))))))
+(def categ-amount (memoize (fn [chgsid step categ cofs amount-ftr]
+  (apply + (filter amount-ftr (categ-amounts chgsid step categ cofs))))))
 
-(def categ-amount-total (memoize (fn [categ]
+(def categ-amount-total (memoize (fn [chgsid categ]
   (apply + (map :amount (filter #((:tag-filter categ) (:tags %))
-                         hinance.data/chgsact))))))
+    (lookup chgsid)))))))
 
 (def group-index (into (hash-map) (map-indexed (fn [i g] (vector g (str i)))
   (apply sorted-set (map :group
@@ -92,10 +93,10 @@
                  (str (group-index (:group x)))]]
            [:td {:class "text-right"} (amount-str (:amount x) (:cur x))]])]))
 
-(def chgs-split-table (memoize (fn [split step sel-ofs sel-cat]
+(def chgs-split-table (memoize (fn [chgsid split step sel-ofs sel-cat]
   (hiccups.core/html (chgs-table (filter
     #((:tag-filter ((:categs (hinance.user/splits split)) sel-cat)) (:tags %))
-    (pick-chgs step sel-ofs 1)))))))
+    (pick-chgs (lookup chgsid) step sel-ofs 1)))))))
 
 (defn svg-stack [split step ofs len sel-ofs sel-cat dir column items]
   (if (empty? items) [:g] (let
@@ -121,31 +122,32 @@
 (defn stack-up   [h] (hash-map :y (- h) :next-y (- h)))
 (defn stack-down [h] (hash-map :y 0     :next-y h))
 
-(def sum-split-amounts (memoize (fn [split step cofs]
+(def sum-split-amounts (memoize (fn [chgsid split step cofs]
   (apply + (for [categ (:categs (hinance.user/splits split))
-                 amount (categ-amounts step categ cofs)] (Math/abs amount))))))
+    amount (categ-amounts chgsid step categ cofs)] (Math/abs amount))))))
 
-(def max-split-amount (memoize (fn [split step ofs len]
-  (apply max (for [i (range len)] (sum-split-amounts split step (+ ofs i)))))))
+(def max-split-amount (memoize (fn [chgsid split step ofs len]
+  (apply max (for [i (range len)] (sum-split-amounts chgsid split step
+                                   (+ ofs i)))))))
 
-(defn stack-items [split step ofs len column amount-ftr]
+(defn stack-items [chgsid split step ofs len column amount-ftr]
   (sort-by (comp Math/abs first) < (for
     [[icat categ](map-indexed vector(:categs (hinance.user/splits split))) :let
-     [mamount (max-split-amount split step ofs len)
+     [mamount (max-split-amount chgsid split step ofs len)
       scale (/ (cfg :amount-scale) (if (zero? mamount) 1 mamount))
-      amount (categ-amount step categ (+ ofs column) amount-ftr)
+      amount (categ-amount chgsid step categ (+ ofs column) amount-ftr)
       height (max (cfg :mark-height) (* scale (Math/abs amount)))]
      :when (not (zero? amount))]
     [(int (/ amount 100)) height icat categ])))
 
 (def svg-stack-render (memoize (fn
-  [dir amount-ftr split step ofs len sel-ofs sel-cat column]
+  [chgsid dir amount-ftr split step ofs len sel-ofs sel-cat column]
   (hiccups.core/html (svg-stack split step ofs len sel-ofs sel-cat dir column
-                       (stack-items split step ofs len column amount-ftr))))))
+                (stack-items chgsid split step ofs len column amount-ftr))))))
 
-(defn split-diagram [split step ofs len sel-ofs sel-cat] (let
+(defn split-diagram [chgsid split step ofs len sel-ofs sel-cat] (let
   [max-stack-height (fn [amount-ftr] (apply max (for [column (range len)]
-     (apply + (map second (stack-items split step ofs len column
+     (apply + (map second (stack-items chgsid split step ofs len column
                                        amount-ftr))))))
    cells-height-pos (max-stack-height pos?)
    cells-height-neg (max-stack-height neg?)
@@ -166,8 +168,8 @@
      (vector :g
        [:g {:transform (str "translate(" x ","
               (+ (cfg :margin-top) cells-height-pos) ")")}
-        (svg-stack-render stack-up pos? split step ofs len sel-ofs-cached
-                          sel-cat-cached column)]
+        (svg-stack-render chgsid stack-up pos? split step ofs len
+                          sel-ofs-cached sel-cat-cached column)]
        [:rect {:width (str (cfg :cell-width)) :height (str (cfg :mark-height))
                :fill "none" :stroke (cfg :bdr-col) :rx (str (cfg :bdr-round))
                :ry (str (cfg :bdr-round)) :x (str x) :y (str mark-y)}]
@@ -177,8 +179,8 @@
         (str (+ ofs column))]
        [:g {:transform (str "translate(" x ","
               (+ mark-y (cfg :mark-height) (cfg :mark-space)) ")")}
-        (svg-stack-render stack-down neg? split step ofs len sel-ofs-cached
-                          sel-cat-cached column)]))))))
+        (svg-stack-render chgsid stack-down neg? split step ofs len
+                          sel-ofs-cached sel-cat-cached column)]))))))
 
 (def handlers {
   :home #(vector :h1 "Welcome!")
@@ -223,15 +225,30 @@
      [:div {:class "panel panel-default"}
        [:div {:class "panel-heading"} [:h3 {:class "panel-title"} "Actual"]]
        [:div {:class "panel-body text-center"}
-         (split-diagram split step ofs len sel-ofs sel-cat)
+         (split-diagram :chgsact split step ofs len sel-ofs sel-cat)
          [:ul {:class "list-inline"}
           (for [c (:categs (hinance.user/splits split))]
            [:li [:span {:class "label" :style
              (str "color:" (:fg-col c) ";background-color:" (:bg-col c))}
-             (str (:title c) ": " (int (* 0.01 (categ-amount-total c))))]])]]]
+             (str (:title c) ": " (int (* 0.01
+               (categ-amount-total :chgsact c))))]])]]]
+     [:div {:class "panel panel-default"}
+       [:div {:class "panel-heading"} [:h3 {:class "panel-title"} "Planned"]]
+       [:div {:class "panel-body text-center"}
+         (split-diagram :chgsplan split step ofs len sel-ofs sel-cat)
+         [:ul {:class "list-inline"}
+          (for [c (:categs (hinance.user/splits split))]
+           [:li [:span {:class "label" :style
+             (str "color:" (:fg-col c) ";background-color:" (:bg-col c))}
+             (str (:title c) ": " (int (* 0.01
+               (categ-amount-total :chgsplan c))))]])]]]
      [:div {:class "panel panel-default"}
        [:div {:class "panel-heading"} [:h3 {:class "panel-title"} "Actual"]]
-       (chgs-split-table split step sel-ofs sel-cat)]])))})
+       (chgs-split-table :chgsact split step sel-ofs sel-cat)]
+     [:div {:class "panel panel-default"}
+       [:div {:class "panel-heading"} [:h3 {:class "panel-title"} "Planned"]]
+       (chgs-split-table :chgsplan split step sel-ofs sel-cat)
+     ]])))})
 
 (def html-content (memoize (fn [path]
   (let [m (bidi.bidi/match-route routes path)
