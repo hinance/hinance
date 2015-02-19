@@ -15,23 +15,27 @@ import Text.Show.Pretty
 import Text.Printf
 
 main = do putStrLn.concat $ intersperse "\n" $ concat $ xs where
-  xs = [[""],diagscljs, [""],chgscljs]
+  xs = [[""],diagscljs,
+        [""],chgscljs chgsact "chgsact",
+        [""],chgscljs chgsplan "chgsplan"]
 
 diagscljs = concat [["(def diag ["],
   (cljs "Checks" (length checks) checks),
   (cljs "Changes without groups" (length nchgs) nchgs),
   (cljs "Unbalanced groups" (length ugrps) ugrps),
-  (cljs "Partitions mismatch" (length mparts) chkparts),
+  (cljs "Partitions mismatch" (length mparts) cparts),
   ["])"]] where
-    nchgs = filter (not.grouped) chgsfinal
-    ugrps = unbalgrps $ filter grouped chgsfinal
-    mparts = concatMap (\(a,b) -> a++b) chkparts
+    nchgs = filter (not.grouped) (chgsact++chgsplan)
+    ugrps = unbalgrps $ filter grouped (chgsact++chgsplan)
+    cparts = concatMap chkparts [chgsact, chgsplan]
+    mparts = concatMap (\(a,b) -> a++b) cparts
     checks = concatMap (concatMap chkbalance.baccs) banks
     cljs s n xs = [printf "  (hinance.type/Diag. \"%s\" %i [" s n] ++
                    (map ((printf "    %s").show) (lines $ ppShow xs)) ++
                    ["  ])"]
 
-chgscljs = concat [["(def changes ["],(concatMap cljs chgsfinal),["])"]] where
+chgscljs chgs title = concat [[printf "(def %s [" title],
+  (concatMap cljs chgs),["])"]] where
   cljs c = [printf "  (hinance.type/Change. %s %i :%s"
              (numcljs $ camount c) (ctime c) (show $ ccur c),
             "    " ++ (show $ filter isAscii $ clabel c),
@@ -44,9 +48,11 @@ numcljs n
   | n >= 0 = show n
   | otherwise = printf "(- %s)" (show$abs n)
 
-chgsfinal = (sortBy (compare`on`ctime)).(concatMap addchanges)
+chgsact = (sortBy (compare`on`ctime)).(concatMap addchanges)
             .joinxfers.mergechgs$raw where
   raw = concat $ (map changes banks) ++ (map changes shops)
+
+chgsplan = chgsact --TODO
 
 banks = patched $ map (mrgbacs.mrgbs) $ groupSortBy bid banksraw where
   mrgbs = foldl1 (\a x -> x{baccs = (baccs a) ++ (baccs x)})
@@ -67,10 +73,10 @@ chkbalance a | baldiff a /= 0 = [printf "Account %s balance mismatch: %i"
                                  (baid a) (baldiff a)]
              | otherwise = [] :: [String]
 
-chkparts = map chk tagparts where
+chkparts chgs = map chk tagparts where
   chk (wf, pfs) = (srt $ whole \\ parts, srt $ parts \\ whole) where
     srt = reverse.(sortBy (compare `on` ctime))
-    whole = sort $ filter (\Change{ctags=ts} -> wf ts) chgsfinal
+    whole = sort $ filter (\Change{ctags=ts} -> wf ts) chgs
     parts = sort $ concatMap part pfs
     part pf = filter (\Change{ctags=ts}->pf ts) whole
 

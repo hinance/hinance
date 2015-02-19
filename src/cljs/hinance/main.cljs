@@ -22,8 +22,8 @@
 
 (defn href [& args] (str "#" (apply bidi.bidi/path-for routes args)))
 
-(defn chgs-time-span [] (- (:time (last hinance.data/changes))
-                           (:time (first hinance.data/changes))))
+(defn chgs-time-span [] (- (:time (last hinance.data/chgsact))
+                           (:time (first hinance.data/chgsact))))
 
 (defn nav-split [splitn handler params] (let
   [split (hinance.user/splits splitn) len (cfg :len-default)
@@ -58,10 +58,10 @@
   :span {:class "label label-default"} (subs (str t) 4)))
 
 (defn pick-chgs [step ofs len] (let
-  [tmin (:time (first hinance.data/changes))
+  [tmin (:time (first hinance.data/chgsact))
    tfrom (+ tmin (* ofs step)) tto (+ tfrom (* len step))]
   (take-while #(> tto (:time %))
-    (drop-while #(> tfrom (:time %)) hinance.data/changes))))
+    (drop-while #(> tfrom (:time %)) hinance.data/chgsact))))
 
 (def categ-amounts (memoize (fn [step categ cofs]
   (map :amount (filter #((:tag-filter categ) (:tags %))
@@ -72,10 +72,10 @@
 
 (def categ-amount-total (memoize (fn [categ]
   (apply + (map :amount (filter #((:tag-filter categ) (:tags %))
-                         hinance.data/changes))))))
+                         hinance.data/chgsact))))))
 
 (def group-index (into (hash-map) (map-indexed (fn [i g] (vector g (str i)))
-  (apply sorted-set (map :group hinance.data/changes)))))
+  (apply sorted-set (map :group hinance.data/chgsact)))))
 
 (def index-group (clojure.set/map-invert group-index))
 
@@ -187,7 +187,7 @@
   :group (fn [params] (seq [
     [:h3 (str "Group: " (index-group (params :group)))]
     (chgs-table (filter #(= (group-index (:group %)) (params :group))
-      hinance.data/changes))]))
+      hinance.data/chgsact))]))
   :split (fn [params]
           (let [split (cljs.reader/read-string (:split params))
                 step (cljs.reader/read-string (:step params))
