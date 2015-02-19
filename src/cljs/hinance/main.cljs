@@ -184,6 +184,14 @@
         (svg-stack-render chgsid stack-down neg? split step ofs len
                           sel-ofs-cached sel-cat-cached column)]))))))
 
+(defn split-labels [chgsid split] (vector
+  :ul {:class "list-inline"}
+    (for [c (:categs (hinance.user/splits split))]
+     [:li [:span {:class "label" :style
+       (str "color:" (:fg-col c) ";background-color:" (:bg-col c))}
+       (str (:title c) ": " (int (* 0.01
+         (categ-amount-total chgsid c))))]])))
+
 (def handlers {
   :home #(vector :h1 "Welcome!")
   :diag #(for [x hinance.data/diag] (list
@@ -228,40 +236,24 @@
        [:div {:class "panel-heading"} [:h3 {:class "panel-title"} "Actual"]]
        [:div {:class "panel-body text-center"}
          (split-diagram :chgsact split step ofs len sel-ofs sel-cat)
-         [:ul {:class "list-inline"}
-          (for [c (:categs (hinance.user/splits split))]
-           [:li [:span {:class "label" :style
-             (str "color:" (:fg-col c) ";background-color:" (:bg-col c))}
-             (str (:title c) ": " (int (* 0.01
-               (categ-amount-total :chgsact c))))]])]]]
+         (split-labels :chgsact split)]]
      [:div {:class "panel panel-default"}
        [:div {:class "panel-heading"} [:h3 {:class "panel-title"} "Planned"]]
        [:div {:class "panel-body text-center"}
          (split-diagram :chgsplan split step ofs len sel-ofs sel-cat)
-         [:ul {:class "list-inline"}
-          (for [c (:categs (hinance.user/splits split))]
-           [:li [:span {:class "label" :style
-             (str "color:" (:fg-col c) ";background-color:" (:bg-col c))}
-             (str (:title c) ": " (int (* 0.01
-               (categ-amount-total :chgsplan c))))]])]]]
+         (split-labels :chgsplan split)]]
      [:div {:class "panel panel-default"}
        [:div {:class "panel-heading"} [:h3 {:class "panel-title"}
          "Actual - Planned ="]]
        [:div {:class "panel-body text-center"}
          (split-diagram :chgsdiff split step ofs len sel-ofs sel-cat)
-         [:ul {:class "list-inline"}
-          (for [c (:categs (hinance.user/splits split))]
-           [:li [:span {:class "label" :style
-             (str "color:" (:fg-col c) ";background-color:" (:bg-col c))}
-             (str (:title c) ": " (int (* 0.01
-               (categ-amount-total :chgsdiff c))))]])]]]
+         (split-labels :chgsdiff split)]]
      [:div {:class "panel panel-default"}
        [:div {:class "panel-heading"} [:h3 {:class "panel-title"} "Actual"]]
        (chgs-split-table :chgsact split step sel-ofs sel-cat)]
      [:div {:class "panel panel-default"}
        [:div {:class "panel-heading"} [:h3 {:class "panel-title"} "Planned"]]
-       (chgs-split-table :chgsplan split step sel-ofs sel-cat)
-     ]])))})
+       (chgs-split-table :chgsplan split step sel-ofs sel-cat)]])))})
 
 (def html-content (memoize (fn [path]
   (let [m (bidi.bidi/match-route routes path)
