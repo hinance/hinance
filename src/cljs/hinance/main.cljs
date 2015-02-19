@@ -15,7 +15,9 @@
   ["split." :split "/step." :step "/ofs." :ofs "/len." :len
    "/sel-ofs." :sel-ofs "/sel-cat." :sel-cat] :split}}])
 
-(def lookup {:chgsact hinance.data/chgsact :chgsplan hinance.data/chgsplan})
+(def lookup {:chgsact hinance.data/chgsact
+             :chgsplan hinance.data/chgsplan
+             :chgsdiff hinance.data/chgsdiff})
 
 (defn html! [content]
   (aset (js/document.getElementById "content") "innerHTML" content))
@@ -242,6 +244,17 @@
              (str "color:" (:fg-col c) ";background-color:" (:bg-col c))}
              (str (:title c) ": " (int (* 0.01
                (categ-amount-total :chgsplan c))))]])]]]
+     [:div {:class "panel panel-default"}
+       [:div {:class "panel-heading"} [:h3 {:class "panel-title"}
+         "Actual - Planned ="]]
+       [:div {:class "panel-body text-center"}
+         (split-diagram :chgsdiff split step ofs len sel-ofs sel-cat)
+         [:ul {:class "list-inline"}
+          (for [c (:categs (hinance.user/splits split))]
+           [:li [:span {:class "label" :style
+             (str "color:" (:fg-col c) ";background-color:" (:bg-col c))}
+             (str (:title c) ": " (int (* 0.01
+               (categ-amount-total :chgsdiff c))))]])]]]
      [:div {:class "panel panel-default"}
        [:div {:class "panel-heading"} [:h3 {:class "panel-title"} "Actual"]]
        (chgs-split-table :chgsact split step sel-ofs sel-cat)]

@@ -17,7 +17,8 @@ import Text.Printf
 main = do putStrLn.concat $ intersperse "\n" $ concat $ xs where
   xs = [[""],diagscljs,
         [""],chgscljs chgsact "chgsact",
-        [""],chgscljs chgsplan "chgsplan"]
+        [""],chgscljs chgsplan "chgsplan",
+        [""],chgscljs chgsdiff "chgsdiff"]
 
 diagscljs = concat [["(def diag ["],
   (cljs "Checks" (length checks) checks),
@@ -55,6 +56,10 @@ chgsact = (sortBy (compare`on`ctime)).(concatMap addchanges)
 chgsplan = (sortBy (compare`on`ctime)) . (++ planned) . concat
   . (filter$(< planfrom).ctime.head) . (groupSortBy cgroup)
   $ filter grouped chgsact
+
+chgsdiff = (sortBy (compare`on`ctime)) . (++ chgsact)
+  . (map $ \x -> x{camount = -camount x})
+  . (filter $ (< (ctime $ last chgsact)).ctime) $ chgsplan
 
 banks = patched $ map (mrgbacs.mrgbs) $ groupSortBy bid banksraw where
   mrgbs = foldl1 (\a x -> x{baccs = (baccs a) ++ (baccs x)})
