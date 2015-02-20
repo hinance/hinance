@@ -85,10 +85,12 @@
 
 (def index-group (clojure.set/map-invert group-index))
 
-(defn chgs-table [changes] (vector
+(defn chgs-table [changes srt asc th-fn] (vector
   :table {:class "table table-striped"}
-    [:thead [:tr [:th "Date"] [:th "Description"] [:th "Tags"] [:th "Group"]
-                 [:th {:class "text-right"} "Amount"]]]
+    [:thead [:tr [:th (th-fn "time" "Date")]
+                 [:th (th-fn "label" "Description")]
+                 [:th (th-fn "tags" "Tags")] [:th (th-fn "group" "Group")]
+                 [:th {:class "text-right"} (th-fn "amount" "Amount")]]]
     [:tbody (for [x changes]
       [:tr [:td (date (:time x))]
            [:td (if (empty?(:url x)) (:label x) [:a{:href(:url x)}(:label x)])]
@@ -98,10 +100,14 @@
                  (str (group-index (:group x)))]]
            [:td {:class "text-right"} (amount-str (:amount x) (:cur x))]])]))
 
-(def chgs-split-table (memoize (fn [chgsid split step sel-ofs sel-cat]
+(def chgs-split-table (memoize (fn [chgsid split step ofs len srt
+                                    asc sel-ofs sel-cat]
   (hiccups.core/html (chgs-table (filter
     #((:tag-filter ((:categs (hinance.user/splits split)) sel-cat)) (:tags %))
-    (pick-chgs (lookup chgsid) step sel-ofs 1)))))))
+    (pick-chgs (lookup chgsid) step sel-ofs 1)) srt asc
+    (fn [srt' text] (vector :a {:href (href :split :split split :step step
+      :ofs ofs :len len :srt srt' :asc (if (= srt srt') (- 1 asc) 1)
+      :sel-ofs sel-ofs :sel-cat sel-cat)} text)))))))
 
 (defn svg-stack [split step ofs len srt asc sel-ofs sel-cat dir column items]
   (if (empty? items) [:g] (let
@@ -207,11 +213,11 @@
     [:div {:class "panel panel-default"}
       [:div {:class "panel-heading"} [:h3 {:class "panel-title"} "Actual"]]
       (chgs-table (filter #(= (group-index (:group %)) (params :group))
-        hinance.data/chgsact))]
+        hinance.data/chgsact) "time" 0 (fn [srt' text] text))]
     [:div {:class "panel panel-default"}
       [:div {:class "panel-heading"} [:h3 {:class "panel-title"} "Planned"]]
       (chgs-table (filter #(= (group-index (:group %)) (params :group))
-        hinance.data/chgsplan))]]))
+        hinance.data/chgsplan) "time" 0 (fn [srt' text] text))]]))
   :split (fn [params]
           (let [split (cljs.reader/read-string (:split params))
                 step (cljs.reader/read-string (:step params))
@@ -259,10 +265,11 @@
          (split-labels :chgsplan split)]]
      [:div {:class "panel panel-default"}
        [:div {:class "panel-heading"} [:h3 {:class "panel-title"} "Actual"]]
-       (chgs-split-table :chgsact split step sel-ofs sel-cat)]
+       (chgs-split-table :chgsact split step ofs len srt asc sel-ofs sel-cat)]
      [:div {:class "panel panel-default"}
        [:div {:class "panel-heading"} [:h3 {:class "panel-title"} "Planned"]]
-       (chgs-split-table :chgsplan split step sel-ofs sel-cat)]])))})
+       (chgs-split-table :chgsplan split step ofs len srt asc sel-ofs sel-cat)
+     ]])))})
 
 (def html-content (memoize (fn [path]
   (let [m (bidi.bidi/match-route routes path)
