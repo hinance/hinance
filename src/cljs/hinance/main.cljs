@@ -91,7 +91,9 @@
                  [:th (th-fn "label" "Description")]
                  [:th (th-fn "tags" "Tags")] [:th (th-fn "group" "Group")]
                  [:th {:class "text-right"} (th-fn "amount" "Amount")]]]
-    [:tbody (for [x (sort-by (keyword srt) ({0 > 1 <} asc) changes)]
+    [:tbody (for [x (sort-by #((keyword srt) {
+      :time (:time %) :label (:label %) :tags (str (sort (:tags %)))
+      :group (:group %) :amount (:amount %)}) ({0 > 1 <} asc) changes)]
       [:tr [:td (date (:time x))]
            [:td (if (empty?(:url x)) (:label x) [:a{:href(:url x)}(:label x)])]
            [:td [:ul {:class "list-inline"}
