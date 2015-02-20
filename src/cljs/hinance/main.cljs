@@ -29,13 +29,14 @@
 (defn chgs-time-span [] (- (:time (last hinance.data/chgsact))
                            (:time (first hinance.data/chgsact))))
 
-(defn nav-split [splitn handler params] (let
+(defn nav-split [splitn handler params?] (let
   [split (hinance.user/splits splitn) len (cfg :len-default)
-   step (Math/ceil (/ (+ 1 (chgs-time-span)) len))]
+   step (Math/ceil (/ (+ 1 (chgs-time-span)) len)) params (or params? {})]
   (if (and (= handler :split) (= (str splitn) (params :split)))
     [:li {:class "active"} [:a (:title split)]]
-    [:li [:a {:href (href :split :split splitn :step step :ofs 0
-                :len len :sel-ofs 0 :sel-cat 0)} (:title split)]])))
+    [:li [:a {:href (href :split :split splitn :step (or (params :step) step)
+      :ofs (or (params :ofs) 0) :len (or (params :len) len)
+      :sel-ofs 0 :sel-cat 0)} (:title split)]])))
 
 (defn nav [title dest handler] (if (= dest handler)
   [:li {:class "active"} [:a title]] [:li [:a {:href (href dest)} title]]))
