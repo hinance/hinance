@@ -125,39 +125,33 @@
 (defn stack-up   [h] (hash-map :y (- h) :next-y (- h)))
 (defn stack-down [h] (hash-map :y 0     :next-y h))
 
-(def sum-split-amounts (memoize (fn [chgsid split step cofs]
-  (apply + (for [categ (:categs (hinance.user/splits split))
-    amount (categ-amounts chgsid step categ cofs)] (Math/abs amount))))))
-
-(def max-split-amount (memoize (fn [chgsid split step ofs len]
-  (apply max (for [i (range len)] (sum-split-amounts chgsid split step
-                                   (+ ofs i)))))))
-
-(defn stack-items [chgsid split step ofs len column amount-ftr sum-ftr]
+(defn stack-items [chgsid split step ofs len column ascale amount-ftr sum-ftr]
   (sort-by (comp Math/abs first) < (for
     [[icat categ](map-indexed vector(:categs (hinance.user/splits split))) :let
-     [mamount (max-split-amount chgsid split step ofs len)
-      scale (/ (cfg :amount-scale) (if (zero? mamount) 1 mamount))
-      amount (categ-amount chgsid step categ (+ ofs column) amount-ftr)
-      height (max (cfg :mark-height) (* scale (Math/abs amount)))]
+     [amount (categ-amount chgsid step categ (+ ofs column) amount-ftr)
+      height (max (cfg :mark-height) (* ascale (Math/abs amount)))]
      :when (sum-ftr amount)]
     [(int (/ amount 100)) height icat categ])))
 
-(def svg-stack-render (memoize (fn
-  [chgsid dir amount-ftr sum-ftr split step ofs len sel-ofs sel-cat column]
+(def svg-stack-render (memoize (fn [chgsid dir amount-ftr sum-ftr split step
+                                    ofs len sel-ofs sel-cat column ascale]
   (hiccups.core/html (svg-stack split step ofs len sel-ofs sel-cat dir column
-         (stack-items chgsid split step ofs len column amount-ftr sum-ftr))))))
+    (stack-items chgsid split step ofs len column ascale
+                 amount-ftr sum-ftr))))))
 
 (defn non-zero? [x] (not (zero? x)))
 
 (defn split-diagram [chgsid posneg split step ofs len sel-ofs sel-cat] (let
-  [max-stack-height (fn [amount-ftr sum-ftr] (apply max (for[column(range len)]
-     (apply + (map second (stack-items chgsid split step ofs len column
-                                       amount-ftr sum-ftr))))))
+  [max-stack-height (fn [ascale amount-ftr sum-ftr] (apply max
+    (for [column (range len)] (apply + (map second (stack-items chgsid split
+      step ofs len column ascale amount-ftr sum-ftr))))))
    pos-ftrs (if posneg [pos? non-zero?] [non-zero? pos?])
    neg-ftrs (if posneg [neg? non-zero?] [non-zero? neg?])
-   cells-height-pos (apply max-stack-height pos-ftrs)
-   cells-height-neg (apply max-stack-height neg-ftrs)
+   norm-height-pos (apply max-stack-height (concat [1] pos-ftrs))
+   norm-height-neg (apply max-stack-height (concat [1] neg-ftrs))
+   ascale (/ (cfg :amount-scale) (max 1 (+ norm-height-pos norm-height-neg)))
+   cells-height-pos (apply max-stack-height (concat [ascale] pos-ftrs))
+   cells-height-neg (apply max-stack-height (concat [ascale] neg-ftrs))
    cell-wspace (+ (cfg :cell-width) (cfg :cell-space))
    cells-width (- (* len cell-wspace) (cfg :cell-space))
    total-width (+ (cfg :margin-left) cells-width (cfg :margin-right))
@@ -176,7 +170,7 @@
        [:g {:transform (str "translate(" x ","
               (+ (cfg :margin-top) cells-height-pos) ")")}
         (apply svg-stack-render (concat [chgsid stack-up] pos-ftrs
-          [split step ofs len sel-ofs-cached sel-cat-cached column]))]
+          [split step ofs len sel-ofs-cached sel-cat-cached column ascale]))]
        [:rect {:width (str (cfg :cell-width)) :height (str (cfg :mark-height))
                :fill "none" :stroke (cfg :bdr-col) :rx (str (cfg :bdr-round))
                :ry (str (cfg :bdr-round)) :x (str x) :y (str mark-y)}]
@@ -187,7 +181,8 @@
        [:g {:transform (str "translate(" x ","
               (+ mark-y (cfg :mark-height) (cfg :mark-space)) ")")}
         (apply svg-stack-render (concat [chgsid stack-down] neg-ftrs
-          [split step ofs len sel-ofs-cached sel-cat-cached column]))]))))))
+          [split step ofs len sel-ofs-cached sel-cat-cached column ascale]))
+       ]))))))
 
 (defn split-labels [chgsid split] (vector
   :ul {:class "list-inline"}
