@@ -12,8 +12,8 @@
   :mark-space 10 :mark-height 30 :mark-ofs-x 35 :mark-ofs-y 20})
 
 (def routes ["" {"" :home "/" {"diag" :diag ["group." :group] :group
-  ["split." :split "/step." :step "/ofs." :ofs "/len." :len
-   "/sel-ofs." :sel-ofs "/sel-cat." :sel-cat] :split}}])
+  ["split." :split "/step." :step "/ofs." :ofs "/len." :len "/srt." :srt
+   "/asc." :asc "/sel-ofs." :sel-ofs "/sel-cat." :sel-cat] :split}}])
 
 (def lookup {:chgsact hinance.data/chgsact
              :chgsplan hinance.data/chgsplan
@@ -36,6 +36,7 @@
     [:li {:class "active"} [:a (:title split)]]
     [:li [:a {:href (href :split :split splitn :step (or (params :step) step)
       :ofs (or (params :ofs) 0) :len (or (params :len) len)
+      :srt (or (params :srt) "time") :asc (or (params :asc) 0)
       :sel-ofs 0 :sel-cat 0)} (:title split)]])))
 
 (defn nav [title dest handler] (if (= dest handler)
@@ -91,7 +92,8 @@
     [:tbody (for [x changes]
       [:tr [:td (date (:time x))]
            [:td (if (empty?(:url x)) (:label x) [:a{:href(:url x)}(:label x)])]
-           [:td [:ul {:class "list-inline"} (for [t (:tags x)] [:li (tag t)])]]
+           [:td [:ul {:class "list-inline"}
+                  (for [t (sort (:tags x))] [:li (tag t)])]]
            [:td [:a {:href (href :group :group (group-index (:group x)))}
                  (str (group-index (:group x)))]]
            [:td {:class "text-right"} (amount-str (:amount x) (:cur x))]])]))
@@ -101,12 +103,12 @@
     #((:tag-filter ((:categs (hinance.user/splits split)) sel-cat)) (:tags %))
     (pick-chgs (lookup chgsid) step sel-ofs 1)))))))
 
-(defn svg-stack [split step ofs len sel-ofs sel-cat dir column items]
+(defn svg-stack [split step ofs len srt asc sel-ofs sel-cat dir column items]
   (if (empty? items) [:g] (let
   [cofs (+ column ofs) [[amount height icat categ] & irest] (seq items)]
   (vector :g
-    [:a {:xlink:href (href :split :split split :step step :ofs ofs
-                       :len len :sel-ofs cofs :sel-cat icat)}
+    [:a {:xlink:href (href :split :split split :step step :ofs ofs :len len
+                               :srt srt :asc asc :sel-ofs cofs :sel-cat icat)}
       [:rect (merge (if (and (= sel-ofs cofs) (= sel-cat icat))
         {:stroke (cfg :sel-col) :stroke-width (str (cfg :sel-width))
          :height (str (- height (* 2 (cfg :sel-width))))
@@ -120,7 +122,8 @@
         (str amount)]]
     (if (empty? irest) [:g]
       [:g {:transform (str "translate(0," ((dir height) :next-y) ")")}
-       (svg-stack split step ofs len sel-ofs sel-cat dir column irest)])))))
+       (svg-stack split step ofs len srt asc sel-ofs sel-cat dir column irest)
+      ])))))
 
 (defn stack-up   [h] (hash-map :y (- h) :next-y (- h)))
 (defn stack-down [h] (hash-map :y 0     :next-y h))
@@ -134,14 +137,15 @@
     [(int (/ amount 100)) height icat categ])))
 
 (def svg-stack-render (memoize (fn [chgsid dir amount-ftr sum-ftr split step
-                                    ofs len sel-ofs sel-cat column ascale]
-  (hiccups.core/html (svg-stack split step ofs len sel-ofs sel-cat dir column
-    (stack-items chgsid split step ofs len column ascale
-                 amount-ftr sum-ftr))))))
+                                ofs len srt asc sel-ofs sel-cat column ascale]
+  (hiccups.core/html (svg-stack split step ofs len srt asc sel-ofs sel-cat
+    dir column (stack-items chgsid split step ofs len column ascale
+                            amount-ftr sum-ftr))))))
 
 (defn non-zero? [x] (not (zero? x)))
 
-(defn split-diagram [chgsid posneg split step ofs len sel-ofs sel-cat] (let
+(defn split-diagram [chgsid posneg split step ofs len
+                     srt asc sel-ofs sel-cat] (let
   [max-stack-height (fn [ascale amount-ftr sum-ftr] (apply max
     (for [column (range len)] (apply + (map second (stack-items chgsid split
       step ofs len column ascale amount-ftr sum-ftr))))))
@@ -170,7 +174,8 @@
        [:g {:transform (str "translate(" x ","
               (+ (cfg :margin-top) cells-height-pos) ")")}
         (apply svg-stack-render (concat [chgsid stack-up] pos-ftrs
-          [split step ofs len sel-ofs-cached sel-cat-cached column ascale]))]
+          [split step ofs len srt asc sel-ofs-cached sel-cat-cached
+           column ascale]))]
        [:rect {:width (str (cfg :cell-width)) :height (str (cfg :mark-height))
                :fill "none" :stroke (cfg :bdr-col) :rx (str (cfg :bdr-round))
                :ry (str (cfg :bdr-round)) :x (str x) :y (str mark-y)}]
@@ -181,8 +186,8 @@
        [:g {:transform (str "translate(" x ","
               (+ mark-y (cfg :mark-height) (cfg :mark-space)) ")")}
         (apply svg-stack-render (concat [chgsid stack-down] neg-ftrs
-          [split step ofs len sel-ofs-cached sel-cat-cached column ascale]))
-       ]))))))
+          [split step ofs len srt asc sel-ofs-cached sel-cat-cached
+           column ascale]))]))))))
 
 (defn split-labels [chgsid split] (vector
   :ul {:class "list-inline"}
@@ -212,6 +217,7 @@
                 step (cljs.reader/read-string (:step params))
                 ofs (cljs.reader/read-string (:ofs params))
                 len (cljs.reader/read-string (:len params))
+                srt (:srt params) asc (cljs.reader/read-string (:asc params))
                 sel-ofs (cljs.reader/read-string (:sel-ofs params))
                 sel-cat (cljs.reader/read-string (:sel-cat params))] (concat
     (if (pos? (warns))
@@ -225,28 +231,31 @@
          (if (pos? ofs)
            [:li {:class "previous"}
              [:a {:href (href :split :split split :step step :ofs (dec ofs)
-                         :len len :sel-ofs sel-ofs :sel-cat sel-cat)}
+               :len len :srt srt :asc asc :sel-ofs sel-ofs :sel-cat sel-cat)}
               "Older"]]
            [:li {:class "previous disabled"} [:a "Older"]])
          [:li {:class "next"}
            [:a {:href (href :split :split split :step step :ofs (inc ofs)
-                       :len len :sel-ofs sel-ofs :sel-cat sel-cat)}
+               :len len :srt srt :asc asc :sel-ofs sel-ofs :sel-cat sel-cat)}
             "Newer"]]]]
      [:div {:class "panel panel-default"}
        [:div {:class "panel-heading"} [:h3 {:class "panel-title"} "Actual"]]
        [:div {:class "panel-body text-center"}
-         (split-diagram :chgsact true split step ofs len sel-ofs sel-cat)
+         (split-diagram :chgsact true split step ofs len srt asc
+                        sel-ofs sel-cat)
          (split-labels :chgsact split)]]
      [:div {:class "panel panel-default"}
        [:div {:class "panel-heading"} [:h3 {:class "panel-title"}
          "Actual - Planned ="]]
        [:div {:class "panel-body text-center"}
-         (split-diagram :chgsdiff false split step ofs len sel-ofs sel-cat)
+         (split-diagram :chgsdiff false split step ofs len srt asc
+                        sel-ofs sel-cat)
          (split-labels :chgsdiff split)]]
      [:div {:class "panel panel-default"}
        [:div {:class "panel-heading"} [:h3 {:class "panel-title"} "Planned"]]
        [:div {:class "panel-body text-center"}
-         (split-diagram :chgsplan true split step ofs len sel-ofs sel-cat)
+         (split-diagram :chgsplan true split step ofs len srt asc
+                        sel-ofs sel-cat)
          (split-labels :chgsplan split)]]
      [:div {:class "panel panel-default"}
        [:div {:class "panel-heading"} [:h3 {:class "panel-title"} "Actual"]]
