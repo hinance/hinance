@@ -29,6 +29,8 @@
 (defn chgs-time-span [] (- (:time (last hinance.data/chgsact))
                            (:time (first hinance.data/chgsact))))
 
+(defn first-time [] (:time (first hinance.data/chgsact)))
+
 (defn nav-split [splitn handler params?] (let
   [split (hinance.user/splits splitn) len (cfg :len-default)
    step (Math/ceil (/ (+ 1 (chgs-time-span)) len)) params (or params? {})]
@@ -55,9 +57,9 @@
   (.toLocaleString (* 0.01 number) js/undefined
     (clj->js {:style "currency" :currency cur}))))
 
-(defn date [unixtime]
+(defn date [fmt unixtime]
   (cljs-time.format/unparse
-    (cljs-time.format/formatter "yyyy-MM-dd")
+    (cljs-time.format/formatter fmt)
     (cljs-time.coerce/from-long (* 1000 unixtime))))
 
 (defn tag [t] (vector
@@ -94,7 +96,7 @@
     [:tbody (for [x (sort-by #((keyword srt) {
       :time (:time %) :label (:label %) :tags (str (sort (:tags %)))
       :group (:group %) :amount (:amount %)}) ({0 > 1 <} asc) changes)]
-      [:tr [:td (date (:time x))]
+      [:tr [:td (date "yyyy-MM-dd" (:time x))]
            [:td (if (empty?(:url x)) (:label x) [:a{:href(:url x)}(:label x)])]
            [:td [:ul {:class "list-inline"}
                   (for [t (sort (:tags x))] [:li (tag t)])]]
@@ -190,7 +192,7 @@
        [:text {:text-anchor "middle" :fill (cfg :txt-col)
                :x (str (+ x (cfg :mark-ofs-x)))
                :y (str (+ mark-y (cfg :mark-ofs-y)))}
-        (str (+ ofs column))]
+        (date "YY-MM" (+ (first-time) (* step (+ ofs column))))]
        [:g {:transform (str "translate(" x ","
               (+ mark-y (cfg :mark-height) (cfg :mark-space)) ")")}
         (apply svg-stack-render (concat [chgsid stack-down] neg-ftrs
