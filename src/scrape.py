@@ -1,4 +1,5 @@
 from weboob.tools.application.base import Application
+from weboob.capabilities.base import Currency
 from weboob.capabilities.bank import CapBank
 from weboob.capabilities.shop import CapShop
 from datetime import datetime
@@ -71,7 +72,7 @@ class MyApp(Application):
   def get_shop_data(self, backend):
     lastReport = time()
     sorders = []
-    currency = backend.get_currency()
+    currency = Currency.get_currency(backend.get_currency())
     for o in backend.iter_orders():
       sopayments = [[
         u'ShopPayment',
