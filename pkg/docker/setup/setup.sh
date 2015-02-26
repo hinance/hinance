@@ -18,8 +18,8 @@ echo "Server = " \
      > /etc/pacman.d/mirrorlist
 pacman -Syyuu --noconfirm
 
-pacman -S --noconfirm --needed base base-devel cabal-install ghc git happy \
-                                    mupdf phantomjs python2-prettytable sudo
+pacman -S --noconfirm --needed base base-devel cabal-install firefox ghc \
+                git happy mupdf python2-prettytable sudo xorg-server-xvfb
 
 # aur
 curl -O http://pkgbuild.com/git/aur-mirror.git/snapshot/aur-mirror-$AUR_TAG.tar.xz
