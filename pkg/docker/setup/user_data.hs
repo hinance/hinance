@@ -26,3 +26,7 @@ instance Patchable Shop where
 
 instance Patchable Bank where
   patched = id
+
+planfrom = 0
+planto = 0
+planned = []
