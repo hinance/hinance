@@ -65,13 +65,6 @@ cd /hinance-docker/aur/python2-html2text
 makepkg -sc --noconfirm
 sudo pacman -U --noconfirm python2-html2text-2014.9.25-2-any.pkg.tar.xz
 
-# python2-selenium
-# TODO: remove this patch when the package is updated
-cd /hinance-docker/aur/python2-selenium
-patch PKGBUILD /hinance-docker/setup/python2-selenium/PKGBUILD.patch
-makepkg -sc --noconfirm
-sudo pacman -U --noconfirm python2-selenium-2.43.0-1-x86_64.pkg.tar.xz
-
 # weboob-git
 cd /hinance-docker/aur/weboob-git
 patch PKGBUILD /hinance-docker/setup/weboob-git/PKGBUILD.patch

@@ -8,7 +8,6 @@ url="https://github.com/olegus8/hinance"
 license=('MIT')
 depends=('haskell-pretty-show' 'haskell-regex-tdfa'
          'leiningen' 'python2' 'weboob')
-optdepends=('xorg-server-xvfb: for headless selenium scraping')
 makedepends=('git')
 source=("git+https://github.com/olegus8/hinance#tag=${pkgver}")
 md5sums=('SKIP')
