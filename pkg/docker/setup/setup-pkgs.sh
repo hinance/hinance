@@ -69,7 +69,7 @@ sudo pacman -U --noconfirm python2-html2text-2014.9.25-2-any.pkg.tar.xz
 cd /hinance-docker/aur/weboob-git
 patch PKGBUILD /hinance-docker/setup/weboob-git/PKGBUILD.patch
 makepkg -sc --noconfirm
-sudo pacman -U --noconfirm weboob-git-2402b546-1-x86_64.pkg.tar.xz
+sudo pacman -U --noconfirm weboob-git-aa794ab0-1-x86_64.pkg.tar.xz
 
 # leiningen
 cd /hinance-docker/aur/leiningen
