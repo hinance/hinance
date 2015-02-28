@@ -5,7 +5,7 @@
   (:require-macros [hiccups.core])
   (:import goog.History goog.history.EventType))
 
-(def cfg {:len-default 16
+(def cfg {:len-default 16 :len-default-xs 5
   :margin-left 5 :margin-right 5 :margin-top 5 :margin-bottom 5
   :sel-col "#000" :sel-width 5 :bdr-round 8 :bdr-col "#DDD"
   :cell-width 70 :cell-space 10 :txt-col "#333" :amount-scale 400
@@ -32,23 +32,24 @@
 (defn first-time [] (:time (first hinance.data/chgsact)))
 
 (defn nav-split [splitn handler params?] (let
-  [split (hinance.user/splits splitn) len (cfg :len-default)
-   step (Math/ceil (/ (+ 1 (chgs-time-span)) len)) params (or params? {})]
-  (if (and (= handler :split) (= (str splitn) (params :split)))
-    [:li {:class "active"} [:a (:title split)]]
-    [:li [:a {:href (href :split :split splitn :step (or (params :step) step)
+  [split (hinance.user/splits splitn) params (or params? {})
+   link (fn [len] (let [
+     step (Math/ceil (/ (+ 1 (chgs-time-span)) len))]
+   (vector :a {:href (href :split :split splitn :step (or (params :step) step)
       :ofs (or (params :ofs) 0) :len (or (params :len) len)
       :srt (or (params :srt) "time") :asc (or (params :asc) 0)
-      :sel-ofs 0 :sel-cat 0)} (:title split)]])))
-
-(defn nav [title dest handler] (if (= dest handler)
-  [:li {:class "active"} [:a title]] [:li [:a {:href (href dest)} title]]))
+      :sel-ofs 0 :sel-cat 0)} (:title split))))]
+  (if (and (= handler :split) (= (str splitn) (params :split)))
+    [[:li {:class "active"} [:a (:title split)]]]
+    [[:li {:class "hidden-sm hidden-md hidden-lg"} (link(cfg :len-default-xs))]
+     [:li {:class "hidden-xs"} (link (cfg :len-default))]])))
 
 (defn page [handler params content] (vector
   :div {:class "container"}
     [:ul {:class "nav nav-pills"}
-      (for [[splitn _] (map-indexed vector hinance.user/splits)]
-       (nav-split splitn handler params))]
+      (for [[splitn _] (map-indexed vector hinance.user/splits)
+            nav (nav-split splitn handler params)]
+       nav)]
     [:div {:class "row"} [:div {:class "col-md-12"} content
        [:hr] [:p {:class "text-muted text-right"}
          "Generated on " hinance.data/timestamp]]]))
