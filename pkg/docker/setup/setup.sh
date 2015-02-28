@@ -19,7 +19,7 @@ echo "Server = " \
 pacman -Syyuu --noconfirm
 
 pacman -S --noconfirm --needed base base-devel cabal-install ghc git happy \
-                               mupdf phantomjs python2-prettytable sudo
+                               mupdf python2-prettytable sudo v8
 
 # aur
 curl -O http://pkgbuild.com/git/aur-mirror.git/snapshot/aur-mirror-$AUR_TAG.tar.xz
