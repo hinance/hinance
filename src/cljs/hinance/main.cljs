@@ -88,22 +88,32 @@
 
 (def index-group (clojure.set/map-invert group-index))
 
-(defn chgs-table [changes srt asc th-fn] (vector
-  :table {:class "table table-striped"}
-    [:thead [:tr [:th (th-fn "time" "Date")]
-                 [:th (th-fn "label" "Description")]
-                 [:th (th-fn "tags" "Tags")] [:th (th-fn "group" "Group")]
-                 [:th {:class "text-right"} (th-fn "amount" "Amount")]]]
-    [:tbody (for [x (sort-by #((keyword srt) {
-      :time (:time %) :label (:label %) :tags (str (sort (:tags %)))
-      :group (:group %) :amount (:amount %)}) ({0 > 1 <} asc) changes)]
-      [:tr [:td (date "yyyy-MM-dd" (:time x))]
-           [:td (if (empty?(:url x)) (:label x) [:a{:href(:url x)}(:label x)])]
-           [:td [:ul {:class "list-inline"}
-                  (for [t (sort (:tags x))] [:li (tag t)])]]
-           [:td [:a {:href (href :group :group (group-index (:group x)))}
-                 (str (group-index (:group x)))]]
-           [:td {:class "text-right"} (amount-str (:amount x) (:cur x))]])]))
+(defn chgs-table [changes srt asc th-fn] (let [
+  srt-chgs (sort-by #((keyword srt) {
+    :time (:time %) :label (:label %) :tags (str (sort (:tags %)))
+    :group (:group %) :amount (:amount %)}) ({0 > 1 <} asc) changes)
+  tdate #(date "yyyy-MM-dd" (:time %))
+  tdesc #(if (empty? (:url %)) (:label %) [:a {:href (:url %)} (:label %)])
+  ttags #(vector :ul {:class "list-inline"} (for [t (sort (:tags %))]
+                     [:li (tag t)]))
+  tgrp #(vector :a {:href (href :group :group (group-index (:group %)))}
+                   (str (group-index (:group %))))
+  tamt #(amount-str (:amount %) (:cur %))
+  mobile-only {:class "hidden-sm hidden-md hidden-lg"}
+  desktop-only {:class "hidden-xs"}]
+(vector :table {:class "table table-striped"}
+  [:thead desktop-only
+    [:tr [:th (th-fn "time" "Date")] [:th(th-fn "label" "Description")]
+         [:th (th-fn "tags" "Tags")] [:th (th-fn "group" "Group")]
+         [:th {:class "text-right"} (th-fn "amount" "Amount")]]]
+  [:tbody desktop-only (for [x srt-chgs]
+    [:tr [:td (tdate x)] [:td (tdesc x)] [:td (ttags x)] [:td (tgrp x)]
+         [:td {:class "text-right"} (tamt x)]])]
+  [:tbody mobile-only (for [x srt-chgs] [:tr [:td
+      [:p [:big [:strong (th-fn "time" "Date:") " "] (tdate x)]]
+      [:p [:big [:strong (th-fn "label" "Description:") " "] (tdesc x)]]
+      [:p [:big [:strong (th-fn "tags" "Tags:")] (ttags x)]]
+      [:p [:big [:strong (th-fn "amount" "Amount:") " "] (tamt x)]]]])])))
 
 (def chgs-split-table (memoize (fn [chgsid split step ofs len srt
                                     asc sel-ofs sel-cat]
