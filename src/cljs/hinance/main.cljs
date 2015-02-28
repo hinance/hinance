@@ -103,7 +103,7 @@
   desktop-only {:class "hidden-xs"}]
 (vector :table {:class "table table-striped"}
   [:thead desktop-only
-    [:tr [:th (th-fn "time" "Date")] [:th(th-fn "label" "Description")]
+    [:tr [:th (th-fn "time" "Date")] [:th (th-fn "label" "Description")]
          [:th (th-fn "tags" "Tags")] [:th (th-fn "group" "Group")]
          [:th {:class "text-right"} (th-fn "amount" "Amount")]]]
   [:tbody desktop-only (for [x srt-chgs]
