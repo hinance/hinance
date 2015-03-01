@@ -91,7 +91,9 @@
 
 (def index-group (clojure.set/map-invert group-index))
 
-(defn chgs-table [changes srt asc lim th-fn] (let [
+(defn chgs-panel [title changes srt asc lim th-fn] (let [
+  crange (if (<=(count changes)lim) (str " (showing all " (count changes) ")")
+    (str " (showing first " (str lim) " out of " (str (count changes)) ")"))
   srt-chgs (take lim (sort-by #((keyword srt) {
     :time (:time %) :label (:label %) :tags (str (sort (:tags %)))
     :group (:group %) :amount (:amount %)}) ({0 > 1 <} asc) changes))
@@ -104,35 +106,30 @@
   tamt #(amount-str (:amount %) (:cur %))
   mobile-only {:class "hidden-sm hidden-md hidden-lg"}
   desktop-only {:class "hidden-xs"}]
-(vector :table {:class "table table-striped"}
-  [:thead desktop-only
-    [:tr [:th (th-fn "time" "Date")] [:th (th-fn "label" "Description")]
-         [:th (th-fn "tags" "Tags")] [:th (th-fn "group" "Group")]
-         [:th {:class "text-right"} (th-fn "amount" "Amount")]]]
-  [:tbody desktop-only (for [x srt-chgs]
-    [:tr [:td (tdate x)] [:td (tdesc x)] [:td (ttags x)] [:td (tgrp x)]
-         [:td {:class "text-right"} (tamt x)]])]
-  [:tbody mobile-only (for [x srt-chgs] [:tr [:td
-      [:p [:big [:strong (th-fn "time" "Date:") " "] (tdate x)]]
-      [:p [:big [:strong (th-fn "label" "Description:") " "] (tdesc x)]]
-      [:p [:big [:strong (th-fn "tags" "Tags:")] (ttags x)]]
-      [:p [:big [:strong (th-fn "amount" "Amount:") " "] (tamt x)]]]])])))
+  (if (empty? changes) "" (vector :div {:class "panel panel-default"}
+    [:div {:class "panel-heading"} [:h3 {:class "panel-title"} title crange]]
+    [:table {:class "table table-striped"}
+      [:thead desktop-only
+        [:tr [:th (th-fn "time" "Date")] [:th (th-fn "label" "Description")]
+             [:th (th-fn "tags" "Tags")] [:th (th-fn "group" "Group")]
+             [:th {:class "text-right"} (th-fn "amount" "Amount")]]]
+      [:tbody desktop-only (for [x srt-chgs]
+        [:tr [:td (tdate x)] [:td (tdesc x)] [:td (ttags x)] [:td (tgrp x)]
+             [:td {:class "text-right"} (tamt x)]])]
+      [:tbody mobile-only (for [x srt-chgs] [:tr [:td
+        [:p [:big [:strong (th-fn "time" "Date:") " "] (tdate x)]]
+        [:p [:big [:strong (th-fn "label" "Description:") " "] (tdesc x)]]
+        [:p [:big [:strong (th-fn "tags" "Tags:")] (ttags x)]]
+        [:p [:big [:strong (th-fn "amount" "Amount:") " "] (tamt x)]]]])]]))))
 
 (def chgs-split-panel (memoize (fn [title chgsid split step ofs len srt
-                                    asc lim sel-ofs sel-cat] (let [
-  chgs (filter
+                                    asc lim sel-ofs sel-cat]
+  (hiccups.core/html (chgs-panel title (filter
     #((:tag-filter ((:categs (hinance.user/splits split)) sel-cat))(:tags %))
-    (pick-chgs (lookup chgsid) step sel-ofs 1))
-  crange (if (<= (count chgs) lim) (str " (showing all " (count chgs) ")")
-    (str " (showing first " (str lim) " out of " (str (count chgs)) ")"))
-  table (chgs-table chgs srt asc lim
+    (pick-chgs (lookup chgsid) step sel-ofs 1)) srt asc lim
     (fn [srt' text] (vector :a {:href (href :split :split split :step step
       :ofs ofs :len len :srt srt' :asc (if (= srt srt') (- 1 asc) 1)
-      :lim lim :sel-ofs sel-ofs :sel-cat sel-cat)} text)))]
-  (hiccups.core/html (if (empty chgs) ""
-    (vector :div {:class "panel panel-default"}
-      [:div {:class "panel-heading"} [:h3 {:class "panel-title"} title crange]]
-      table)))))))
+      :lim lim :sel-ofs sel-ofs :sel-cat sel-cat)} text)))))))
 
 (defn svg-stack [split step ofs len srt asc lim sel-ofs sel-cat
                  dir column items]
@@ -237,14 +234,10 @@
       [:pre (clojure.string/join "\n" (:info x))]))
   :group (fn [params] (seq [
     [:h3 (str "Group: " (index-group (params :group)))]
-    [:div {:class "panel panel-default"}
-      [:div {:class "panel-heading"} [:h3 {:class "panel-title"} "Actual"]]
-      (chgs-table (filter #(= (group-index (:group %)) (params :group))
-        hinance.data/chgsact) "time" 0 999 (fn [srt' text] text))]
-    [:div {:class "panel panel-default"}
-      [:div {:class "panel-heading"} [:h3 {:class "panel-title"} "Planned"]]
-      (chgs-table (filter #(= (group-index (:group %)) (params :group))
-        hinance.data/chgsplan) "time" 0 999 (fn [srt' text] text))]]))
+    (chgs-panel "Actual" (filter #(= (group-index (:group %)) (params :group))
+        hinance.data/chgsact) "time" 0 999 (fn [srt' text] text))
+    (chgs-panel "Planned" (filter #(= (group-index (:group %)) (params :group))
+        hinance.data/chgsplan) "time" 0 999 (fn [srt' text] text))]))
   :split (fn [params]
           (let [split (cljs.reader/read-string (:split params))
                 step (cljs.reader/read-string (:step params))
