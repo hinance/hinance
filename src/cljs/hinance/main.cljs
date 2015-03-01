@@ -6,7 +6,7 @@
   (:import goog.History goog.history.EventType))
 
 (def cfg {:len-default {:sm 16 :xs 5} :lim-default {:sm 50 :xs 10}
-  :tag-categ-bg "#5CB85C" :tag-categ-fg "#FFF"
+  :tag-categ-bg "#777" :tag-categ-fg "#FFF"
   :margin-left 5 :margin-right 5 :margin-top 5 :margin-bottom 5
   :sel-col "#000" :sel-width 5 :bdr-round 8 :bdr-col "#DDD"
   :cell-width 70 :cell-space 10 :txt-col "#333" :amount-scale 400
