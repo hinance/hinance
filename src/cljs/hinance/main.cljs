@@ -39,13 +39,15 @@
 (defn nav-split [splitn handler params?] (let
   [split (hinance.user/splits splitn) params (or params? {})
    link (fn [len-def lim] (let [
-     len (cljs.reader/read-string (or (params :len) (str len-def)))
-     step (cljs.reader/read-string (or (params :step) (str (step-actual len))))
-     sel-ofs (Math/floor (/ (chgs-time-span) step))
-     ofs (max 0 (+ 1 (- sel-ofs len)))]
+     param-read (fn [k v] (cljs.reader/read-string (or (params k) (str v))))
+     len (param-read :len len-def)
+     step (param-read :step (step-actual len))
+     sel-ofs (param-read :sel-ofs (Math/floor (/ (chgs-time-span) step)))
+     ofs (param-read :ofs (max 0 (+ 1 (- sel-ofs len))))
+     srt (or (params :srt) "time") asc (param-read :asc 0)
+     lim (param-read :lim lim)]
      (vector :a {:href (href :split :split splitn :step step :ofs ofs :len len
-       :srt (or (params :srt) "time") :asc (or (params :asc) 0)
-       :lim (or (params :lim) lim) :sel-ofs sel-ofs :sel-cat 0)}
+       :srt srt :asc asc :lim lim :sel-ofs sel-ofs :sel-cat 0)}
        (:title split))))]
   (if (and (= handler :split) (= (str splitn) (params :split)))
     [[:li {:class "active"} [:a (:title split)]]]
@@ -94,6 +96,13 @@
     (concat hinance.data/chgsact hinance.data/chgsplan))))))
 
 (def index-group (clojure.set/map-invert group-index))
+
+(def tag-index (into (hash-map) (map-indexed (fn [i t] (vector t i))
+  (apply sorted-set (for
+    [change (concat hinance.data/chgsact hinance.data/chgsplan)
+     tag (:tags change)] tag)))))
+
+(def index-tag (clojure.set/map-invert tag-index))
 
 (defn chgs-panel [title changes srt asc lim th-fn] (let [
   crange (if (<=(count changes)lim) (str " (showing all " (count changes) ")")
