@@ -255,20 +255,18 @@
          " There are " (str (warns)) " validation errors ("
          [:a {:href (href :diag)} "read full report"]
          ")."]] [])
-    [[:nav
-       [:ul {:class "pager"}
-         (if (pos? ofs)
-           [:li {:class "previous"}
-             [:a {:href (href :split :split split :step step :ofs (dec ofs)
-               :len len :srt srt :asc asc :lim lim :sel-ofs sel-ofs
-               :sel-cat sel-cat)}
-              "Older"]]
-           [:li {:class "previous disabled"} [:a "Older"]])
-         [:li {:class "next"}
-           [:a {:href (href :split :split split :step step :ofs (inc ofs)
-               :len len :srt srt :asc asc :lim lim :sel-ofs sel-ofs
-               :sel-cat sel-cat)}
-            "Newer"]]]]
+    [[:div {:class "btn-group btn-group-justified"}
+       (if (pos? ofs)
+         [:a {:class "btn btn-default" :href (href :split :split split
+              :step step :ofs (max 0 (- ofs len)) :len len :srt srt :asc asc
+              :lim lim :sel-ofs sel-ofs :sel-cat sel-cat)}
+           "Older"]
+         [:a {:class "btn btn-default disabled"} "Older"])
+       [:a {:class "btn btn-default" :href (href :split :split split
+            :step step :ofs (+ ofs len) :len len :srt srt :asc asc :lim lim
+            :sel-ofs sel-ofs :sel-cat sel-cat)}
+        "Newer"]]
+     [:br]
      [:div {:class "panel panel-default"}
        [:div {:class "panel-heading"} [:h3 {:class "panel-title"} "Actual"]]
        [:div {:class "panel-body text-center"}
