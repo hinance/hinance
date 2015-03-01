@@ -123,7 +123,7 @@
   chgs (filter
     #((:tag-filter ((:categs (hinance.user/splits split)) sel-cat))(:tags %))
     (pick-chgs (lookup chgsid) step sel-ofs 1))
-  crange (if (<= (count chgs) lim) ""
+  crange (if (<= (count chgs) lim) (str " (showing all " (count chgs) ")")
     (str " (showing first " (str lim) " out of " (str (count chgs)) ")"))
   table (chgs-table chgs srt asc lim
     (fn [srt' text] (vector :a {:href (href :split :split split :step step
