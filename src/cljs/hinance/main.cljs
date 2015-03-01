@@ -165,8 +165,7 @@
     (if (empty? irest) [:g]
       [:g {:transform (str "translate(0," ((dir height) :next-y) ")")}
        (svg-stack split step ofs len srt asc lim sel-ofs sel-cat
-                  dir column irest)
-      ])))))
+                  dir column irest)])))))
 
 (defn stack-up   [h] (hash-map :y (- h) :next-y (- h)))
 (defn stack-down [h] (hash-map :y 0     :next-y h))
