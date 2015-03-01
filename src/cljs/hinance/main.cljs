@@ -40,8 +40,7 @@
   [split (hinance.user/splits splitn) params (or params? {})
    link (fn [len-def lim] (let [
      param-read (fn [k v] (cljs.reader/read-string (or (params k) (str v))))
-     len (param-read :len len-def)
-     step (param-read :step (step-actual len))
+     len (param-read :len len-def) step (param-read :step (step-actual len))
      sel-ofs (param-read :sel-ofs (Math/floor (/ (chgs-time-span) step)))
      ofs (param-read :ofs (max 0 (+ 1 (- sel-ofs len))))
      srt (or (params :srt) "time") asc (param-read :asc 0)
