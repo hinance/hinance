@@ -36,18 +36,22 @@
 
 (defn first-time [] (:time (first hinance.data/chgsact)))
 
-(defn nav-split [splitn handler params?] (let
-  [split (hinance.user/splits splitn) params (or params? {})
-   link (fn [len-def lim] (let [
-     param-read (fn [k v] (cljs.reader/read-string (or (params k) (str v))))
-     len (param-read :len len-def) step (param-read :step (step-actual len))
-     sel-ofs (param-read :sel-ofs (Math/floor (/ (chgs-time-span) step)))
-     ofs (param-read :ofs (max 0 (+ 1 (- sel-ofs len))))
-     srt (or (params :srt) "time") asc (param-read :asc 0)
-     lim (param-read :lim lim)]
-     (vector :a {:href (href :split :split splitn :step step :ofs ofs :len len
-       :srt srt :asc asc :lim lim :sel-ofs sel-ofs :sel-cat 0)}
-       (:title split))))]
+(defn split-href [params-old params-new] (let
+  [params (merge (or params-old {}) params-new)
+   param-read (fn [k v] (cljs.reader/read-string (str (or (params k) v))))
+   len (params :len) step (param-read :step (step-actual len))
+   sel-ofs (param-read :sel-ofs (Math/floor (/ (chgs-time-span) step)))
+   ofs (param-read :ofs (max 0 (+ 1 (- sel-ofs len)))) asc (param-read :asc 0)
+   srt (or (params :srt) "time") lim (params :lim) split (params :split)
+   sel-cat (param-read :sel-cat 0)]
+  (href :split :split split :step step :ofs ofs :len len :srt srt
+               :asc asc :lim lim :sel-ofs sel-ofs :sel-cat sel-cat)))
+
+(defn nav-split [splitn handler params] (let
+  [split (hinance.user/splits splitn)
+   link (fn [len lim] (vector :a {:href (split-href
+     (if (= handler :split) params {})
+     {:split splitn :sel-cat 0 :len len :lim lim})} (:title split)))]
   (if (and (= handler :split) (= (str splitn) (params :split)))
     [[:li {:class "active"} [:a (:title split)]]]
     [[:li {:class "hidden-sm hidden-md hidden-lg"}
