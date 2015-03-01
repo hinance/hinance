@@ -257,20 +257,18 @@
       [[:div {:class "alert alert-warning"}
          [:strong "Warning!"] " There are " (str(warns)) " validation errors ("
          [:a {:href (href :diag)} "read full report"] ")."]] [])
-    [[:div {:class "btn-group btn-group-lg btn-group-justified"}
-       (if (pos? ofs)
-         [:a {:class "btn btn-lg btn-default" :href (href :split :split split
-              :step step :ofs (max 0 (- ofs len)) :len len :srt srt :asc asc
-              :lim lim :sel-ofs sel-ofs :sel-cat sel-cat)}
-           "Older"]
-         [:a {:class "btn btn-lg btn-default disabled"} "Older"])
-       (if (= step step-month)
-         [:a {:class "btn btn-lg btn-default"} "Full"]
-         [:a {:class "btn btn-lg btn-default"} "Monthly"])
-       [:a {:class "btn btn-lg btn-default" :href (href :split :split split
-            :step step :ofs (+ ofs len) :len len :srt srt :asc asc :lim lim
-            :sel-ofs sel-ofs :sel-cat sel-cat)}
-        "Newer"]]
+    [(let [link (fn [title step ofs sel-ofs]
+       (vector :a {:class "btn btn-lg btn-default" :href (href :split
+         :split split :step step :ofs ofs :len len :srt srt :asc asc
+         :lim lim :sel-ofs sel-ofs :sel-cat sel-cat)} title))]
+       (vector :div {:class "btn-group btn-group-lg btn-group-justified"}
+         (if (pos? ofs)
+           (link "Older" step (max 0 (- ofs len)) sel-ofs)
+           [:a {:class "btn btn-lg btn-default disabled"} "Older"])
+         (if (= step step-month)
+           [:a {:class "btn btn-lg btn-default"} "Full"]
+           [:a {:class "btn btn-lg btn-default"} "Monthly"])
+         (link "Newer" step (+ ofs len) sel-ofs)))
      [:br]
      [:div {:class "panel panel-default"}
        [:div {:class "panel-heading"} [:h3 {:class "panel-title"} "Actual"]]
