@@ -40,11 +40,11 @@
   [split (hinance.user/splits splitn) params (or params? {})
    link (fn [len lim]
    (vector :a {:href (href :split :split splitn
-     :step (or (params :step) (step-actual len))
-     :ofs (or (params :ofs) 0) :len (or (params :len) len)
-     :srt (or (params :srt) "time") :asc (or (params :asc) 0)
-     :lim (or (params :lim) lim) :sel-ofs (- len 1) :sel-cat 0)}
-     (:title split)))]
+     :step (or (params :step) (step-actual len)) :ofs (or (params :ofs) 0)
+     :len (or (params :len) len) :srt (or (params :srt) "time")
+     :asc (or (params :asc) 0) :lim (or (params :lim) lim)
+     :sel-ofs (or (params :sel-ofs) (- len 1))
+     :sel-cat (or (params :sel-cat) 0))} (:title split)))]
   (if (and (= handler :split) (= (str splitn) (params :split)))
     [[:li {:class "active"} [:a (:title split)]]]
     [[:li {:class "hidden-sm hidden-md hidden-lg"}
@@ -257,17 +257,22 @@
       [[:div {:class "alert alert-warning"}
          [:strong "Warning!"] " There are " (str(warns)) " validation errors ("
          [:a {:href (href :diag)} "read full report"] ")."]] [])
-    [(let [link (fn [title step ofs sel-ofs]
-       (vector :a {:class "btn btn-lg btn-default" :href (href :split
-         :split split :step step :ofs ofs :len len :srt srt :asc asc
-         :lim lim :sel-ofs sel-ofs :sel-cat sel-cat)} title))]
+    [(let [
+       link (fn [title step ofs sel-ofs]
+         (vector :a {:class "btn btn-lg btn-default" :href (href :split
+           :split split :step step :ofs ofs :len len :srt srt :asc asc
+           :lim lim :sel-ofs sel-ofs :sel-cat sel-cat)} title))
+       link-step (fn [title step-new] (let [
+         ofs-end-new (int (/ (+ (* (+ ofs len) step) step-new) step-new))
+         ofs-new (max 0 (- ofs-end-new len))]
+         (link title step-new ofs-new sel-ofs)))]
        (vector :div {:class "btn-group btn-group-lg btn-group-justified"}
          (if (pos? ofs)
            (link "Older" step (max 0 (- ofs len)) sel-ofs)
            [:a {:class "btn btn-lg btn-default disabled"} "Older"])
          (if (= step step-month)
-           [:a {:class "btn btn-lg btn-default"} "Full"]
-           [:a {:class "btn btn-lg btn-default"} "Monthly"])
+           (link "Actual" (step-actual len) 0 sel-ofs)
+           (link-step "Months" step-month))
          (link "Newer" step (+ ofs len) sel-ofs)))
      [:br]
      [:div {:class "panel panel-default"}
