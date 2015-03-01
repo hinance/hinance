@@ -129,9 +129,10 @@
     (fn [srt' text] (vector :a {:href (href :split :split split :step step
       :ofs ofs :len len :srt srt' :asc (if (= srt srt') (- 1 asc) 1)
       :lim lim :sel-ofs sel-ofs :sel-cat sel-cat)} text)))]
-  (hiccups.core/html (vector :div {:class "panel panel-default"}
-    [:div {:class "panel-heading"} [:h3 {:class "panel-title"} title crange]]
-    table))))))
+  (hiccups.core/html (if (empty chgs) ""
+    (vector :div {:class "panel panel-default"}
+      [:div {:class "panel-heading"} [:h3 {:class "panel-title"} title crange]]
+      table)))))))
 
 (defn svg-stack [split step ofs len srt asc lim sel-ofs sel-cat
                  dir column items]
