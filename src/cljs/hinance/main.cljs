@@ -6,6 +6,7 @@
   (:import goog.History goog.history.EventType))
 
 (def cfg {:len-default {:sm 16 :xs 5} :lim-default {:sm 50 :xs 10}
+  :tag-categ-bg "#5CB85C" :tag-categ-fg "#FFF"
   :margin-left 5 :margin-right 5 :margin-top 5 :margin-bottom 5
   :sel-col "#000" :sel-width 5 :bdr-round 8 :bdr-col "#DDD"
   :cell-width 70 :cell-space 10 :txt-col "#333" :amount-scale 400
@@ -49,8 +50,22 @@
   (href :split :split split :step step :ofs ofs :len len :srt srt
                :asc asc :lim lim :sel-ofs sel-ofs :sel-cat sel-cat)))
 
+(def tags-sorted (apply sorted-set (for
+  [change (concat hinance.data/chgsact hinance.data/chgsplan)
+     tag (:tags change)] tag)))
+
+(def tag-split (into (hash-map) (map-indexed
+  (fn [i t] (vector t (+ i (count hinance.user/splits)))) tags-sorted)))
+
+(defn tag-human [tag] (subs (str tag) 4))
+
+(def splits (vec (concat hinance.user/splits (for [t tags-sorted :let
+  [tname (str "Tagged with \"" (tag-human t) "\"")]]
+  (hinance.type/Split. tname [(hinance.type/Categ.
+    (cfg :tag-categ-bg) (cfg :tag-categ-fg) tname #(contains? % t))])))))
+
 (defn nav-split [splitn handler params] (let
-  [split (hinance.user/splits splitn)
+  [split (splits splitn)
    link (fn [screen] (vector :a {:href (split-href screen
      (if (= handler :split) params {}) {:split splitn :sel-cat 0})}
      (:title split)))]
@@ -63,8 +78,7 @@
   :div {:class "container"}
     [:ul {:class "nav nav-pills"}
       (for [[splitn _] (map-indexed vector hinance.user/splits)
-            nav (nav-split splitn handler params)]
-       nav)]
+            nav (nav-split splitn handler params)] nav)]
     [:div {:class "row"} [:div {:class "col-md-12"} content
        [:hr] [:p {:class "text-muted text-right"}
          "Generated on " hinance.data/timestamp]]]))
@@ -100,13 +114,6 @@
 
 (def index-group (clojure.set/map-invert group-index))
 
-(def tag-index (into (hash-map) (map-indexed (fn [i t] (vector t i))
-  (apply sorted-set (for
-    [change (concat hinance.data/chgsact hinance.data/chgsplan)
-     tag (:tags change)] tag)))))
-
-(def index-tag (clojure.set/map-invert tag-index))
-
 (defn chgs-panel [title changes srt asc lim thref-fn th-fn] (let [
   crange (if (<=(count changes)lim) (str " (showing all " (count changes) ")")
     (str " (showing first " (str lim) " out of " (str (count changes)) ")"))
@@ -116,8 +123,8 @@
   tdate #(date "yyyy-MM-dd" (:time %))
   tdesc #(if (empty? (:url %)) (:label %) [:a {:href (:url %)} (:label %)])
   ttags #(for [t (sort (:tags %))]
-    [:span [:a {:class "btn btn-default" :href (thref-fn {:split 0})}
-            (subs (str t) 4)] " "])
+    [:span [:a {:class "btn btn-default" :href
+                 (thref-fn {:split (tag-split t)})} (tag-human t)] " "])
   tgrp #(vector :a {:href (href :group :group (group-index (:group %)))}
                    (str (group-index (:group %))))
   tamt #(amount-str (:amount %) (:cur %))
@@ -146,7 +153,7 @@
           :lim lim :sel-ofs sel-ofs :sel-cat sel-cat}
   thref-fn #(split-href nil params %)]
   (hiccups.core/html (chgs-panel title (filter
-    #((:tag-filter ((:categs (hinance.user/splits split)) sel-cat))(:tags %))
+    #((:tag-filter ((:categs (splits split)) sel-cat))(:tags %))
     (pick-chgs (lookup chgsid) step sel-ofs 1)) srt asc lim thref-fn
     (fn [srt' text] (vector :a {:href (thref-fn 
       {:srt srt' :asc (if (= srt srt') (- 1 asc) 1)})} text))))))))
@@ -179,7 +186,7 @@
 
 (defn stack-items [chgsid split step ofs len column ascale amount-ftr sum-ftr]
   (sort-by (comp Math/abs first) < (for
-    [[icat categ](map-indexed vector(:categs (hinance.user/splits split))) :let
+    [[icat categ](map-indexed vector(:categs (splits split))) :let
      [amount (categ-amount chgsid step categ (+ ofs column) amount-ftr)
       height (max (cfg :mark-height) (* ascale (Math/abs amount)))]
      :when (sum-ftr amount)]
@@ -240,7 +247,7 @@
 
 (defn split-labels [chgsid split] (vector
   :ul {:class "list-inline"}
-    (for [c (:categs (hinance.user/splits split))]
+    (for [c (:categs (splits split))]
      [:li [:span {:class "label" :style
        (str "color:" (:fg-col c) ";background-color:" (:bg-col c))}
        (str (:title c) ": " (int (* 0.01
