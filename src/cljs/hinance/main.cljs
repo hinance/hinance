@@ -40,11 +40,11 @@
   [split (hinance.user/splits splitn) params (or params? {})
    link (fn [len lim]
    (vector :a {:href (href :split :split splitn
-     :step (or (params :step) (step-actual len)) :ofs (or (params :ofs) 0)
-     :len (or (params :len) len) :srt (or (params :srt) "time")
-     :asc (or (params :asc) 0) :lim (or (params :lim) lim)
-     :sel-ofs (or (params :sel-ofs) (- len 1))
-     :sel-cat (or (params :sel-cat) 0))} (:title split)))]
+     :step (or (params :step) (step-actual len))
+     :ofs (or (params :ofs) 0) :len (or (params :len) len)
+     :srt (or (params :srt) "time") :asc (or (params :asc) 0)
+     :lim (or (params :lim) lim) :sel-ofs (- len 1) :sel-cat 0)}
+     (:title split)))]
   (if (and (= handler :split) (= (str splitn) (params :split)))
     [[:li {:class "active"} [:a (:title split)]]]
     [[:li {:class "hidden-sm hidden-md hidden-lg"}
