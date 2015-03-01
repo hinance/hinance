@@ -120,6 +120,7 @@
         [:p [:big [:strong (th-fn "time" "Date:") " "] (tdate x)]]
         [:p [:big [:strong (th-fn "label" "Description:") " "] (tdesc x)]]
         [:p [:big [:strong (th-fn "tags" "Tags:")] (ttags x)]]
+        [:p [:big [:strong (th-fn "group" "Group:") " "] (tgrp x)]]
         [:p [:big [:strong (th-fn "amount" "Amount:") " "] (tamt x)]]]])]]))))
 
 (def chgs-split-panel (memoize (fn [title chgsid split step ofs len srt
