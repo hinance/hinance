@@ -73,9 +73,6 @@
     (cljs-time.format/formatter fmt)
     (cljs-time.coerce/from-long (* 1000 unixtime))))
 
-(defn tag [t] (vector
-  :span {:class "label label-default"} (subs (str t) 4)))
-
 (defn pick-chgs [changes step ofs len] (let
   [tmin (:time (first changes))
    tfrom (+ tmin (* ofs step)) tto (+ tfrom (* len step))]
@@ -106,8 +103,8 @@
     :group (:group %) :amount (:amount %)}) ({0 > 1 <} asc) changes))
   tdate #(date "yyyy-MM-dd" (:time %))
   tdesc #(if (empty? (:url %)) (:label %) [:a {:href (:url %)} (:label %)])
-  ttags #(vector :ul {:class "list-inline"} (for [t (sort (:tags %))]
-                     [:li (tag t)]))
+  ttags #(for [t (sort (:tags %))]
+    [:span [:a {:class "btn btn-default"} (subs (str t) 4)] " "])
   tgrp #(vector :a {:href (href :group :group (group-index (:group %)))}
                    (str (group-index (:group %))))
   tamt #(amount-str (:amount %) (:cur %))
@@ -126,7 +123,7 @@
       [:tbody mobile-only (for [x srt-chgs] [:tr [:td
         [:p [:big [:strong (th-fn "time" "Date:") " "] (tdate x)]]
         [:p [:big [:strong (th-fn "label" "Description:") " "] (tdesc x)]]
-        [:p [:big [:strong (th-fn "tags" "Tags:")] (ttags x)]]
+        [:p [:big [:strong (th-fn "tags" "Tags:") " "] (ttags x)]]
         [:p [:big [:strong (th-fn "group" "Group:") " "] (tgrp x)]]
         [:p [:big [:strong (th-fn "amount" "Amount:") " "] (tamt x)]]]])]]))))
 
