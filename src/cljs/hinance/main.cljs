@@ -5,7 +5,7 @@
   (:require-macros [hiccups.core])
   (:import goog.History goog.history.EventType))
 
-(def cfg {:len-default 16 :len-default-xs 5 :lim-default 50 :lim-default-xs 10
+(def cfg {:len-default {:sm 16 :xs 5} :lim-default {:sm 50 :xs 10}
   :margin-left 5 :margin-right 5 :margin-top 5 :margin-bottom 5
   :sel-col "#000" :sel-width 5 :bdr-round 8 :bdr-col "#DDD"
   :cell-width 70 :cell-space 10 :txt-col "#333" :amount-scale 400
@@ -36,28 +36,28 @@
 
 (defn first-time [] (:time (first hinance.data/chgsact)))
 
-(defn split-href [params-old params-new] (let
+(defn split-href [screen params-old params-new] (let
   [params (merge (or params-old {}) params-new)
    param-read (fn [k v] (cljs.reader/read-string (str (or (params k) v))))
-   len (params :len) step (param-read :step (step-actual len))
+   len (or (params :len) ((cfg :len-default) screen))
+   step (param-read :step (step-actual len))
    sel-ofs (param-read :sel-ofs (Math/floor (/ (chgs-time-span) step)))
    ofs (param-read :ofs (max 0 (+ 1 (- sel-ofs len)))) asc (param-read :asc 0)
-   srt (or (params :srt) "time") lim (params :lim) split (params :split)
+   srt (or (params :srt) "time") split (params :split)
+   lim (or (params :lim) ((cfg :lim-default) screen))
    sel-cat (param-read :sel-cat 0)]
   (href :split :split split :step step :ofs ofs :len len :srt srt
                :asc asc :lim lim :sel-ofs sel-ofs :sel-cat sel-cat)))
 
 (defn nav-split [splitn handler params] (let
   [split (hinance.user/splits splitn)
-   link (fn [len lim] (vector :a {:href (split-href
-     (if (= handler :split) params {})
-     {:split splitn :sel-cat 0 :len len :lim lim})} (:title split)))]
+   link (fn [screen] (vector :a {:href (split-href screen
+     (if (= handler :split) params {}) {:split splitn :sel-cat 0})}
+     (:title split)))]
   (if (and (= handler :split) (= (str splitn) (params :split)))
     [[:li {:class "active"} [:a (:title split)]]]
-    [[:li {:class "hidden-sm hidden-md hidden-lg"}
-      (link (cfg :len-default-xs) (cfg :lim-default-xs))]
-     [:li {:class "hidden-xs"}
-      (link (cfg :len-default) (cfg :lim-default))]])))
+    [[:li {:class "hidden-sm hidden-md hidden-lg"} (link :xs)]
+     [:li {:class "hidden-xs"} (link :sm)]])))
 
 (defn page [handler params content] (vector
   :div {:class "container"}
@@ -107,7 +107,7 @@
 
 (def index-tag (clojure.set/map-invert tag-index))
 
-(defn chgs-panel [title changes srt asc lim th-fn] (let [
+(defn chgs-panel [title changes srt asc lim thref-fn th-fn] (let [
   crange (if (<=(count changes)lim) (str " (showing all " (count changes) ")")
     (str " (showing first " (str lim) " out of " (str (count changes)) ")"))
   srt-chgs (take lim (sort-by #((keyword srt) {
@@ -116,7 +116,8 @@
   tdate #(date "yyyy-MM-dd" (:time %))
   tdesc #(if (empty? (:url %)) (:label %) [:a {:href (:url %)} (:label %)])
   ttags #(for [t (sort (:tags %))]
-    [:span [:a {:class "btn btn-default"} (subs (str t) 4)] " "])
+    [:span [:a {:class "btn btn-default" :href (thref-fn {:split 0})}
+            (subs (str t) 4)] " "])
   tgrp #(vector :a {:href (href :group :group (group-index (:group %)))}
                    (str (group-index (:group %))))
   tamt #(amount-str (:amount %) (:cur %))
@@ -140,13 +141,15 @@
         [:p [:big [:strong (th-fn "amount" "Amount:") " "] (tamt x)]]]])]]))))
 
 (def chgs-split-panel (memoize (fn [title chgsid split step ofs len srt
-                                    asc lim sel-ofs sel-cat]
+                                    asc lim sel-ofs sel-cat] (let [
+  params {:split split :step step :ofs ofs :len len :srt srt :asc asc
+          :lim lim :sel-ofs sel-ofs :sel-cat sel-cat}
+  thref-fn #(split-href nil params %)]
   (hiccups.core/html (chgs-panel title (filter
     #((:tag-filter ((:categs (hinance.user/splits split)) sel-cat))(:tags %))
-    (pick-chgs (lookup chgsid) step sel-ofs 1)) srt asc lim
-    (fn [srt' text] (vector :a {:href (href :split :split split :step step
-      :ofs ofs :len len :srt srt' :asc (if (= srt srt') (- 1 asc) 1)
-      :lim lim :sel-ofs sel-ofs :sel-cat sel-cat)} text)))))))
+    (pick-chgs (lookup chgsid) step sel-ofs 1)) srt asc lim thref-fn
+    (fn [srt' text] (vector :a {:href (thref-fn 
+      {:srt srt' :asc (if (= srt srt') (- 1 asc) 1)})} text))))))))
 
 (defn svg-stack [split step ofs len srt asc lim sel-ofs sel-cat
                  dir column items]
@@ -250,10 +253,12 @@
       [:pre (clojure.string/join "\n" (:info x))]))
   :group (fn [params] (seq [
     [:h3 (str "Group: " (index-group (params :group)))]
-    (chgs-panel "Actual" (filter #(= (group-index (:group %)) (params :group))
-        hinance.data/chgsact) "time" 0 999 (fn [srt' text] text))
-    (chgs-panel "Planned" (filter #(= (group-index (:group %)) (params :group))
-        hinance.data/chgsplan) "time" 0 999 (fn [srt' text] text))]))
+    (for [[cls scrn] [["hidden-sm hidden-md hidden-lg" :xs] ["hidden-xs" :sm]]]
+      [:div {:class cls} (for [[title chgs] [["Actual" hinance.data/chgsact]
+                                            ["Planned" hinance.data/chgsplan]]]
+          (chgs-panel title
+            (filter #(= (group-index (:group %)) (params :group)) chgs)
+            "time" 0 999 #(split-href scrn {} %) (fn [srt' text] text)))])]))
   :split (fn [params]
           (let [split (cljs.reader/read-string (:split params))
                 step (cljs.reader/read-string (:step params))
