@@ -37,9 +37,10 @@
    link (fn [len lim] (let [
      step (Math/ceil (/ (+ 1 (chgs-time-span)) len))]
    (vector :a {:href (href :split :split splitn :step (or (params :step) step)
-      :ofs (or (params :ofs) 0) :len (or (params :len) len)
-      :srt (or (params :srt) "time") :asc (or (params :asc) 0)
-      :lim (or (params :lim) lim) :sel-ofs 0 :sel-cat 0)} (:title split))))]
+     :ofs (or (params :ofs) 0) :len (or (params :len) len)
+     :srt (or (params :srt) "time") :asc (or (params :asc) 0)
+     :lim (or (params :lim) lim) :sel-ofs (- len 1) :sel-cat 0)}
+     (:title split))))]
   (if (and (= handler :split) (= (str splitn) (params :split)))
     [[:li {:class "active"} [:a (:title split)]]]
     [[:li {:class "hidden-sm hidden-md hidden-lg"}
