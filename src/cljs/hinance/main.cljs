@@ -255,14 +255,15 @@
          " There are " (str (warns)) " validation errors ("
          [:a {:href (href :diag)} "read full report"]
          ")."]] [])
-    [[:div {:class "btn-group btn-group-justified"}
+    [[:div {:class "btn-group btn-group-lg btn-group-justified"}
        (if (pos? ofs)
-         [:a {:class "btn btn-default" :href (href :split :split split
+         [:a {:class "btn btn-lg btn-default" :href (href :split :split split
               :step step :ofs (max 0 (- ofs len)) :len len :srt srt :asc asc
               :lim lim :sel-ofs sel-ofs :sel-cat sel-cat)}
            "Older"]
-         [:a {:class "btn btn-default disabled"} "Older"])
-       [:a {:class "btn btn-default" :href (href :split :split split
+         [:a {:class "btn btn-lg btn-default disabled"} "Older"])
+       [:a {:class "btn btn-lg btn-default"} "Monthly"]
+       [:a {:class "btn btn-lg btn-default" :href (href :split :split split
             :step step :ofs (+ ofs len) :len len :srt srt :asc asc :lim lim
             :sel-ofs sel-ofs :sel-cat sel-cat)}
         "Newer"]]
