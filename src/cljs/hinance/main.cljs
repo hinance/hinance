@@ -150,7 +150,7 @@
 (def chgs-split-panel (memoize (fn [title chgsid split step ofs len srt
                                     asc lim sel-ofs sel-cat] (let [
   params {:split split :step step :ofs ofs :len len :srt srt :asc asc
-          :lim lim :sel-ofs sel-ofs :sel-cat sel-cat}
+          :lim lim :sel-ofs sel-ofs}
   thref-fn #(split-href nil params %)]
   (hiccups.core/html (chgs-panel title (filter
     #((:tag-filter ((:categs (splits split)) sel-cat))(:tags %))
