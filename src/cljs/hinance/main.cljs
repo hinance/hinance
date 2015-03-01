@@ -6,11 +6,12 @@
   (:import goog.History goog.history.EventType))
 
 (def cfg {:len-default 16 :len-default-xs 5 :lim-default 50 :lim-default-xs 10
-  :step-month (/ (* 365 24 3600) 12)
   :margin-left 5 :margin-right 5 :margin-top 5 :margin-bottom 5
   :sel-col "#000" :sel-width 5 :bdr-round 8 :bdr-col "#DDD"
   :cell-width 70 :cell-space 10 :txt-col "#333" :amount-scale 400
   :mark-space 10 :mark-height 30 :mark-ofs-x 35 :mark-ofs-y 20})
+
+(def step-month (/ (* 365 24 3600) 12))
 
 (def routes ["" {"" :home "/" {"diag" :diag ["group." :group] :group
   ["split." :split "/step." :step "/ofs." :ofs "/len." :len "/srt." :srt
@@ -31,17 +32,19 @@
 (defn chgs-time-span [] (- (:time (last hinance.data/chgsact))
                            (:time (first hinance.data/chgsact))))
 
+(defn step-actual [len] (Math/ceil (/ (+ 1 (chgs-time-span)) len)))
+
 (defn first-time [] (:time (first hinance.data/chgsact)))
 
 (defn nav-split [splitn handler params?] (let
   [split (hinance.user/splits splitn) params (or params? {})
-   link (fn [len lim] (let [
-     step (Math/ceil (/ (+ 1 (chgs-time-span)) len))]
-   (vector :a {:href (href :split :split splitn :step (or (params :step) step)
+   link (fn [len lim]
+   (vector :a {:href (href :split :split splitn
+     :step (or (params :step) (step-actual len))
      :ofs (or (params :ofs) 0) :len (or (params :len) len)
      :srt (or (params :srt) "time") :asc (or (params :asc) 0)
      :lim (or (params :lim) lim) :sel-ofs (- len 1) :sel-cat 0)}
-     (:title split))))]
+     (:title split)))]
   (if (and (= handler :split) (= (str splitn) (params :split)))
     [[:li {:class "active"} [:a (:title split)]]]
     [[:li {:class "hidden-sm hidden-md hidden-lg"}
@@ -261,7 +264,7 @@
               :lim lim :sel-ofs sel-ofs :sel-cat sel-cat)}
            "Older"]
          [:a {:class "btn btn-lg btn-default disabled"} "Older"])
-       (if (= step (cfg :step-month))
+       (if (= step step-month)
          [:a {:class "btn btn-lg btn-default"} "Full"]
          [:a {:class "btn btn-lg btn-default"} "Monthly"])
        [:a {:class "btn btn-lg btn-default" :href (href :split :split split
