@@ -6,6 +6,7 @@
   (:import goog.History goog.history.EventType))
 
 (def cfg {:len-default 16 :len-default-xs 5 :lim-default 50 :lim-default-xs 10
+  :step-month (/ (* 365 24 3600) 12)
   :margin-left 5 :margin-right 5 :margin-top 5 :margin-bottom 5
   :sel-col "#000" :sel-width 5 :bdr-round 8 :bdr-col "#DDD"
   :cell-width 70 :cell-space 10 :txt-col "#333" :amount-scale 400
@@ -251,10 +252,8 @@
                 sel-cat (cljs.reader/read-string (:sel-cat params))] (concat
     (if (pos? (warns))
       [[:div {:class "alert alert-warning"}
-         [:strong "Warning!"]
-         " There are " (str (warns)) " validation errors ("
-         [:a {:href (href :diag)} "read full report"]
-         ")."]] [])
+         [:strong "Warning!"] " There are " (str(warns)) " validation errors ("
+         [:a {:href (href :diag)} "read full report"] ")."]] [])
     [[:div {:class "btn-group btn-group-lg btn-group-justified"}
        (if (pos? ofs)
          [:a {:class "btn btn-lg btn-default" :href (href :split :split split
@@ -262,7 +261,9 @@
               :lim lim :sel-ofs sel-ofs :sel-cat sel-cat)}
            "Older"]
          [:a {:class "btn btn-lg btn-default disabled"} "Older"])
-       [:a {:class "btn btn-lg btn-default"} "Monthly"]
+       (if (= step (cfg :step-month))
+         [:a {:class "btn btn-lg btn-default"} "Full"]
+         [:a {:class "btn btn-lg btn-default"} "Monthly"])
        [:a {:class "btn btn-lg btn-default" :href (href :split :split split
             :step step :ofs (+ ofs len) :len len :srt srt :asc asc :lim lim
             :sel-ofs sel-ofs :sel-cat sel-cat)}
