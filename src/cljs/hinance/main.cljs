@@ -156,7 +156,8 @@
     #((:tag-filter ((:categs (splits split)) sel-cat))(:tags %))
     (pick-chgs (lookup chgsid) step sel-ofs 1)) srt asc lim thref-fn
     (fn [srt' text] (vector :a {:href (thref-fn 
-      {:srt srt' :asc (if (= srt srt') (- 1 asc) 1)})} text))))))))
+      {:srt srt' :asc (if (= srt srt') (- 1 asc) 1) :sel-cat sel-cat})}
+      text))))))))
 
 (defn svg-stack [split step ofs len srt asc lim sel-ofs sel-cat
                  dir column items]
