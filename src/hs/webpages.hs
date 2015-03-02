@@ -12,7 +12,7 @@ webpages =
  [("home.html", "home page"),
   ("diag.html", html $ page diags "TODO")]
 
-diags = (
+diags =
   (printf "<h3>Checks (%i):</h3>" (length checks)) ++
   (printf "<pre>%s</pre>" (ppShow checks)) ++
   (printf "<h3>Changes without groups (%i):</h3>" (length nchgs)) ++
@@ -20,7 +20,7 @@ diags = (
   (printf "<h3>Unbalanced groups (%i):</h3>" (length ugrps)) ++
   (printf "<pre>%s</pre>" (ppShow ugrps)) ++
   (printf "<h3>Slices mismatch (%i):</h3>" (length mparts)) ++
-  (printf "<pre>%s</pre>" (ppShow cparts))) where
+  (printf "<pre>%s</pre>" (ppShow cparts)) where
   nchgs = filter (not.grouped) (chgsact++chgsplan)
   ugrps = unbalgrps $ filter grouped (chgsact++chgsplan)
   cparts = concatMap chkparts [chgsact, chgsplan]
@@ -39,16 +39,20 @@ diags = (
                | otherwise = [] :: [String]
   baldiff a = (-) (babalance a) $ foldl (+) 0 $ map btamount $ batrans a
 
-page content time = (
+page content time =
   "<div class=\"container\">" ++
     "<ul class=\"nav nav-pills\">" ++ navs ++ "</ul>" ++
     "<div class=\"row\"><div class=\"col-md-12\">" ++ content ++ 
       "<hr><p class=\"text-muted text-right\">Generated on "++time++"</p>"++
-  "</div></div></div>") where
-  navs = concatMap nav slices
-  nav Slice{sname=name} = "<li><a>" ++ name ++ "</a></li>"
+  "</div></div></div>" where
+  navs = concatMap nav $ zip [0..] slices
+  nav :: (Integer, Slice) -> String
+  nav (i, Slice{sname=name}) =
+    (printf "<li class=\"hnav\" data-hslice=\"%i\"><a>%s</a></li>" i name) ++
+    (printf ("<li class=\"hnav-active active\" data-hslice=\"%i\">" ++
+             "<a>%s</a></li>") i name)
 
-html body = (
+html body =
   "<!DOCTYPE html><html lang=\"en\"><head>" ++
     "<meta charset=\"utf-8\">" ++
     "<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">" ++
@@ -59,11 +63,11 @@ html body = (
                                  "/bootstrap/3.3.1/css/bootstrap.min.css\">"++
     "<link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com" ++
                            "/bootstrap/3.3.1/css/bootstrap-theme.min.css\">"++
-    "</head>"++
+    "</head>" ++
   "<body>" ++ body ++
     "<script src=\"https://ajax.googleapis.com/ajax/libs" ++ 
                     "/jquery/1.11.1/jquery.min.js\"></script>" ++
     "<script src=\"https://maxcdn.bootstrapcdn.com" ++
                     "/bootstrap/3.3.1/js/bootstrap.min.js\"></script>" ++
     "<script type=\"text/javascript\" src=\"hinance.js\"></script>" ++
-    "</body></html>")
+    "</body></html>"
