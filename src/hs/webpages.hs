@@ -9,8 +9,10 @@ import Text.Printf
 import Text.Show.Pretty
 
 webpages = 
- [("home.html", "home page"),
+ [("home.html", html $ page home "TODO"),
   ("diag.html", html $ page diags "TODO")]
+
+home = "<h1>Welcome!</h1>"
 
 diags =
   (printf "<h3>Checks (%i):</h3>" (length checks)) ++
