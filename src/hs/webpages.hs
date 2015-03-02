@@ -10,34 +10,55 @@ import Text.Show.Pretty
 
 webpages = 
  [("home.html", ["home page"]),
-  ("diag.html", html diags)]
+  ("diag.html", html $ page diags "TODO")]
 
 diags = [
-  printf "<h3>Checks (%i)</h3>" (length checks),
+  printf "<h3>Checks (%i):</h3>" (length checks),
   printf "<pre>%s</pre>" (ppShow checks),
-  printf "<h3>Changes without groups (%i)</h3>" (length nchgs),
+  printf "<h3>Changes without groups (%i):</h3>" (length nchgs),
   printf "<pre>%s</pre>" (ppShow nchgs),
-  printf "<h3>Unbalanced groups (%i)</h3>" (length ugrps),
+  printf "<h3>Unbalanced groups (%i):</h3>" (length ugrps),
   printf "<pre>%s</pre>" (ppShow ugrps),
-  printf "<h3>Slices mismatch (%i)</h3>" (length mparts),
+  printf "<h3>Slices mismatch (%i):</h3>" (length mparts),
   printf "<pre>%s</pre>" (ppShow cparts)] where
-    nchgs = filter (not.grouped) (chgsact++chgsplan)
-    ugrps = unbalgrps $ filter grouped (chgsact++chgsplan)
-    cparts = concatMap chkparts [chgsact, chgsplan]
-    mparts = concatMap (\(_, (a,b)) -> a++b) cparts
-    checks = concatMap (concatMap chkbalance.baccs) banks
-    chkparts chgs = map (\s -> (sname s, chk$extract s)) slices where
-      extract Slice{stags=wts, scategs=cts} = (wts, concatMap sctags cts)
-      chk (wts, pts) = (srt $ whole \\ parts, srt $ parts \\ whole) where
-        srt = reverse.(sortBy (compare `on` ctime))
-        whole = sort $ filter (\Change{ctags=ts}->all (flip elem$ts) wts) chgs
-        parts = sort $ concatMap part pts
-        part pt = filter (\Change{ctags=ts}->elem pt ts) whole
-    unbalgrps = filter (((/=) 0).sum.map camount) . groupSortBy cgroup
-    chkbalance a | baldiff a /= 0 = [printf "Account %s balance mismatch: %i"
-                                     (baid a) (baldiff a)]
-                 | otherwise = [] :: [String]
-    baldiff a = (-) (babalance a) $ foldl (+) 0 $ map btamount $ batrans a
+  nchgs = filter (not.grouped) (chgsact++chgsplan)
+  ugrps = unbalgrps $ filter grouped (chgsact++chgsplan)
+  cparts = concatMap chkparts [chgsact, chgsplan]
+  mparts = concatMap (\(_, (a,b)) -> a++b) cparts
+  checks = concatMap (concatMap chkbalance.baccs) banks
+  chkparts chgs = map (\s -> (sname s, chk$extract s)) slices where
+    extract Slice{stags=wts, scategs=cts} = (wts, concatMap sctags cts)
+    chk (wts, pts) = (srt $ whole \\ parts, srt $ parts \\ whole) where
+      srt = reverse.(sortBy (compare `on` ctime))
+      whole = sort $ filter (\Change{ctags=ts}->all (flip elem$ts) wts) chgs
+      parts = sort $ concatMap part pts
+      part pt = filter (\Change{ctags=ts}->elem pt ts) whole
+  unbalgrps = filter (((/=) 0).sum.map camount) . groupSortBy cgroup
+  chkbalance a | baldiff a /= 0 = [printf "Account %s balance mismatch: %i"
+                                   (baid a) (baldiff a)]
+               | otherwise = [] :: [String]
+  baldiff a = (-) (babalance a) $ foldl (+) 0 $ map btamount $ batrans a
+
+page content time = [
+  "<div class=\"container\">",
+  "  <ul class=\"nav nav-pills\">"] ++ (map (
+  "    " ++) navs) ++ [
+  "  </ul>",
+  "  <div class=\"row\">",
+  "    <div class=\"col-md-12\">"] ++ (map (
+  "      " ++) content) ++ [
+  "      <hr>",
+  "      <p class=\"text-muted text-right\">",
+  "        Generated on " ++ time,
+  "      </p>",
+  "    </div>",
+  "  </div>",
+  "</div>"] where
+  navs = concatMap nav slices
+  nav Slice{sname=name} = [
+    "<li>",
+    "  <a>" ++ name ++ "</a>",
+    "</li>"]
 
 html body = [
   "<!DOCTYPE html>",
