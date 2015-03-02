@@ -26,15 +26,21 @@ slicepage slice = alert ++ buttons ++ figact ++ figdiff ++ figplan where
       "<a class=\"btn btn-lg btn-default\">Older</a>" ++
       "<a class=\"btn btn-lg btn-default\">Months</a>" ++
       "<a class=\"btn btn-lg btn-default\">Newer</a></div><br>"
-  figact = figure "Actual" chgsact
-  figdiff = figure "Actual - Planned =" chgsdiff
-  figplan = figure "Planned" chgsplan
+  figact = figure "Actual" chgsact slice
+  figdiff = figure "Actual - Planned =" chgsdiff slice
+  figplan = figure "Planned" chgsplan slice
 
-figure title chgs =
+figure title chgs slice =
   "<div class=\"panel panel-default\">" ++ 
     "<div class=\"panel-heading\">" ++
       "<h3 class=\"panel-title\">" ++ title ++ "</h3></div>"++
-    "<div class=\"panel-body text-center\">TODO</div></div>"
+    "<div class=\"panel-body text-center\">" ++ svg ++ labels ++ "</div>" ++
+  "</div>" where
+  labels="<ul class=\"list-inline\">"++(concatMap label$scategs slice)++"</ul>"
+  label c = printf (
+    "<li><span class=\"label\" style=\"color:%s;background-color:%s\"" ++
+      ">%s: %i</span></li>") (scfg c) (scbg c) (scname c) (0::Integer)
+  svg = "TODO"
 
 diagpage =
   (printf "<h3>Checks (%i):</h3>" (length diagchecks)) ++
