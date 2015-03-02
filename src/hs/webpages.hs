@@ -39,8 +39,13 @@ figure title chgs slice =
   labels="<ul class=\"list-inline\">"++(concatMap label$scategs slice)++"</ul>"
   label c = printf (
     "<li><span class=\"label\" style=\"color:%s;background-color:%s\"" ++
-      ">%s: %i</span></li>") (scfg c) (scbg c) (scname c) (0::Integer)
+      ">%s: %i</span></li>") (scfg c) (scbg c) (scname c) (div amt 100) where
+    amt :: Integer
+    amt = sum $ map camount $ catchgs c $ slicechgs slice chgs
   svg = "TODO"
+
+catchgs c = filter (\Change{ctags=ts}->any (flip elem$ts) $ sctags c)
+slicechgs s = filter (\Change{ctags=ts}->all (flip elem$ts) $ stags s)
 
 diagpage =
   (printf "<h3>Checks (%i):</h3>" (length diagchecks)) ++
