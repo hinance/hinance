@@ -8,13 +8,17 @@ import Hinance.User.Type
 import Text.Printf
 import Text.Show.Pretty
 
-webpages = 
- [("home.html", html $ page home "TODO"),
-  ("diag.html", html $ page diags "TODO")]
+webpages = map (\(k,v) -> (k, html $ page v "TODO")) $
+ [("home.html", home), ("diag.html", diag)] ++
+ [(printf "slice%i.html" n, slice s) | (n, s) <- nslices]
+
+nslices = zip [0..] slices :: [(Integer, Slice)]
 
 home = "<h1>Welcome!</h1>"
 
-diags =
+slice s = "<h1>Slice " ++ (sname s) ++ "</h1>"
+
+diag =
   (printf "<h3>Checks (%i):</h3>" (length checks)) ++
   (printf "<pre>%s</pre>" (ppShow checks)) ++
   (printf "<h3>Changes without groups (%i):</h3>" (length nchgs)) ++
@@ -47,8 +51,7 @@ page content time =
     "<div class=\"row\"><div class=\"col-md-12\">" ++ content ++ 
       "<hr><p class=\"text-muted text-right\">Generated on "++time++"</p>"++
   "</div></div></div>" where
-  navs = concatMap nav $ zip [0..] slices
-  nav :: (Integer, Slice) -> String
+  navs = concatMap nav $ nslices
   nav (i, Slice{sname=name}) =
     (printf "<li class=\"hnav\" data-hslice=\"%i\"><a>%s</a></li>" i name) ++
     (printf ("<li class=\"hnav-active active\" data-hslice=\"%i\">" ++

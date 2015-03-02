@@ -3,18 +3,31 @@
     [dommy.core :refer [attr set-attr!] :refer-macros [sel sel1]])
   (:import goog.History goog.history.EventType))
 
-(def routes ["" {"" :home "/" {"diag" :diag "group" :group "split" :split}}])
+(def routes ["" {"" :home "/" {"diag" :diag "group" :group
+  ["slice." :slice] :slice}}])
 
 (defn href [& args] (str "#" (apply bidi.bidi/path-for routes args)))
 
+(defn hide! [x] (set-attr! x :style "display:none"))
+(defn show! [x] (set-attr! x :style "display:inherit"))
+(defn attr= [k v] #(= (attr % k) v))
+(defn not-attr= [k v] #(not= (attr % k) v))
+(defn set-hnav-href! [li] (let [a (sel1 li :a) n (attr li :data-hslice)]
+  (set-attr! a :href (str "slice" n ".html" (href :slice :slice n)))))
+
 (def handlers! {
-  :home (fn [params]
-    (doseq [li (sel ".hnav-active")] (set-attr! li :style "display:none"))
-    (doseq [li (sel ".hnav") :let [a (sel1 li :a) n (attr li :data-hslice)]]
-      (set-attr! a :href (str "split" n ".html#/split." n))))
+  :home (fn [params] (dorun (concat
+    (map hide! (sel :.hnav-active))
+    (map set-hnav-href! (sel :.hnav)))))
   :diag #(js/console.log "diag")
   :group #(js/console.log "group")
-  :split #(js/console.log "split")})
+  :slice (fn [params] (let [cur? #(= (attr % :data-hslice) (params :slice))]
+    (dorun (concat
+    (->> (sel :.hnav-active)
+         (map #((if (cur? %) show! hide!) %)))
+    (->> (sel :.hnav)
+         (map #((if (cur? %) hide! show!) %))
+         (map set-hnav-href!))))))})
 
 (defn handle! [path]
   (let [m (bidi.bidi/match-route routes path)
