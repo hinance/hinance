@@ -11,45 +11,12 @@ import Hinance.Shop.Type
 import Hinance.User.Tag
 import Hinance.User.Type
 import Hinance.User.Data
+import Hinance.WebPages
 import Text.Show.Pretty
 import Text.Printf
 
-main = do mapM (\(n,d) -> (writeFile n $ concat $ intersperse "\n" $ d)) htmls
-
-htmls = 
-  [("diag.cljs", diagscljs),
-   ("act.cljs", chgscljs chgsact "chgsact"),
-   ("plan.cljs", chgscljs chgsplan "chgsplan"),
-   ("diff.cljs", chgscljs chgsdiff "chgsdiff")]
-
-diagscljs = concat [["(def diag ["],
-  (cljs "Checks" (length checks) checks),
-  (cljs "Changes without groups" (length nchgs) nchgs),
-  (cljs "Unbalanced groups" (length ugrps) ugrps),
-  (cljs "Partitions mismatch" (length mparts) cparts),
-  ["])"]] where
-    nchgs = filter (not.grouped) (chgsact++chgsplan)
-    ugrps = unbalgrps $ filter grouped (chgsact++chgsplan)
-    cparts = concatMap chkparts [chgsact, chgsplan]
-    mparts = concatMap (\(a,b) -> a++b) cparts
-    checks = concatMap (concatMap chkbalance.baccs) banks
-    cljs s n xs = [printf "  (hinance.type/Diag. \"%s\" %i [" s n] ++
-                   (map ((printf "    %s").show) (lines $ ppShow xs)) ++
-                   ["  ])"]
-
-chgscljs chgs title = concat [[printf "(def %s [" title],
-  (concatMap cljs chgs),["])"]] where
-  cljs c = [printf "  (hinance.type/Change. %s %i :%s"
-             (numcljs $ camount c) (ctime c) (show $ ccur c),
-            "    " ++ (show $ filter isAscii $ clabel c),
-            "    " ++ (show $ filter isAscii $ cgroup c),
-            (printf "    #{%s}" $ concat $ intersperse " " $
-              [printf ":%s" $ show t | t <- ctags c]),
-            printf "    %s)" (show $ curl c)]
-
-numcljs n
-  | n >= 0 = show n
-  | otherwise = printf "(- %s)" (show$abs n)
+main = do mapM (\(n,d) -> writeFile n $ concat $ intersperse "\n" d) pages
+  where pages = webpages chgsact chgsplan chgsdiff
 
 chgsact = (sortBy (compare`on`ctime)).(concatMap addchanges)
             .joinxfers.mergechgs$raw where
