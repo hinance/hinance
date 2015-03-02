@@ -21,18 +21,19 @@ diagscljs = concat [["(def diag ["],
     nchgs = filter (not.grouped) (chgsact++chgsplan)
     ugrps = unbalgrps $ filter grouped (chgsact++chgsplan)
     cparts = concatMap chkparts [chgsact, chgsplan]
-    mparts = concatMap (\(a,b) -> a++b) cparts
+    mparts = concatMap (\(_, (a,b)) -> a++b) cparts
     checks = concatMap (concatMap chkbalance.baccs) banks
     cljs s n xs = [printf "  (hinance.type/Diag. \"%s\" %i [" s n] ++
                    (map ((printf "    %s").show) (lines $ ppShow xs)) ++
                    ["  ])"]
 
-chkparts chgs = map chk tagparts where
-  chk (wf, pfs) = (srt $ whole \\ parts, srt $ parts \\ whole) where
+chkparts chgs = map (\s -> (sname s, chk$extract s)) slices where
+  extract Slice{stags=wts, scategs=cts} = (wts, concatMap sctags cts)
+  chk (wts, pts) = (srt $ whole \\ parts, srt $ parts \\ whole) where
     srt = reverse.(sortBy (compare `on` ctime))
-    whole = sort $ filter (\Change{ctags=ts} -> wf ts) chgs
-    parts = sort $ concatMap part pfs
-    part pf = filter (\Change{ctags=ts}->pf ts) whole
+    whole = sort $ filter (\Change{ctags=ts} -> all (flip elem$ts) wts) chgs
+    parts = sort $ concatMap part pts
+    part pt = filter (\Change{ctags=ts}->elem pt ts) whole
 
 unbalgrps = filter (((/=) 0).sum.map camount) . groupSortBy cgroup
 
