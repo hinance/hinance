@@ -14,7 +14,16 @@ nslices = zip [0..] slices :: [(Integer, Slice)]
 
 homepage = "<h1>Welcome!</h1>"
 
-slicepage s = "<h1>Slice " ++ (sname s) ++ "</h1>"
+slicepage slice = alert ++ buttons where
+  alert | diagcount == 0 = ""
+        | otherwise = "<div class=\"alert alert-warning\">" ++ 
+          "<strong>Warning!</strong> There are " ++ (show diagcount) ++
+          " validation errors (<a href=\"diag.html\">read full report</a>)." ++
+          "</div>"
+  buttons = "<div class=\"btn-group btn-group-lg btn-group-justified\">" ++
+    "<a class=\"btn btn-lg btn-default\">Older</a>" ++
+    "<a class=\"btn btn-lg btn-default\">Months</a>" ++
+    "<a class=\"btn btn-lg btn-default\">Newer</a></div>"
 
 diagpage =
   (printf "<h3>Checks (%i):</h3>" (length diagchecks)) ++
