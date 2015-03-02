@@ -11,21 +11,23 @@
 (defn hide! [x] (set-attr! x :style "display:none"))
 (defn show! [x] (set-attr! x :style "display:inherit"))
 (defn set-hnav-href! [li] (let [a (sel1 li :a) n (attr li :data-hslice)]
-  (set-attr! a :href (str "slice" n ".html" (href :slice :slice n)))))
+  (set-attr! a :href (str "slice" n ".html" (href :slice :slice n)))
+  (identity li)))
+
+(defn handle-home! [params] (dorun (concat
+  (->> (sel :.hnav-active) (map hide!))
+  (->> (sel :.hnav) (map set-hnav-href!) (map show!)))))
+
+(defn handle-slice! [params] (let
+  [cur? #(= (attr % :data-hslice) (params :slice))] (dorun (concat
+  (->> (sel :.hnav-active) (map #((if (cur? %) show! hide!) %)))
+  (->> (sel :.hnav) (map #((if(cur? %)hide! show!)%))(map set-hnav-href!))))))
 
 (def handlers! {
-  :home (fn [params] (dorun (concat
-    (map hide! (sel :.hnav-active))
-    (map set-hnav-href! (sel :.hnav)))))
+  :home handle-home!
   :diag #(js/console.log "diag")
   :group #(js/console.log "group")
-  :slice (fn [params] (let [cur? #(= (attr % :data-hslice) (params :slice))]
-    (dorun (concat
-    (->> (sel :.hnav-active)
-         (map #((if (cur? %) show! hide!) %)))
-    (->> (sel :.hnav)
-         (map #((if (cur? %) hide! show!) %))
-         (map set-hnav-href!))))))})
+  :slice handle-slice!})
 
 (defn handle! [path]
   (let [m (bidi.bidi/match-route routes path)
