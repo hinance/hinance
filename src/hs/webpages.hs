@@ -1,49 +1,30 @@
 module Hinance.WebPages (webpages) where
-import Data.Function
-import Data.List
-import Hinance.Bank.Type
 import Hinance.Changes
+import Hinance.Diag
 import Hinance.User.Data
 import Hinance.User.Type
 import Text.Printf
 import Text.Show.Pretty
 
 webpages = map (\(k,v) -> (k, html $ page v "TODO")) $
- [("home.html", home), ("diag.html", diag)] ++
- [(printf "slice%i.html" n, slice s) | (n, s) <- nslices]
+ [("home.html", homepage), ("diag.html", diagpage)] ++
+ [(printf "slice%i.html" n, slicepage s) | (n, s) <- nslices]
 
 nslices = zip [0..] slices :: [(Integer, Slice)]
 
-home = "<h1>Welcome!</h1>"
+homepage = "<h1>Welcome!</h1>"
 
-slice s = "<h1>Slice " ++ (sname s) ++ "</h1>"
+slicepage s = "<h1>Slice " ++ (sname s) ++ "</h1>"
 
-diag =
-  (printf "<h3>Checks (%i):</h3>" (length checks)) ++
-  (printf "<pre>%s</pre>" (ppShow checks)) ++
-  (printf "<h3>Changes without groups (%i):</h3>" (length nchgs)) ++
-  (printf "<pre>%s</pre>" (ppShow nchgs)) ++
-  (printf "<h3>Unbalanced groups (%i):</h3>" (length ugrps)) ++
-  (printf "<pre>%s</pre>" (ppShow ugrps)) ++
-  (printf "<h3>Slices mismatch (%i):</h3>" (length mparts)) ++
-  (printf "<pre>%s</pre>" (ppShow cparts)) where
-  nchgs = filter (not.grouped) (chgsact++chgsplan)
-  ugrps = unbalgrps $ filter grouped (chgsact++chgsplan)
-  cparts = concatMap chkparts [chgsact, chgsplan]
-  mparts = concatMap (\(_, (a,b)) -> a++b) cparts
-  checks = concatMap (concatMap chkbalance.baccs) banks
-  chkparts chgs = map (\s -> (sname s, chk$extract s)) slices where
-    extract Slice{stags=wts, scategs=cts} = (wts, concatMap sctags cts)
-    chk (wts, pts) = (srt $ whole \\ parts, srt $ parts \\ whole) where
-      srt = reverse.(sortBy (compare `on` ctime))
-      whole = sort $ filter (\Change{ctags=ts}->all (flip elem$ts) wts) chgs
-      parts = sort $ concatMap part pts
-      part pt = filter (\Change{ctags=ts}->elem pt ts) whole
-  unbalgrps = filter (((/=) 0).sum.map camount) . groupSortBy cgroup
-  chkbalance a | baldiff a /= 0 = [printf "Account %s balance mismatch: %i"
-                                   (baid a) (baldiff a)]
-               | otherwise = [] :: [String]
-  baldiff a = (-) (babalance a) $ foldl (+) 0 $ map btamount $ batrans a
+diagpage =
+  (printf "<h3>Checks (%i):</h3>" (length diagchecks)) ++
+  (printf "<pre>%s</pre>" (ppShow diagchecks)) ++
+  (printf "<h3>Changes without groups (%i):</h3>" (length diagnogrp)) ++
+  (printf "<pre>%s</pre>" (ppShow diagnogrp)) ++
+  (printf "<h3>Unbalanced groups (%i):</h3>" (length diagugrps)) ++
+  (printf "<pre>%s</pre>" (ppShow diagugrps)) ++
+  (printf "<h3>Slices mismatch (%i):</h3>" (length diagslicesflat)) ++
+  (printf "<pre>%s</pre>" (ppShow diagslices))
 
 page content time =
   "<div class=\"container\">" ++
