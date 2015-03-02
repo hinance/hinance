@@ -52,10 +52,11 @@ page content time =
       "<hr><p class=\"text-muted text-right\">Generated on "++time++"</p>"++
   "</div></div></div>" where
   navs = concatMap nav $ nslices
-  nav (i, Slice{sname=name}) =
-    (printf "<li class=\"hnav\" data-hslice=\"%i\"><a>%s</a></li>" i name) ++
-    (printf ("<li class=\"hnav-active active\" data-hslice=\"%i\">" ++
-             "<a>%s</a></li>") i name)
+  nav (i, Slice{sname=name}) = concat [
+    printf ("<li class=\"" ++ cls ++ "\" data-hslice=\"%i\" " ++ hide ++
+            "><a>%s</a></li>") i name | cls <- ["hnav", "hnav-active active"]]
+
+hide = "style=\"display:none\""
 
 html body =
   "<!DOCTYPE html><html lang=\"en\"><head>" ++

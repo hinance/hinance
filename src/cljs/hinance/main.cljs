@@ -10,8 +10,6 @@
 
 (defn hide! [x] (set-attr! x :style "display:none"))
 (defn show! [x] (set-attr! x :style "display:inherit"))
-(defn attr= [k v] #(= (attr % k) v))
-(defn not-attr= [k v] #(not= (attr % k) v))
 (defn set-hnav-href! [li] (let [a (sel1 li :a) n (attr li :data-hslice)]
   (set-attr! a :href (str "slice" n ".html" (href :slice :slice n)))))
 
