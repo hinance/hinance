@@ -14,11 +14,13 @@ import Hinance.User.Data
 import Text.Show.Pretty
 import Text.Printf
 
-main = do putStrLn.concat $ intersperse "\n" $ concat $ xs where
-  xs = [[""],diagscljs,
-        [""],chgscljs chgsact "chgsact",
-        [""],chgscljs chgsplan "chgsplan",
-        [""],chgscljs chgsdiff "chgsdiff"]
+main = do mapM (\(n,d) -> (writeFile n $ concat $ intersperse "\n" $ d)) htmls
+
+htmls = 
+  [("diag.cljs", diagscljs),
+   ("act.cljs", chgscljs chgsact "chgsact"),
+   ("plan.cljs", chgscljs chgsplan "chgsplan"),
+   ("diff.cljs", chgscljs chgsdiff "chgsdiff")]
 
 diagscljs = concat [["(def diag ["],
   (cljs "Checks" (length checks) checks),

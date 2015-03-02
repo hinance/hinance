@@ -10,7 +10,7 @@
   :home #(js/console.log "home")
   :diag #(js/console.log "diag")
   :group #(js/console.log "group")
-  :split #(js/console.log "split")}
+  :split #(js/console.log "split")})
 
 (defn handle! [path]
   (let [m (bidi.bidi/match-route routes path)
