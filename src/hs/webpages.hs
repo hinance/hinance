@@ -1,6 +1,7 @@
 module Hinance.WebPages (webpages) where
 import Data.Function
 import Data.List
+import Data.Maybe
 import Data.Time.Clock.POSIX
 import Data.Time.Format
 import Hinance.Changes
@@ -36,15 +37,25 @@ data Device = Device {dname::String, dlen::Integer}
 
 devicepages time dev = map (\(k,v) -> (k, html $ page v time dev)) $
  [(pfx ++ "home.html", homepage), (pfx ++ "diag.html", diagpage)] ++
- [(printf "%sslice%i-step%i.html" pfx n step, slicepage s n step 0 dev)
-  | (n, s) <- zip idxs slices, step <- steps $ dlen dev]
+ [(printf "%sslice%i-step%i-ofs%i.html" pfx nslice step ofs,
+   slicepage slice nslice step ofs dev)
+  | (nslice, slice) <- zip idxs slices,
+    step <- steps $ dlen dev,
+    ofs <- offsets (dlen dev) step]
  where pfx = (dname dev) ++ "-"
 
-defstep len = div (tmax - tmin + len) len where
-  tmin = minimum $ map ctime chgsact
-  tmax = maximum $ map ctime chgsact
-
 steps len = [stepmonth, defstep len]
+
+defstep len = div (actmax - actmin + len) len
+
+actmin = minimum $ map ctime chgsact
+actmax = maximum $ map ctime chgsact
+
+offsets len step = sort $ past ++ future where
+  past = [present, present-len .. 1] ++ [0]
+  future = [present+len, present+2*len .. endplan]
+  endplan = div (planto-actmin+step) step
+  present = div (actmax-actmin+step) step
 
 homepage = "<h1>Welcome!</h1>"
 
@@ -58,19 +69,32 @@ slicepage slice nslice step ofs dev =
             "(<a href=\"" ++ pfx ++ "diag.html\">read full report</a>).</div>"
   buttons =
     "<div class=\"btn-group btn-group-lg btn-group-justified\">" ++
-      "<a class=\"btn btn-lg btn-default\">Older</a>" ++ stepbtns ++ 
-      "<a class=\"btn btn-lg btn-default\">Newer</a></div><br>"
+      olderbtn ++ stepbtns ++ newerbtn ++ "</div><br>"
+  olderbtn = ofsbtn "Older" prevofs
+  newerbtn = ofsbtn "Newer" nextofs
+  ofsbtn title Nothing =
+    "<a class=\"btn btn-lg btn-default disabled\">" ++ title ++ "</a>"
+  ofsbtn title (Just newofs) = (printf
+    "<a class=\"btn btn-lg btn-default hofs\" data-hofs=\"%i\">%s</a>"
+    newofs title)
   stepbtns = (concat [printf (
-    "<a class=\"btn btn-lg btn-default hstep\" data-hstep=\"%i\" " ++ hide ++
-    ">%s</a>") s n | (s,n)<-zip (steps len) ["Months", "Actual"]])
+    "<a class=\"btn btn-lg btn-default hstep\" " ++ 
+    "data-hstep=\"%i\" data-hofs=\"0\"" ++ hide ++ ">%s</a>") s n
+    | (s, n) <- zip (steps len) ["Months", "Actual"]])
   params = "<span id=\"hslice-params\" " ++
     (printf "data-hslice=\"%i\" " nslice) ++
-    (printf "data-hstep=\"%i\"></span>" step)
+    (printf "data-hstep=\"%i\" " step) ++
+    (printf "data-hofs=\"%i\"></span>" ofs)
   figact = figure "Actual" chgsact slice step ofs len True
   figdiff = figure "Actual - Planned =" chgsdiff slice step ofs len False
   figplan = figure "Planned" chgsplan slice step ofs len True
   len = (dlen dev)
   pfx = (dname dev) ++ "-"
+  prevofs | ofsidx > 0 = Just $ ofss !! (ofsidx-1) | otherwise = Nothing
+  nextofs | ofsidx < ofslen-1 = Just $ ofss !! (ofsidx+1) | otherwise = Nothing
+  ofslen = length ofss
+  ofsidx = fromMaybe 0 $ elemIndex ofs ofss
+  ofss = offsets len step
 
 figure title allchgs slice step ofs len posneg =
   "<div class=\"panel panel-default\">" ++ 
@@ -129,7 +153,7 @@ figure title allchgs slice step ofs len posneg =
       figurecells (scategs slice) normheight amftr catftr $ colchgs icolumn
     stackposy = cellsheightpos + cfgmargintop
     stacknegy = marky + cfgmarkspace + cfgmarkheight
-    x = cfgmarginleft + (icolumn * cellwspace)
+    x = cfgmarginleft + ((icolumn-ofs) * cellwspace)
     marky = cfgmargintop + cellsheightpos + cfgmarkspace
     fdate = formatTime defaultTimeLocale "%y-%m" $ time
     time = posixSecondsToUTCTime $ fromIntegral $ coltime icolumn
