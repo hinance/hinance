@@ -129,7 +129,7 @@ figure title allchgs slice step ofs len posneg =
     "</g>" where
     svgstack [] = ""
     svgstack (cell:cells) = "<g>" ++ justcell ++ tailcells ++ "</g>" where
-      justcell = "<a>" ++
+      justcell = "<a xlink:href=\"#\">" ++
         "<rect class=\"hcell-active\" " ++ hide ++ " " ++
           (printf "data-hofs=\"%i\" data-hcateg=\"%i\" " icolumn icateg) ++
           (printf "fill=\"%s\"" bgcolor) ++

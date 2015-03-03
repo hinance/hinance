@@ -1,6 +1,7 @@
 (ns hinance.main
   (:require [bidi.bidi] [goog.events] 
-    [dommy.core :refer [attr set-attr! remove-attr!] :refer-macros [sel sel1]])
+    [dommy.core :refer [attr set-attr! remove-attr! parent]
+                :refer-macros [sel sel1]])
   (:import goog.History goog.history.EventType))
 
 (def routes ["" {"" :home "/" {"diag" :diag "group" :group
@@ -24,14 +25,22 @@
 (defn hide! [x] (set-attr! x :style "display:none"))
 (defn show! [x] (remove-attr! x :style))
 
-(defn slice-href [dev slice step ofs sel-ofs sel-cat]
+(defn slice-href-local [sel-ofs sel-cat]
+  (href :slice :sel-ofs sel-ofs :sel-cat sel-cat))
+
+(defn slice-href [dev slice step ofs & args]
   (str dev "-slice" slice "-step" step "-ofs" ofs ".html"
-    (href :slice :sel-ofs sel-ofs :sel-cat sel-cat)))
+    (apply slice-href-local args)))
 
 (defn set-hnav-href! [li] (let [a (sel1 li :a) n (attr li :data-hslice)
   s (or (hsp :step) (hdp :defstep)) d (hdp :name) so (- (hdpi :len) 1)]
   (set-attr! a :href (slice-href d n s 0 so 0))
   (identity li)))
+
+(defn set-hcell-href! [rect] (let
+  [a (parent rect) so (attr rect :data-hofs) sc (attr rect :data-hcateg)]
+  (set-attr! a :xlink:href (slice-href-local so sc))
+  (identity rect)))
 
 (defn set-hstep-href! [a] (let [d (hdp :name) n (hsp :slice)
   s (attr a :data-hstep) o (attri a :data-hofs) so (+ o (- (hdpi :len) 1))]
@@ -53,7 +62,7 @@
   (->> (sel :.hnav-active) (map #((if (curn? %) show! hide!) %)))
   (->> (sel :.hnav) (map #((if(curn? %)hide! show!)%)) (map set-hnav-href!))
   (->> (sel :.hcell-active) (map #((if (curc? %) show! hide!) %)))
-  (->> (sel :.hcell) (map #((if (curc? %) hide! show!) %)))
+  (->> (sel :.hcell) (map #((if(curc? %)hide! show!)%)) (map set-hcell-href!))
   (->> (sel :.hstep) (map #((if(curs? %)hide! show!)%)) (map set-hstep-href!))
   (->> (sel :.hofs) (map set-hofs-href!))))))
 
