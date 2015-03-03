@@ -26,15 +26,16 @@ cfgcolumnheight = 400
 stepmonth = 365 * 2 * 3600
 
 webpages = concatMap (devicepages "TODO") [
-  Device{dlen=16}]
+  Device{dname="dtp", dlen=16},
+  Device{dname="mob", dlen=5}]
 
-data Device = Device {dlen::Integer}
+data Device = Device {dname::String, dlen::Integer}
 
 devicepages time dev = map (\(k,v) -> (k, html $ page v time dev)) $
- [("home.html", homepage), ("diag.html", diagpage)] ++
- [(printf "slice%i-%i.html" n step,
-   slicepage s n step 0 (dlen dev))
+ [(pfx ++ "home.html", homepage), (pfx ++ "diag.html", diagpage)] ++
+ [(printf "%sslice%i-step%i.html" pfx n step, slicepage s n step 0 dev)
   | (n, s) <- zip idxs slices, step <- [stepmonth, (defstep $ dlen dev)]]
+ where pfx = (dname dev) ++ "-"
 
 defstep len = div (tmax - tmin + len) len where
   tmin = minimum $ map ctime chgsact
@@ -42,24 +43,27 @@ defstep len = div (tmax - tmin + len) len where
 
 homepage = "<h1>Welcome!</h1>"
 
-slicepage slice nslice step ofs len =
+slicepage slice nslice step ofs dev =
   alert ++ buttons ++ figact ++ figdiff ++ figplan ++ params where
   alert | diagcount == 0 = ""
         | otherwise =
           "<div class=\"alert alert-warning\">" ++ 
             "<strong>Warning!</strong> There are " ++ (show diagcount) ++
             " validation errors " ++
-            "(<a href=\"diag.html\">read full report</a>).</div>"
+            "(<a href=\"" ++ pfx ++ "diag.html\">read full report</a>).</div>"
   buttons =
     "<div class=\"btn-group btn-group-lg btn-group-justified\">" ++
       "<a class=\"btn btn-lg btn-default\">Older</a>" ++
       "<a class=\"btn btn-lg btn-default\">Months</a>" ++
       "<a class=\"btn btn-lg btn-default\">Newer</a></div><br>"
-  params =
-    printf "<span id=\"hslice-params\" data-hslice=\"%i\"></span>" nslice
+  params = "<span id=\"hslice-params\" " ++
+    (printf "data-hslice=\"%i\" " nslice) ++
+    (printf "data-hstep=\"%i\"></span>" step)
   figact = figure "Actual" chgsact slice step ofs len True
   figdiff = figure "Actual - Planned =" chgsdiff slice step ofs len False
   figplan = figure "Planned" chgsplan slice step ofs len True
+  len = (dlen dev)
+  pfx = (dname dev) ++ "-"
 
 figure title allchgs slice step ofs len posneg =
   "<div class=\"panel panel-default\">" ++ 
@@ -164,8 +168,9 @@ diagpage =
   (printf "<pre>%s</pre>" (ppShow diagslices))
 
 page content time dev =
-  "<span id=\"hparams\" " ++
-    (printf "data-hdefstep=\"%i\"></span>" (defstep $ dlen dev)) ++
+  "<span id=\"hdev-params\" " ++
+    (printf "data-hdefstep=\"%i\" " (defstep $ dlen dev)) ++
+    (printf "data-hname=\"%s\"></span>" (dname dev)) ++
   "<div class=\"container\">" ++
     "<ul class=\"nav nav-pills\">" ++ navs ++ "</ul>" ++
     "<div class=\"row\"><div class=\"col-md-12\">" ++ content ++ 
