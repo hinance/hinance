@@ -6,15 +6,28 @@ import Hinance.User.Type
 import Text.Printf
 import Text.Show.Pretty
 
+cfgbdrcol = "#DDD"
+cfgtxtcol = "#333"
+cfgbdrround = 8 :: Integer
+cfgcellwidth = 70 :: Integer
+cfgcellspace = 10 :: Integer
+cfgmarkheight = 30 :: Integer
+cfgmarkspace = 10 :: Integer
+cfgmarkofsx = 35 :: Integer
+cfgmarkofsy = 20 :: Integer
+cfgmarginleft = 5 :: Integer
+cfgmarginright = 5 :: Integer
+cfgmargintop = 5 :: Integer
+cfgmarginbottom = 5 :: Integer
+
 webpages = map (\(k,v) -> (k, html $ page v "TODO")) $
  [("home.html", homepage), ("diag.html", diagpage)] ++
- [(printf "slice%i.html" n, slicepage s) | (n, s) <- nslices]
-
-nslices = zip [0..] slices :: [(Integer, Slice)]
+ [(printf "slice%i.html" n, slicepage s 2600000 0 16)
+  | (n, s) <- zip idxs slices]
 
 homepage = "<h1>Welcome!</h1>"
 
-slicepage slice = alert ++ buttons ++ figact ++ figdiff ++ figplan where
+slicepage slice step ofs len = alert++buttons++figact++figdiff++figplan where
   alert | diagcount == 0 = ""
         | otherwise =
           "<div class=\"alert alert-warning\">" ++ 
@@ -26,11 +39,11 @@ slicepage slice = alert ++ buttons ++ figact ++ figdiff ++ figplan where
       "<a class=\"btn btn-lg btn-default\">Older</a>" ++
       "<a class=\"btn btn-lg btn-default\">Months</a>" ++
       "<a class=\"btn btn-lg btn-default\">Newer</a></div><br>"
-  figact = figure "Actual" chgsact slice
-  figdiff = figure "Actual - Planned =" chgsdiff slice
-  figplan = figure "Planned" chgsplan slice
+  figact = figure "Actual" chgsact slice step ofs len
+  figdiff = figure "Actual - Planned =" chgsdiff slice step ofs len
+  figplan = figure "Planned" chgsplan slice step ofs len
 
-figure title chgs slice =
+figure title chgs slice step ofs len =
   "<div class=\"panel panel-default\">" ++ 
     "<div class=\"panel-heading\">" ++
       "<h3 class=\"panel-title\">" ++ title ++ "</h3></div>"++
@@ -40,12 +53,30 @@ figure title chgs slice =
   label c = printf (
     "<li><span class=\"label\" style=\"color:%s;background-color:%s\"" ++
       ">%s: %i</span></li>") (scfg c) (scbg c) (scname c) (div amt 100) where
-    amt :: Integer
     amt = sum $ map camount $ catchgs c $ slicechgs slice chgs
-  svg = "TODO"
-
-catchgs c = filter (\Change{ctags=ts}->any (flip elem$ts) $ sctags c)
-slicechgs s = filter (\Change{ctags=ts}->all (flip elem$ts) $ stags s)
+  svg = (printf "<svg width=\"100%%\" viewbox=\"0 0 %i %i\">%s</svg>"
+         totalwidth totalheight (concatMap column [0..len]))
+  totalwidth = cfgmarginleft + (len*cellwspace) - cfgcellspace + cfgmarginright
+  totalheight = cfgmargintop + cellsheightpos +
+                cfgmarkspace + cfgmarkheight + cfgmarkspace +
+                cellsheightneg + cfgmarginbottom
+  cellwspace = cfgcellwidth + cfgcellspace
+  cellsheightpos = 100
+  cellsheightneg = 100
+  column icolumn = "<g>" ++ stackpos ++
+    "<rect " ++
+      (printf "width=\"%i\" height=\"%i\" " cfgcellwidth cfgmarkheight) ++
+      (printf "fill=\"none\" stroke=\"%s\" " cfgbdrcol) ++
+      (printf "rx=\"%i\" ry=\"%i\" " cfgbdrround cfgbdrround) ++
+      (printf "x=\"%i\" y=\"%i\"/>" x marky) ++
+    "<text " ++ 
+      (printf "text-anchor=\"middle\" fill=\"%s\" " cfgtxtcol) ++
+      (printf "x=\"%i\" y=\"%i\">" (x + cfgmarkofsx) (marky + cfgmarkofsy)) ++
+      (printf "%i</text>" icolumn) ++ stackneg ++ "</g>" where
+    stackpos = ""
+    stackneg = ""
+    x = cfgmarginleft + (icolumn * cellwspace)
+    marky = cfgmargintop + cellsheightpos + cfgmarkspace
 
 diagpage =
   (printf "<h3>Checks (%i):</h3>" (length diagchecks)) ++
@@ -63,10 +94,10 @@ page content time =
     "<div class=\"row\"><div class=\"col-md-12\">" ++ content ++ 
       "<hr><p class=\"text-muted text-right\">Generated on "++time++"</p>"++
   "</div></div></div>" where
-  navs = concatMap nav $ nslices
+  navs = concatMap nav $ zip idxs slices
   nav (i, Slice{sname=name}) = concat [
-    printf ("<li class=\"" ++ cls ++ "\" data-hslice=\"%i\" " ++ hide ++
-            "><a>%s</a></li>") i name | cls <- ["hnav", "hnav-active active"]]
+    printf ("<li class=\"%s\" data-hslice=\"%i\" "++hide++"><a>%s</a></li>")
+    cls i name | cls <- ["hnav", "hnav-active active"]]
 
 hide = "style=\"display:none\""
 
@@ -89,3 +120,7 @@ html body =
                     "/bootstrap/3.3.1/js/bootstrap.min.js\"></script>" ++
     "<script type=\"text/javascript\" src=\"hinance.js\"></script>" ++
     "</body></html>"
+
+catchgs c = filter (\Change{ctags=ts}->any (flip elem$ts) $ sctags c)
+slicechgs s = filter (\Change{ctags=ts}->all (flip elem$ts) $ stags s)
+idxs = [(toInteger 0)..]
