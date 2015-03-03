@@ -34,12 +34,14 @@ data Device = Device {dname::String, dlen::Integer}
 devicepages time dev = map (\(k,v) -> (k, html $ page v time dev)) $
  [(pfx ++ "home.html", homepage), (pfx ++ "diag.html", diagpage)] ++
  [(printf "%sslice%i-step%i.html" pfx n step, slicepage s n step 0 dev)
-  | (n, s) <- zip idxs slices, step <- [stepmonth, (defstep $ dlen dev)]]
+  | (n, s) <- zip idxs slices, step <- steps $ dlen dev]
  where pfx = (dname dev) ++ "-"
 
 defstep len = div (tmax - tmin + len) len where
   tmin = minimum $ map ctime chgsact
   tmax = maximum $ map ctime chgsact
+
+steps len = [stepmonth, defstep len]
 
 homepage = "<h1>Welcome!</h1>"
 
@@ -53,9 +55,11 @@ slicepage slice nslice step ofs dev =
             "(<a href=\"" ++ pfx ++ "diag.html\">read full report</a>).</div>"
   buttons =
     "<div class=\"btn-group btn-group-lg btn-group-justified\">" ++
-      "<a class=\"btn btn-lg btn-default\">Older</a>" ++
-      "<a class=\"btn btn-lg btn-default\">Months</a>" ++
+      "<a class=\"btn btn-lg btn-default\">Older</a>" ++ stepbtns ++ 
       "<a class=\"btn btn-lg btn-default\">Newer</a></div><br>"
+  stepbtns = (concat [printf (
+    "<a class=\"btn btn-lg btn-default hstep\" data-hstep=\"%i\" " ++ hide ++
+    ">%s</a>") s n | (s,n)<-zip (steps len) ["Months", "Actual"]])
   params = "<span id=\"hslice-params\" " ++
     (printf "data-hslice=\"%i\" " nslice) ++
     (printf "data-hstep=\"%i\"></span>" step)

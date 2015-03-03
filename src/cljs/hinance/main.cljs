@@ -1,6 +1,6 @@
 (ns hinance.main
   (:require [bidi.bidi] [goog.events] 
-    [dommy.core :refer [attr set-attr!] :refer-macros [sel sel1]])
+    [dommy.core :refer [attr set-attr! remove-attr!] :refer-macros [sel sel1]])
   (:import goog.History goog.history.EventType))
 
 (def routes ["" {"" :home "/" {"diag" :diag "group" :group "slice" :slice}}])
@@ -17,21 +17,27 @@
 (def hsp (html-params :#hslice-params ["slice" "step"]))
 
 (defn hide! [x] (set-attr! x :style "display:none"))
-(defn show! [x] (set-attr! x :style "display:inherit"))
+(defn show! [x] (remove-attr! x :style))
 
 (defn set-hnav-href! [li] (let [a (sel1 li :a) n (attr li :data-hslice)
   s (or (hsp :step) (hdp :defstep)) d (hdp :name)]
   (set-attr! a :href (str d "-slice" n "-step" s ".html" (href :slice)))
   (identity li)))
 
+(defn set-hstep-href! [a] (let
+  [d (hdp :name) n (hsp :slice) s (attr a :data-hstep)]
+  (set-attr! a :href (str d "-slice" n "-step" s ".html" (href :slice)))))
+
 (defn handle-home! [params] (dorun (concat
   (->> (sel :.hnav-active) (map hide!))
   (->> (sel :.hnav) (map set-hnav-href!) (map show!)))))
 
 (defn handle-slice! [params] (let
-  [cur? #(= (attr % :data-hslice) (hsp :slice))] (dorun (concat
-  (->> (sel :.hnav-active) (map #((if (cur? %) show! hide!) %)))
-  (->> (sel :.hnav) (map #((if(cur? %)hide! show!)%))(map set-hnav-href!))))))
+  [curn? #(= (attr % :data-hslice) (hsp :slice))
+   curs? #(= (attr % :data-hstep) (hsp :step))] (dorun (concat
+  (->>(sel :.hnav-active) (map #((if (curn? %) show! hide!) %)))
+  (->>(sel :.hnav) (map #((if(curn? %)hide! show!)%))(map set-hnav-href!))
+  (->>(sel :.hstep)(map #((if(curs? %)hide! show!)%))(map set-hstep-href!))))))
 
 (def handlers! {
   :home handle-home!
