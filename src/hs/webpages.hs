@@ -79,7 +79,7 @@ slicepage slice nslice step ofs dev =
     newofs title)
   stepbtns = (concat [printf (
     "<a class=\"btn btn-lg btn-default hstep\" " ++ 
-    "data-hstep=\"%i\" data-hofs=\"0\"" ++ hide ++ ">%s</a>") s n
+    "data-hstep=\"%i\" data-hofs=\"%i\"" ++ hide ++ ">%s</a>") s (rcnofs s) n
     | (s, n) <- zip (steps len) ["Months", "Actual"]])
   params = "<span id=\"hslice-params\" " ++
     (printf "data-hslice=\"%i\" " nslice) ++
@@ -95,6 +95,7 @@ slicepage slice nslice step ofs dev =
   ofslen = length ofss
   ofsidx = fromMaybe 0 $ elemIndex ofs ofss
   ofss = offsets len step
+  rcnofs s = last $ takeWhile (\x -> x*s < actmax-actmin) $ offsets len s
 
 figure title allchgs slice step ofs len posneg =
   "<div class=\"panel panel-default\">" ++ 
