@@ -1,4 +1,6 @@
 module Hinance.WebPages (webpages) where
+import Data.Function
+import Data.List
 import Hinance.Changes
 import Hinance.Diag
 import Hinance.User.Data
@@ -39,11 +41,11 @@ slicepage slice step ofs len = alert++buttons++figact++figdiff++figplan where
       "<a class=\"btn btn-lg btn-default\">Older</a>" ++
       "<a class=\"btn btn-lg btn-default\">Months</a>" ++
       "<a class=\"btn btn-lg btn-default\">Newer</a></div><br>"
-  figact = figure "Actual" chgsact slice step ofs len
-  figdiff = figure "Actual - Planned =" chgsdiff slice step ofs len
-  figplan = figure "Planned" chgsplan slice step ofs len
+  figact = figure "Actual" chgsact slice step ofs len True
+  figdiff = figure "Actual - Planned =" chgsdiff slice step ofs len False
+  figplan = figure "Planned" chgsplan slice step ofs len True
 
-figure title changes slice step ofs len =
+figure title changes slice step ofs len posneg =
   "<div class=\"panel panel-default\">" ++ 
     "<div class=\"panel-heading\">" ++
       "<h3 class=\"panel-title\">" ++ title ++ "</h3></div>"++
@@ -78,8 +80,12 @@ figure title changes slice step ofs len =
   cellwspace = cfgcellwidth + cfgcellspace
   cellsheightpos = 100
   cellsheightneg = 100
-  maxcolamountpos = maxcolamount (> 0) (/= 0)
-  maxcolamountneg = maxcolamount (< 0) (/= 0)
+  posamtftr | posneg = (> 0) | otherwise = (/= 0)
+  negamtftr | posneg = (< 0) | otherwise = (/= 0)
+  poscatftr | posneg = (/= 0) | otherwise = (> 0)
+  negcatftr | posneg = (/= 0) | otherwise = (< 0)
+  maxcolamountpos = maxcolamount posamtftr poscatftr
+  maxcolamountneg = maxcolamount negamtftr negcatftr
   maxcolamount amftr catftr = maximum $ map colamount icolumns where 
     colamount = abs.sum.(filter catftr).(map catamount).catschgs.colchgs
     catschgs chgs = map (flip catchgs $ chgs) (scategs slice)
@@ -87,6 +93,16 @@ figure title changes slice step ofs len =
   colchgs icolumn = filter (\Change{ctime=t} -> t >= tmin && t < tmax) changes
     where tmin = (minimum $ map ctime chgsact) + (step * icolumn)
           tmax = tmin + step
+
+data FigureCell = FigureCell {fccateg::SliceCateg, fcamount::Integer,
+                              fcheight::Integer} deriving (Show, Read, Eq, Ord)
+
+figurecells changes categs scale amftr catftr =
+  sortBy (compare `on` fcheight) $ filter cellftr $ map cell categs where
+  cellftr = catftr . fcamount
+  cell categ=FigureCell{fccateg=categ, fcamount=amount, fcheight=height} where
+    amount = sum $ filter amftr $ map camount $ catchgs categ changes
+    height = (abs amount) * scale
 
 diagpage =
   (printf "<h3>Checks (%i):</h3>" (length diagchecks)) ++
