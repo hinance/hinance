@@ -46,7 +46,7 @@ slicepage slice step ofs len = alert++buttons++figact++figdiff++figplan where
   figdiff = figure "Actual - Planned =" chgsdiff slice step ofs len False
   figplan = figure "Planned" chgsplan slice step ofs len True
 
-figure title changes slice step ofs len posneg =
+figure title allchgs slice step ofs len posneg =
   "<div class=\"panel panel-default\">" ++ 
     "<div class=\"panel-heading\">" ++
       "<h3 class=\"panel-title\">" ++ title ++ "</h3></div>"++
@@ -56,7 +56,7 @@ figure title changes slice step ofs len posneg =
   label c = printf (
     "<li><span class=\"label\" style=\"color:%s;background-color:%s\"" ++
       ">%s: %i</span></li>") (scfg c) (scbg c) (scname c) (div amt 100) where
-    amt = sum $ map camount $ catchgs c $ slicechgs slice changes
+    amt = sum $ map camount $ catchgs c $ changes
   svg = (printf "<svg width=\"100%%\" viewbox=\"0 0 %i %i\">%s</svg>"
          totalwidth totalheight $ concatMap column icolumns)
   column icolumn = "<g>" ++ 
@@ -124,6 +124,7 @@ figure title changes slice step ofs len posneg =
   maxcolheight scale amftr catftr = maximum $ map colheight icolumns where
     colheight = sum . (map fcheight) . cells . colchgs
     cells = figurecells (scategs slice) scale amftr catftr
+  changes = slicechgs slice allchgs
   colchgs icolumn = filter (\Change{ctime=t} -> t >= tmin && t < tmax) changes
     where tmin = (minimum $ map ctime chgsact) + (step * icolumn)
           tmax = tmin + step
@@ -132,7 +133,7 @@ data FigureCell = FigureCell {fccateg::SliceCateg, fcamount::Integer,
                               fcheight::Integer} deriving (Show, Read, Eq, Ord)
 
 figurecells categs scale amftr catftr changes =
-  sortBy (compare `on` fcheight) $ filter cellftr $ map cell categs where
+  sortBy (on compare $ abs.fcamount) $ filter cellftr $ map cell categs where
   cellftr = catftr . fcamount
   cell categ=FigureCell{fccateg=categ, fcamount=amount, fcheight=height} where
     amount = sum $ filter amftr $ map camount $ catchgs categ changes
