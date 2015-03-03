@@ -86,10 +86,9 @@ figure title changes slice step ofs len posneg =
   negcatftr | posneg = (/= 0) | otherwise = (< 0)
   maxcolamountpos = maxcolamount posamtftr poscatftr
   maxcolamountneg = maxcolamount negamtftr negcatftr
-  maxcolamount amftr catftr = maximum $ map colamount icolumns where 
-    colamount = abs.sum.(filter catftr).(map catamount).catschgs.colchgs
-    catschgs chgs = map (flip catchgs $ chgs) (scategs slice)
-    catamount = sum . (filter amftr) . (map camount)
+  maxcolamount amftr catftr = maximum $ map colamount icolumns where
+    colamount = abs . sum . (map fcamount) . cells . colchgs
+    cells = figurecells (scategs slice) 1 amftr catftr
   colchgs icolumn = filter (\Change{ctime=t} -> t >= tmin && t < tmax) changes
     where tmin = (minimum $ map ctime chgsact) + (step * icolumn)
           tmax = tmin + step
@@ -97,7 +96,7 @@ figure title changes slice step ofs len posneg =
 data FigureCell = FigureCell {fccateg::SliceCateg, fcamount::Integer,
                               fcheight::Integer} deriving (Show, Read, Eq, Ord)
 
-figurecells changes categs scale amftr catftr =
+figurecells categs scale amftr catftr changes =
   sortBy (compare `on` fcheight) $ filter cellftr $ map cell categs where
   cellftr = catftr . fcamount
   cell categ=FigureCell{fccateg=categ, fcamount=amount, fcheight=height} where
