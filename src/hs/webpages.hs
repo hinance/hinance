@@ -43,7 +43,7 @@ slicepage slice step ofs len = alert++buttons++figact++figdiff++figplan where
   figdiff = figure "Actual - Planned =" chgsdiff slice step ofs len
   figplan = figure "Planned" chgsplan slice step ofs len
 
-figure title chgs slice step ofs len =
+figure title changes slice step ofs len =
   "<div class=\"panel panel-default\">" ++ 
     "<div class=\"panel-heading\">" ++
       "<h3 class=\"panel-title\">" ++ title ++ "</h3></div>"++
@@ -53,16 +53,9 @@ figure title chgs slice step ofs len =
   label c = printf (
     "<li><span class=\"label\" style=\"color:%s;background-color:%s\"" ++
       ">%s: %i</span></li>") (scfg c) (scbg c) (scname c) (div amt 100) where
-    amt = sum $ map camount $ catchgs c $ slicechgs slice chgs
+    amt = sum $ map camount $ catchgs c $ slicechgs slice changes
   svg = (printf "<svg width=\"100%%\" viewbox=\"0 0 %i %i\">%s</svg>"
-         totalwidth totalheight (concatMap column [0..len]))
-  totalwidth = cfgmarginleft + (len*cellwspace) - cfgcellspace + cfgmarginright
-  totalheight = cfgmargintop + cellsheightpos +
-                cfgmarkspace + cfgmarkheight + cfgmarkspace +
-                cellsheightneg + cfgmarginbottom
-  cellwspace = cfgcellwidth + cfgcellspace
-  cellsheightpos = 100
-  cellsheightneg = 100
+         totalwidth totalheight (concatMap column icolumns))
   column icolumn = "<g>" ++ stackpos ++
     "<rect " ++
       (printf "width=\"%i\" height=\"%i\" " cfgcellwidth cfgmarkheight) ++
@@ -77,6 +70,23 @@ figure title chgs slice step ofs len =
     stackneg = ""
     x = cfgmarginleft + (icolumn * cellwspace)
     marky = cfgmargintop + cellsheightpos + cfgmarkspace
+  icolumns = [ofs..ofs+len]
+  totalwidth = cfgmarginleft + (len*cellwspace) - cfgcellspace + cfgmarginright
+  totalheight = cfgmargintop + cellsheightpos +
+                cfgmarkspace + cfgmarkheight + cfgmarkspace +
+                cellsheightneg + cfgmarginbottom
+  cellwspace = cfgcellwidth + cfgcellspace
+  cellsheightpos = 100
+  cellsheightneg = 100
+  maxcolamountpos = maxcolamount (> 0) (/= 0)
+  maxcolamountneg = maxcolamount (< 0) (/= 0)
+  maxcolamount amftr catftr = maximum $ map colamount icolumns where 
+    colamount = abs.sum.(filter catftr).(map catamount).catschgs.colchgs
+    catschgs chgs = map (flip catchgs $ chgs) (scategs slice)
+    catamount = sum . (filter amftr) . (map camount)
+  colchgs icolumn = filter (\Change{ctime=t} -> t >= tmin && t < tmax) changes
+    where tmin = (minimum $ map ctime chgsact) + (step * icolumn)
+          tmax = tmin + step
 
 diagpage =
   (printf "<h3>Checks (%i):</h3>" (length diagchecks)) ++
@@ -121,6 +131,7 @@ html body =
     "<script type=\"text/javascript\" src=\"hinance.js\"></script>" ++
     "</body></html>"
 
+--TODO: move to report module
 catchgs c = filter (\Change{ctags=ts}->any (flip elem$ts) $ sctags c)
 slicechgs s = filter (\Change{ctags=ts}->all (flip elem$ts) $ stags s)
 idxs = [(toInteger 0)..]
