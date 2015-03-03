@@ -12,15 +12,16 @@ cfgbdrcol = "#DDD"
 cfgtxtcol = "#333"
 cfgbdrround = 8 :: Integer
 cfgcellwidth = 70 :: Integer
-cfgcellspace = 10 :: Integer
+cfgcellspace = 10
 cfgmarkheight = 30 :: Integer
-cfgmarkspace = 10 :: Integer
-cfgmarkofsx = 35 :: Integer
-cfgmarkofsy = 20 :: Integer
-cfgmarginleft = 5 :: Integer
-cfgmarginright = 5 :: Integer
-cfgmargintop = 5 :: Integer
-cfgmarginbottom = 5 :: Integer
+cfgmarkspace = 10
+cfgmarkofsx = 35
+cfgmarkofsy = 20
+cfgmarginleft = 5
+cfgmarginright = 5
+cfgmargintop = 5
+cfgmarginbottom = 5
+cfgamountscale = 400
 
 webpages = map (\(k,v) -> (k, html $ page v "TODO")) $
  [("home.html", homepage), ("diag.html", diagpage)] ++
@@ -78,17 +79,19 @@ figure title changes slice step ofs len posneg =
                 cfgmarkspace + cfgmarkheight + cfgmarkspace +
                 cellsheightneg + cfgmarginbottom
   cellwspace = cfgcellwidth + cfgcellspace
-  cellsheightpos = 100
-  cellsheightneg = 100
+  cellsheightpos = maxcolheight amtscale posamtftr poscatftr
+  cellsheightneg = maxcolheight amtscale negamtftr negcatftr
+  amtscale = cfgamountscale / fromIntegral normheight
+  normheight = maximum [1, normheightpos + normheightneg]
+  normheightpos = maxcolheight 1 posamtftr poscatftr
+  normheightneg = maxcolheight 1 negamtftr negcatftr
   posamtftr | posneg = (> 0) | otherwise = (/= 0)
   negamtftr | posneg = (< 0) | otherwise = (/= 0)
   poscatftr | posneg = (/= 0) | otherwise = (> 0)
   negcatftr | posneg = (/= 0) | otherwise = (< 0)
-  maxcolamountpos = maxcolamount posamtftr poscatftr
-  maxcolamountneg = maxcolamount negamtftr negcatftr
-  maxcolamount amftr catftr = maximum $ map colamount icolumns where
-    colamount = abs . sum . (map fcamount) . cells . colchgs
-    cells = figurecells (scategs slice) 1 amftr catftr
+  maxcolheight scale amftr catftr = maximum $ map colheight icolumns where
+    colheight = sum . (map fcheight) . cells . colchgs
+    cells = figurecells (scategs slice) scale amftr catftr
   colchgs icolumn = filter (\Change{ctime=t} -> t >= tmin && t < tmax) changes
     where tmin = (minimum $ map ctime chgsact) + (step * icolumn)
           tmax = tmin + step
@@ -101,7 +104,7 @@ figurecells categs scale amftr catftr changes =
   cellftr = catftr . fcamount
   cell categ=FigureCell{fccateg=categ, fcamount=amount, fcheight=height} where
     amount = sum $ filter amftr $ map camount $ catchgs categ changes
-    height = (abs amount) * scale
+    height = maximum [cfgmarkheight, floor$(fromIntegral$abs amount)*scale]
 
 diagpage =
   (printf "<h3>Checks (%i):</h3>" (length diagchecks)) ++
