@@ -14,6 +14,8 @@ import Text.Show.Pretty
 
 cfgbdrcol = "#DDD"
 cfgtxtcol = "#333"
+cfgselcol = "#000"
+cfgselwidth = 5
 cfgbdrround = 8 :: Integer
 cfgcellwidth = 70 :: Integer
 cfgcellspace = 10
@@ -128,7 +130,15 @@ figure title allchgs slice step ofs len posneg =
     svgstack [] = ""
     svgstack (cell:cells) = "<g>" ++ justcell ++ tailcells ++ "</g>" where
       justcell = "<a>" ++
-        "<rect " ++
+        "<rect class=\"hcell-active\" " ++ hide ++ " " ++
+          (printf "data-hofs=\"%i\" data-hcateg=\"%i\" " icolumn icateg) ++
+          (printf "fill=\"%s\"" bgcolor) ++
+          (printf "stroke=\"%s\" stroke-width=\"%i\" " cfgselcol cfgselwidth)++
+          (printf "width=\"%i\" height=\"%i\" " cfgcellwidth heightact) ++
+          (printf "x=\"0\" y=\"%i\" " (diry+cfgselwidth)) ++
+          (printf "rx=\"%i\" ry=\"%i\"/>" cfgbdrround cfgbdrround) ++
+        "<rect class=\"hcell\" " ++ hide ++ " " ++
+          (printf "data-hofs=\"%i\" data-hcateg=\"%i\" " icolumn icateg) ++
           (printf "fill=\"%s\" stroke=\"%s\" " bgcolor cfgbdrcol) ++
           (printf "width=\"%i\" height=\"%i\" " cfgcellwidth height) ++
           (printf "x=\"0\" y=\"%i\" " diry) ++
@@ -144,10 +154,12 @@ figure title allchgs slice step ofs len posneg =
       fgcolor = scfg categ
       amount = fcamount cell
       height = fcheight cell
+      heightact = height - 2*cfgselwidth
       diry | amount > 0 = - height | otherwise = 0
       nexty | amount > 0 = - height | otherwise = height
       texty = diry + cfgmarkofsy
       categ = fccateg cell
+      icateg = fromMaybe 0 $ elemIndex categ (scategs slice)
     stackpos = svgstack $ stackcells posamtftr poscatftr
     stackneg = svgstack $ stackcells negamtftr negcatftr
     stackcells amftr catftr =
@@ -205,6 +217,7 @@ diagpage =
 page content time dev =
   "<span id=\"hdev-params\" " ++
     (printf "data-hdefstep=\"%i\" " (defstep $ dlen dev)) ++
+    (printf "data-hlen=\"%i\" " (dlen dev)) ++
     (printf "data-hname=\"%s\"></span>" (dname dev)) ++
   "<div class=\"container\">" ++
     "<ul class=\"nav nav-pills\">" ++ navs ++ "</ul>" ++
