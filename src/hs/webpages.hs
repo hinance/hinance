@@ -25,12 +25,13 @@ cfgamountscale = 400
 
 webpages = map (\(k,v) -> (k, html $ page v "TODO")) $
  [("home.html", homepage), ("diag.html", diagpage)] ++
- [(printf "slice%i.html" n, slicepage s 2600000 0 16)
+ [(printf "slice%i.html" n, slicepage s n 2600000 0 16)
   | (n, s) <- zip idxs slices]
 
 homepage = "<h1>Welcome!</h1>"
 
-slicepage slice step ofs len = alert++buttons++figact++figdiff++figplan where
+slicepage slice nslice step ofs len =
+  alert ++ buttons ++ figact ++ figdiff ++ figplan ++ params where
   alert | diagcount == 0 = ""
         | otherwise =
           "<div class=\"alert alert-warning\">" ++ 
@@ -42,6 +43,7 @@ slicepage slice step ofs len = alert++buttons++figact++figdiff++figplan where
       "<a class=\"btn btn-lg btn-default\">Older</a>" ++
       "<a class=\"btn btn-lg btn-default\">Months</a>" ++
       "<a class=\"btn btn-lg btn-default\">Newer</a></div><br>"
+  params = printf "<span id=\"hparams\" data-hslice=\"%i\"></span>" nslice
   figact = figure "Actual" chgsact slice step ofs len True
   figdiff = figure "Actual - Planned =" chgsdiff slice step ofs len False
   figplan = figure "Planned" chgsplan slice step ofs len True
