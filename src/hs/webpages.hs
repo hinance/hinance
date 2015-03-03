@@ -21,12 +21,24 @@ cfgmarginleft = 5
 cfgmarginright = 5
 cfgmargintop = 5
 cfgmarginbottom = 5
-cfgamountscale = 400
+cfgcolumnheight = 400
 
-webpages = map (\(k,v) -> (k, html $ page v "TODO")) $
+stepmonth = 365 * 2 * 3600
+
+webpages = concatMap (devicepages "TODO") [
+  Device{dlen=16}]
+
+data Device = Device {dlen::Integer}
+
+devicepages time dev = map (\(k,v) -> (k, html $ page v time dev)) $
  [("home.html", homepage), ("diag.html", diagpage)] ++
- [(printf "slice%i.html" n, slicepage s n 2600000 0 16)
-  | (n, s) <- zip idxs slices]
+ [(printf "slice%i-%i.html" n step,
+   slicepage s n step 0 (dlen dev))
+  | (n, s) <- zip idxs slices, step <- [stepmonth, (defstep $ dlen dev)]]
+
+defstep len = div (tmax - tmin + len) len where
+  tmin = minimum $ map ctime chgsact
+  tmax = maximum $ map ctime chgsact
 
 homepage = "<h1>Welcome!</h1>"
 
@@ -43,7 +55,8 @@ slicepage slice nslice step ofs len =
       "<a class=\"btn btn-lg btn-default\">Older</a>" ++
       "<a class=\"btn btn-lg btn-default\">Months</a>" ++
       "<a class=\"btn btn-lg btn-default\">Newer</a></div><br>"
-  params = printf "<span id=\"hparams\" data-hslice=\"%i\"></span>" nslice
+  params =
+    printf "<span id=\"hslice-params\" data-hslice=\"%i\"></span>" nslice
   figact = figure "Actual" chgsact slice step ofs len True
   figdiff = figure "Actual - Planned =" chgsdiff slice step ofs len False
   figplan = figure "Planned" chgsplan slice step ofs len True
@@ -102,7 +115,7 @@ figure title allchgs slice step ofs len posneg =
     stackpos = svgstack $ stackcells posamtftr poscatftr
     stackneg = svgstack $ stackcells negamtftr negcatftr
     stackcells amftr catftr =
-      figurecells (scategs slice) amtscale amftr catftr $ colchgs icolumn
+      figurecells (scategs slice) normheight amftr catftr $ colchgs icolumn
     stackposy = cellsheightpos + cfgmargintop
     stacknegy = marky + cfgmarkspace + cfgmarkheight
     x = cfgmarginleft + (icolumn * cellwspace)
@@ -113,12 +126,11 @@ figure title allchgs slice step ofs len posneg =
                 cfgmarkspace + cfgmarkheight + cfgmarkspace +
                 cellsheightneg + cfgmarginbottom
   cellwspace = cfgcellwidth + cfgcellspace
-  cellsheightpos = maxcolheight amtscale posamtftr poscatftr
-  cellsheightneg = maxcolheight amtscale negamtftr negcatftr
-  amtscale = cfgamountscale / fromIntegral normheight
+  cellsheightpos = maxcolheight normheight posamtftr poscatftr
+  cellsheightneg = maxcolheight normheight negamtftr negcatftr
   normheight = maximum [1, normheightpos + normheightneg]
-  normheightpos = maxcolheight 1 posamtftr poscatftr
-  normheightneg = maxcolheight 1 negamtftr negcatftr
+  normheightpos = maxcolheight cfgcolumnheight posamtftr poscatftr
+  normheightneg = maxcolheight cfgcolumnheight negamtftr negcatftr
   posamtftr | posneg = (> 0) | otherwise = (/= 0)
   negamtftr | posneg = (< 0) | otherwise = (/= 0)
   poscatftr | posneg = (/= 0) | otherwise = (> 0)
@@ -134,12 +146,12 @@ figure title allchgs slice step ofs len posneg =
 data FigureCell = FigureCell {fccateg::SliceCateg, fcamount::Integer,
                               fcheight::Integer} deriving (Show, Read, Eq, Ord)
 
-figurecells categs scale amftr catftr changes =
+figurecells categs normh amftr catftr changes =
   sortBy (on compare $ abs.fcamount) $ filter cellftr $ map cell categs where
   cellftr = catftr . fcamount
   cell categ=FigureCell{fccateg=categ, fcamount=amount, fcheight=height} where
     amount = sum $ filter amftr $ map camount $ catchgs categ changes
-    height = maximum [cfgmarkheight, floor$(fromIntegral$abs amount)*scale]
+    height = maximum [cfgmarkheight, div ((abs amount)*cfgcolumnheight) normh]
 
 diagpage =
   (printf "<h3>Checks (%i):</h3>" (length diagchecks)) ++
@@ -151,7 +163,9 @@ diagpage =
   (printf "<h3>Slices mismatch (%i):</h3>" (length diagslicesflat)) ++
   (printf "<pre>%s</pre>" (ppShow diagslices))
 
-page content time =
+page content time dev =
+  "<span id=\"hparams\" " ++
+    (printf "data-hdefstep=\"%i\"></span>" (defstep $ dlen dev)) ++
   "<div class=\"container\">" ++
     "<ul class=\"nav nav-pills\">" ++ navs ++ "</ul>" ++
     "<div class=\"row\"><div class=\"col-md-12\">" ++ content ++ 

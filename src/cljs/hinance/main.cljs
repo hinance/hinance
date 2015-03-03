@@ -9,8 +9,9 @@
 
 (defn hide! [x] (set-attr! x :style "display:none"))
 (defn show! [x] (set-attr! x :style "display:inherit"))
-(defn set-hnav-href! [li] (let [a (sel1 li :a) n (attr li :data-hslice)]
-  (set-attr! a :href (str "slice" n ".html" (href :slice)))
+(defn set-hnav-href! [li] (let [a (sel1 li :a) n (attr li :data-hslice)
+  s (attr (sel1 :#hparams) :data-hdefstep)]
+  (set-attr! a :href (str "slice" n "-" s ".html" (href :slice)))
   (identity li)))
 
 (defn handle-home! [params] (dorun (concat
@@ -18,7 +19,7 @@
   (->> (sel :.hnav) (map set-hnav-href!) (map show!)))))
 
 (defn handle-slice! [params] (let
-  [cur-slice (attr (sel1 :#hparams) :data-hslice)
+  [cur-slice (attr (sel1 :#hslice-params) :data-hslice)
    cur? #(= (attr % :data-hslice) cur-slice)] (dorun (concat
   (->> (sel :.hnav-active) (map #((if (cur? %) show! hide!) %)))
   (->> (sel :.hnav) (map #((if(cur? %)hide! show!)%))(map set-hnav-href!))))))
