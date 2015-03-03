@@ -58,19 +58,51 @@ figure title changes slice step ofs len posneg =
       ">%s: %i</span></li>") (scfg c) (scbg c) (scname c) (div amt 100) where
     amt = sum $ map camount $ catchgs c $ slicechgs slice changes
   svg = (printf "<svg width=\"100%%\" viewbox=\"0 0 %i %i\">%s</svg>"
-         totalwidth totalheight (concatMap column icolumns))
-  column icolumn = "<g>" ++ stackpos ++
+         totalwidth totalheight $ concatMap column icolumns)
+  column icolumn = "<g>" ++ 
+    "<g " ++
+      (printf "transform=\"translate(%i,%i)\">%s</g>" x stackposy stackpos) ++
     "<rect " ++
-      (printf "width=\"%i\" height=\"%i\" " cfgcellwidth cfgmarkheight) ++
       (printf "fill=\"none\" stroke=\"%s\" " cfgbdrcol) ++
+      (printf "width=\"%i\" height=\"%i\" " cfgcellwidth cfgmarkheight) ++
       (printf "rx=\"%i\" ry=\"%i\" " cfgbdrround cfgbdrround) ++
       (printf "x=\"%i\" y=\"%i\"/>" x marky) ++
     "<text " ++ 
       (printf "text-anchor=\"middle\" fill=\"%s\" " cfgtxtcol) ++
       (printf "x=\"%i\" y=\"%i\">" (x + cfgmarkofsx) (marky + cfgmarkofsy)) ++
-      (printf "%i</text>" icolumn) ++ stackneg ++ "</g>" where
-    stackpos = ""
-    stackneg = ""
+      (printf "%i</text>" icolumn) ++
+    "<g " ++
+      (printf "transform=\"translate(%i,%i)\">%s</g>" x stacknegy stackneg) ++
+    "</g>" where
+    svgstack [] = ""
+    svgstack (cell:cells) = "<g>" ++ justcell ++ tailcells ++ "</g>" where
+      justcell = "<a>" ++
+        "<rect " ++
+          (printf "fill=\"%s\" stroke=\"%s\" " bgcolor cfgbdrcol) ++
+          (printf "width=\"%i\" height=\"%i\" " cfgcellwidth height) ++
+          (printf "x=\"0\" y=\"%i\" " diry) ++
+          (printf "rx=\"%i\" ry=\"%i\"/>" cfgbdrround cfgbdrround) ++
+        "<text " ++ 
+          (printf "text-anchor=\"middle\" fill=\"%s\" " fgcolor) ++
+          (printf "x=\"%i\" y=\"%i\">" cfgmarkofsx texty) ++
+          (printf "%i</text></a>" (div amount 100))
+      tailcells | null cells = ""
+                | otherwise = (printf "<g transform=\"translate(0,%i)\">%s</g>"
+                               nexty (svgstack cells))
+      bgcolor = scbg categ
+      fgcolor = scfg categ
+      amount = fcamount cell
+      height = fcheight cell
+      diry | amount > 0 = - height | otherwise = 0
+      nexty | amount > 0 = - height | otherwise = height
+      texty = diry + cfgmarkofsy
+      categ = fccateg cell
+    stackpos = svgstack $ stackcells posamtftr poscatftr
+    stackneg = svgstack $ stackcells negamtftr negcatftr
+    stackcells amftr catftr =
+      figurecells (scategs slice) amtscale amftr catftr $ colchgs icolumn
+    stackposy = cellsheightpos + cfgmargintop
+    stacknegy = marky + cfgmarkspace + cfgmarkheight
     x = cfgmarginleft + (icolumn * cellwspace)
     marky = cfgmargintop + cellsheightpos + cfgmarkspace
   icolumns = [ofs..ofs+len]
