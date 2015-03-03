@@ -1,10 +1,13 @@
 module Hinance.WebPages (webpages) where
 import Data.Function
 import Data.List
+import Data.Time.Clock.POSIX
+import Data.Time.Format
 import Hinance.Changes
 import Hinance.Diag
 import Hinance.User.Data
 import Hinance.User.Type
+import System.Locale
 import Text.Printf
 import Text.Show.Pretty
 
@@ -93,7 +96,7 @@ figure title allchgs slice step ofs len posneg =
     "<text " ++ 
       (printf "text-anchor=\"middle\" fill=\"%s\" " cfgtxtcol) ++
       (printf "x=\"%i\" y=\"%i\">" (x + cfgmarkofsx) (marky + cfgmarkofsy)) ++
-      (printf "%i</text>" icolumn) ++
+      (printf "%s</text>" fdate) ++
     "<g " ++
       (printf "transform=\"translate(%i,%i)\">%s</g>" x stacknegy stackneg) ++
     "</g>" where
@@ -128,6 +131,8 @@ figure title allchgs slice step ofs len posneg =
     stacknegy = marky + cfgmarkspace + cfgmarkheight
     x = cfgmarginleft + (icolumn * cellwspace)
     marky = cfgmargintop + cellsheightpos + cfgmarkspace
+    fdate = formatTime defaultTimeLocale "%y-%m" $ time
+    time = posixSecondsToUTCTime $ fromIntegral $ coltime icolumn
   icolumns = [ofs..ofs+len]
   totalwidth = cfgmarginleft + (len*cellwspace) - cfgcellspace + cfgmarginright
   totalheight = cfgmargintop + cellsheightpos +
@@ -147,8 +152,9 @@ figure title allchgs slice step ofs len posneg =
     colheight = sum . (map fcheight) . cells . colchgs
     cells = figurecells (scategs slice) scale amftr catftr
   changes = slicechgs slice allchgs
+  coltime icolumn = (minimum $ map ctime chgsact) + (step * icolumn)
   colchgs icolumn = filter (\Change{ctime=t} -> t >= tmin && t < tmax) changes
-    where tmin = (minimum $ map ctime chgsact) + (step * icolumn)
+    where tmin = coltime icolumn
           tmax = tmin + step
 
 data FigureCell = FigureCell {fccateg::SliceCateg, fcamount::Integer,
