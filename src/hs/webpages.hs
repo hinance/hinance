@@ -155,19 +155,27 @@ table title changes dev | null changes = "" | otherwise =
       "<th>Tags</th>" ++
       "<th>Group</th>" ++
       "<th class=\"text-right\">Amount</th></tr></thead>"
-  row change
-    | dnarrow dev = "<tr><td>" ++
-    "<p><big><strong>Date:</strong></big> " ++ fdate ++ "</p>" ++
-    "<p><big><strong>Description:</strong></big> " ++ desc ++ "</p>" ++
-    "<p><big><strong>Tags:</strong></big> " ++ tags ++ "</p>" ++
-    "<p><big><strong>Group:</strong></big> " ++ group ++ "</p>" ++
-    "<p><big><strong>Amount:</strong></big> " ++ amount ++ "</p></td></tr>"
-    | otherwise = "<tr>" ++
-    "<td>" ++ fdate ++ "</td>" ++
-    "<td>" ++ desc ++ "</td>" ++
-    "<td>" ++ tags ++ "</td>" ++
-    "<td>" ++ group ++ "</td>" ++
-    "<td class=\"text-right\">" ++ amount ++ "</td></tr>" where
+  row change =
+    "<tr class=\"hrow\" " ++
+      (printf "data-hsrtdate=\"%04i\" " $ idx srtdate) ++
+      (printf "data-hsrtdesc=\"%04i\" " $ idx srtdesc) ++
+      (printf "data-hsrttags=\"%04i\" " $ idx srttags) ++
+      (printf "data-hsrtgroup=\"%04i\" " $ idx srtgroup) ++
+      (printf "data-hsrtamount=\"%04i\" " $ idx srtamount) ++
+    ">" ++ rowcontent ++ "</tr>" where
+    rowcontent
+      | dnarrow dev = "<td>" ++
+      "<p><big><strong>Date:</strong> " ++ fdate ++ "</big></p>" ++
+      "<p><big><strong>Description:</strong> " ++ desc ++ "</big></p>" ++
+      "<p><big><strong>Tags:</strong> " ++ tags ++ "</big></p>" ++
+      "<p><big><strong>Group:</strong> " ++ group ++ "</big></p>" ++
+      "<p><big><strong>Amount:</strong> " ++ amount ++ "</big></p></td>"
+      | otherwise =
+      "<td>" ++ fdate ++ "</td>" ++
+      "<td>" ++ desc ++ "</td>" ++
+      "<td>" ++ tags ++ "</td>" ++
+      "<td>" ++ group ++ "</td>" ++
+      "<td class=\"text-right\">" ++ amount ++ "</td>"
     desc | null url = label
          | otherwise = printf "<a href=\"%s\">%s</a>" url label
     group = printf "<a class=\"hgrp\" data-hgrp=\"%i\">%i</a>" igroup igroup
@@ -180,6 +188,12 @@ table title changes dev | null changes = "" | otherwise =
     fdate = formatTime defaultTimeLocale "%Y-%m-%d" $ time
     time = posixSecondsToUTCTime $ fromIntegral $ (ctime change)
     url = curl change
+    idx xs = fromMaybe 0 $ elemIndex change xs
+  srtdate = sortBy (compare `on` ctime) changes
+  srtdesc = sortBy (compare `on` clabel) changes
+  srtgroup = sortBy (compare `on` cgroup) changes
+  srtamount = sortBy (compare `on` camount) changes
+  srttags = sortBy (on compare$concat.sort.(map show).ctags) changes
 
 figure title allchgs slice step ofs len posneg =
   "<div class=\"panel panel-default\">" ++ 
