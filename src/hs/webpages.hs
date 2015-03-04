@@ -46,7 +46,9 @@ devicepages time dev = map (\(k,v) -> (k, html $ page v time dev)) $
     slicepage slice nslice step ofs dev)
    | (nslice, slice) <- zip idxs slices,
      step <- steps $ dlen dev,
-     ofs <- offsets (dlen dev) step]
+     ofs <- offsets (dlen dev) step] ++
+  [(printf "%sgroup%i.html" pfx igrp, grouppage igrp dev)
+   | igrp <- [0 .. length idxToGroup - 1]]
   where pfx = (dname dev) ++ "-"
 
 steps len = [stepmonth, defstep len]
@@ -113,6 +115,10 @@ htmlSafe x = (x /= '<') && (isAscii x)
 
 groupToIdx = fromAscList $ zip idxToGroup idxs
 idxToGroup = map head $ group $ sort $ map cgroup $ chgsact ++ chgsplan
+
+grouppage igrp dev = table ("Group: " ++ group) changes dev where
+  group = idxToGroup !! igrp
+  changes = filter (((==) group).cgroup) $ chgsact ++ chgsplan
 
 tables title allchgs slice step ofs dev =
   concat [tbl i c | i <- [ofs..ofs+(dlen dev)], c <- (scategs slice)] where
