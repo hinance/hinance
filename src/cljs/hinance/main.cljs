@@ -1,6 +1,6 @@
 (ns hinance.main
   (:require [bidi.bidi] [goog.events] 
-    [dommy.core :refer [attr set-attr! remove-attr! parent]
+    [dommy.core :refer [attr set-attr! remove-attr! append! parent]
                 :refer-macros [sel sel1]])
   (:import goog.History goog.history.EventType))
 
@@ -109,11 +109,18 @@
 (defn set-hdiag-href! [a]
   (set-attr! a :href (diag-href {:dev (hdp :name)})))
 
+(defn sort-hrows! [params htable] (dorun (concat
+  (->> (sel htable :.hrow)
+       (sort-by #(attr % (str "data-hsrt" (params :srt)))
+                ({"0" < "1" >} (params :asc)))
+       (map #(append! (parent %) %)))))
+  (identity htable))
+
 (defn update-htable! [params div] (dorun (concat
   (->> (sel div :.hgrp) (map (partial set-hgrp-href! params)))
   (->> (sel div :.hsrt) (map (partial set-slice-hsrt-href! params)))
   (->> (sel div :.htag) (map (partial set-htag-href! params)))))
-  (identity div))
+  (sort-hrows! params div))
 
 (defn handle-home! [params] (dorun (concat
   (->> (sel :.hnav-active) (map hide!))
@@ -128,7 +135,8 @@
   (->> (sel :.hnav) (map (partial set-hnav-href! params)) (map show!))
   (->> (sel :.hgrp) (map (partial set-hgrp-href! params)))
   (->> (sel :.hsrt) (map (partial set-group-hsrt-href! params)))
-  (->> (sel :.htag) (map (partial set-htag-href! params))))))
+  (->> (sel :.htag) (map (partial set-htag-href! params)))
+  (->> (sel :.htable) (map (partial sort-hrows! params))))))
 
 (defn handle-slice! [params] (let
   [curn? #(= (attr % :data-hslice) (hsp :slice))
