@@ -5,6 +5,7 @@ import Data.Maybe
 import Data.Time.Clock.POSIX
 import Data.Time.Format
 import Hinance.Changes
+import Hinance.Currency
 import Hinance.Diag
 import Hinance.User.Data
 import Hinance.User.Type
@@ -110,7 +111,38 @@ tables title allchgs slice step ofs len =
   concat [table i c | i <- [ofs..ofs+len], c <- (scategs slice)] where
   table icolumn categ
     | null changes = ""
-    | otherwise = "<h1>" ++ title ++ "</h1>" where
+    | otherwise =
+    "<div class=\"panel panel-default htable\" " ++ hide ++ " " ++
+      (printf "data-hofs=\"%i\" data-hcateg=\"%i\">" icolumn icateg) ++
+      "<div class=\"panel-heading\">" ++
+        "<h3 class=\"panel-title\">" ++ title ++
+          (printf " (showing all %i)</h3></div>" (length changes)) ++
+        "<table class=\"table table-striped\">" ++
+          "<thead><tr>" ++ 
+            "<th>Date</th>" ++
+            "<th>Description</th>" ++
+            "<th>Tags</th>" ++
+            "<th>Group</th>" ++
+            "<th class=\"text-right\">Amount</th></tr></thead>" ++
+          "<tbody>"++(concatMap row changes)++"</tbody></table></div>" where
+    row change = "<tr>" ++
+      "<td>" ++ fdate ++ "</td>" ++
+      "<td>" ++ desc ++ "</td>" ++
+      "<td>" ++ tags ++ "</td>" ++
+      "<td>" ++ group ++ "</td>" ++
+      "<td class=\"text-right\">" ++ amount ++ "</td></tr>" where
+      desc | null url = label
+           | otherwise = printf "<a href=\"%s\">%s</a>" url label
+      label = show $ clabel change
+      tags = "TODO"
+      group = "TODO"
+      amount = fmtamount (camount change) (ccur change)
+      amtq = quot (camount change) 100
+      amtr = rem (camount change) 100
+      fdate = formatTime defaultTimeLocale "%Y-%m-%d" $ time
+      time = posixSecondsToUTCTime $ fromIntegral $ (ctime change)
+      url = curl change
+    icateg = fromMaybe 0 $ elemIndex categ (scategs slice)
     changes = ofschgs icolumn step $ catchgs categ $ slicechgs slice allchgs
 
 figure title allchgs slice step ofs len posneg =

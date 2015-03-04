@@ -63,6 +63,7 @@
   (->> (sel :.hnav) (map #((if(curn? %)hide! show!)%)) (map set-hnav-href!))
   (->> (sel :.hcell-active) (map #((if (curc? %) show! hide!) %)))
   (->> (sel :.hcell) (map #((if(curc? %)hide! show!)%)) (map set-hcell-href!))
+  (->> (sel :.htable) (map #((if (curc? %) show! hide!) %)))
   (->> (sel :.hstep) (map #((if(curs? %)hide! show!)%)) (map set-hstep-href!))
   (->> (sel :.hofs) (map set-hofs-href!))))))
 
