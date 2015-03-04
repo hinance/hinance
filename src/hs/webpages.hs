@@ -8,7 +8,7 @@ import Data.Time.Clock.POSIX
 import Data.Time.Format
 import Hinance.Changes
 import Hinance.Currency
-import Hinance.Diag
+import Hinance.Report
 import Hinance.User.Tag
 import Hinance.User.Data
 import Hinance.User.Type
@@ -38,10 +38,10 @@ cfgcolumnheight = 400
 stepmonth = 365 * 2 * 3600
 
 webpages = concatMap (devicepages "TODO") [
-  Device{dname="dtp", dlen=16},
-  Device{dname="mob", dlen=5}]
+  Device{dname="dtp", dlen=16, dnarrow=False},
+  Device{dname="mob", dlen=5, dnarrow=True}]
 
-data Device = Device {dname::String, dlen::Integer}
+data Device = Device {dname::String, dlen::Integer, dnarrow::Bool}
 
 devicepages time dev = map (\(k,v) -> (k, html $ page v time dev)) $
   [(pfx ++ "home.html", homepage), (pfx ++ "diag.html", diagpage)] ++
@@ -146,15 +146,23 @@ table title changes dev | null changes = "" | otherwise =
     "<div class=\"panel-heading\">" ++
       "<h3 class=\"panel-title\">" ++ title ++
         (printf " (%i total)</h3></div>" (length changes)) ++
-      "<table class=\"table table-striped\">" ++
-        "<thead><tr>" ++ 
-          "<th>Date</th>" ++
-          "<th>Description</th>" ++
-          "<th>Tags</th>" ++
-          "<th>Group</th>" ++
-          "<th class=\"text-right\">Amount</th></tr></thead>" ++
+      "<table class=\"table table-striped\">" ++ thead ++
         "<tbody>" ++ (concatMap row changes) ++ "</tbody></table></div>" where
-  row change = "<tr>" ++
+  thead | dnarrow dev = "" | otherwise =
+    "<thead><tr>" ++ 
+      "<th>Date</th>" ++
+      "<th>Description</th>" ++
+      "<th>Tags</th>" ++
+      "<th>Group</th>" ++
+      "<th class=\"text-right\">Amount</th></tr></thead>"
+  row change
+    | dnarrow dev = "<tr><td>" ++
+    "<p><big><strong>Date:</strong></big> " ++ fdate ++ "</p>" ++
+    "<p><big><strong>Description:</strong></big> " ++ desc ++ "</p>" ++
+    "<p><big><strong>Tags:</strong></big> " ++ tags ++ "</p>" ++
+    "<p><big><strong>Group:</strong></big> " ++ group ++ "</p>" ++
+    "<p><big><strong>Amount:</strong></big> " ++ amount ++ "</p></td></tr>"
+    | otherwise = "<tr>" ++
     "<td>" ++ fdate ++ "</td>" ++
     "<td>" ++ desc ++ "</td>" ++
     "<td>" ++ tags ++ "</td>" ++
@@ -322,7 +330,4 @@ html body =
     "<script type=\"text/javascript\" src=\"hinance.js\"></script>" ++
     "</body></html>"
 
---TODO: move to report module
-catchgs c = filter (\Change{ctags=ts}->any (flip elem$ts) $ sctags c)
-slicechgs s = filter (\Change{ctags=ts}->all (flip elem$ts) $ stags s)
 idxs = [(toInteger 0)..]

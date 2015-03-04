@@ -1,4 +1,5 @@
-module Hinance.Report where
+module Hinance.Diag (diagcount, diagslices, diagslicesflat, diagnogrp,
+                     diagugrps, diagchecks) where
 import Data.Function
 import Data.List
 import Hinance.Bank.Type
@@ -32,14 +33,3 @@ diffslices chgs = map (\s -> (sname s, diff$extract s)) slices where
     whole = sort $ filter (\Change{ctags=ts}->all (flip elem$ts) wts) chgs
     parts = sort $ concatMap part pts
     part pt = filter (\Change{ctags=ts}->elem pt ts) whole
-
-diffslices chgs = map (\s -> (sname s, diff s)) slices where
-  diff slice = (srt $ whole \\ parts, srt $ parts \\ whole) where
-    srt = reverse.(sortBy (compare `on` ctime))
-    whole = sort $ slicechgs slice chgs
-    parts = sort $ concatMap part $ concatMap sctags $ scategs slice
-    part pt = filter (\Change{ctags=ts}->elem pt ts) whole
-
-catchgs c = filter (\Change{ctags=ts}->any (flip elem$ts) $ sctags c)
-
-slicechgs s = filter (\Change{ctags=ts}->all (flip elem$ts) $ stags s)
