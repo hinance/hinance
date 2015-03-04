@@ -38,10 +38,11 @@ cfgcolumnheight = 400
 stepmonth = 365 * 2 * 3600
 
 webpages = concatMap (devicepages "TODO") [
-  Device{dname="dtp", dlen=16, dnarrow=False},
-  Device{dname="mob", dlen=5, dnarrow=True}]
+  Device{dname="dtp", dlen=16, drows=50, dnarrow=False},
+  Device{dname="mob", dlen=5, drows=10, dnarrow=True}]
 
-data Device = Device {dname::String, dlen::Integer, dnarrow::Bool}
+data Device = Device {dname::String, dlen::Integer, drows::Integer,
+                      dnarrow::Bool}
 
 devicepages time dev = map (\(k,v) -> (k, html $ page v time dev)) $
   [(pfx ++ "home.html", homepage), (pfx ++ "diag.html", diagpage)] ++
@@ -144,8 +145,7 @@ tables title allchgs slice step ofs dev =
 table title changes dev | null changes = "" | otherwise =
   "<div class=\"panel panel-default\">" ++
     "<div class=\"panel-heading\">" ++
-      "<h3 class=\"panel-title\">" ++ title ++
-        (printf " (%i total)</h3></div>" (length changes)) ++
+      "<h3 class=\"panel-title\">" ++ title ++ visrange ++ "</h3></div>" ++
       "<table class=\"table table-striped\">" ++ thead ++
         "<tbody>" ++ (concatMap row changes) ++ "</tbody></table></div>" where
   thead | dnarrow dev = "" | otherwise =
@@ -155,10 +155,13 @@ table title changes dev | null changes = "" | otherwise =
       "<th>" ++ hsrttags ++ "</th>" ++
       "<th>" ++ hsrtgroup ++ "</th>" ++
       "<th class=\"text-right\">" ++ hsrtamount ++ "</th>" ++ "</tr></thead>"
+  visrange
+    | lenchgs <= drows dev = printf " (showing all %i)" lenchgs
+    | otherwise = printf " (showing %i out of %i total)" (drows dev) lenchgs
   hsrt title field =
     printf "<a class=\"hsrt\" data-hsrt=\"%s\">%s</a>" field title
   row change =
-    "<tr class=\"hrow\" " ++
+    "<tr class=\"hrow\" " ++ hide ++ " " ++
       (printf "data-hsrtdate=\"%04i\" " $ idx srtdate) ++
       (printf "data-hsrtdesc=\"%04i\" " $ idx srtdesc) ++
       (printf "data-hsrttags=\"%04i\" " $ idx srttags) ++
@@ -201,6 +204,7 @@ table title changes dev | null changes = "" | otherwise =
   hsrttags = hsrt "Tags" "tags"
   hsrtgroup = hsrt "Group" "group"
   hsrtamount = hsrt "Amount" "amount"
+  lenchgs = toInteger $ length changes
 
 figure title allchgs slice step ofs len posneg =
   "<div class=\"panel panel-default\">" ++ 
@@ -318,6 +322,7 @@ page content time dev =
   "<span id=\"hdev-params\" " ++
     (printf "data-hdefstep=\"%i\" " (defstep $ dlen dev)) ++
     (printf "data-hlen=\"%i\" " (dlen dev)) ++
+    (printf "data-hrows=\"%i\" " (drows dev)) ++
     (printf "data-hname=\"%s\"></span>" (dname dev)) ++
   "<div class=\"container\">" ++
     "<ul class=\"nav nav-pills\">" ++ navs ++ "</ul>" ++

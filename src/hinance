@@ -43,7 +43,7 @@ echo 'Generating report web pages.'
 "$DIR/tmp/hinance-hs" &
 PID=$!
 
-while kill -0 $PID ; do
+while kill -0 $PID 2>/dev/null ; do
   du -hd0 "$DIR/out"
   sleep 10
 done

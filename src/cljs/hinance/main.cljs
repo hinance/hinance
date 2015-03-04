@@ -18,7 +18,7 @@
 (defn html-params [id params]
   (into (hash-map) (map #(vector (keyword %) (html-param id %)) params)))
 
-(def hdp (html-params :#hdev-params ["defstep" "name" "len"]))
+(def hdp (html-params :#hdev-params ["defstep" "name" "len" "rows"]))
 (def hsp (html-params :#hslice-params ["slice" "step" "ofs"]))
 
 (defn pint [x] (if (nil? x) nil (js/parseInt x)))
@@ -111,8 +111,11 @@
 
 (defn sort-hrows! [params htable] (dorun (concat
   (->> (sel htable :.hrow)
+       (map hide!)
        (sort-by #(attr % (str "data-hsrt" (params :srt)))
                 ({"0" > "1" <} (params :asc)))
+       (take (hdpi :rows))
+       (map show!)
        (map #(append! (parent %) %)))))
   (identity htable))
 
