@@ -16,7 +16,7 @@
   (into (hash-map) (map #(vector (keyword %) (html-param id %)) params)))
 
 (def hdp (html-params :#hdev-params ["defstep" "name" "len"]))
-(def hsp (html-params :#hslice-params ["slice" "step"]))
+(def hsp (html-params :#hslice-params ["slice" "step" "ofs"]))
 
 (def hdpi (comp js/parseInt hdp))
 (def hspi (comp js/parseInt hsp))
@@ -56,7 +56,7 @@
 
 (defn set-htag-href! [a] (let
   [d (hdp :name) n (attr a :data-htag) s (or (hsp :step) (hdp :defstep))
-   o (or (hspi :hofs) 0) so (+ o (- (hdpi :len) 1))]
+   o (or (hspi :ofs) 0) so (+ o (- (hdpi :len) 1))]
   (set-attr! a :href (slice-href d n s o so 0))))
 
 (defn set-hgrp-href! [a]
