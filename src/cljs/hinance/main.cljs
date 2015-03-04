@@ -36,9 +36,10 @@
 
 (defn diag-href [dev] (str dev "-diag.html" (href :diag)))
 
-(defn set-hnav-href! [li] (let [a (sel1 li :a) n (attr li :data-hslice)
-  s (or (hsp :step) (hdp :defstep)) d (hdp :name) so (- (hdpi :len) 1)]
-  (set-attr! a :href (slice-href d n s 0 so 0))
+(defn set-hnav-href! [li] (let
+  [a (sel1 li :a) n (attr li :data-hslice) s (or (hsp :step) (hdp :defstep))
+   d (hdp :name) o (or (hspi :ofs) 0) so (+ o (- (hdpi :len) 1))]
+  (set-attr! a :href (slice-href d n s o so 0))
   (identity li)))
 
 (defn set-hcell-href! [rect] (let
