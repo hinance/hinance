@@ -18,9 +18,10 @@
 (def hdp (html-params :#hdev-params ["defstep" "name" "len"]))
 (def hsp (html-params :#hslice-params ["slice" "step" "ofs"]))
 
-(def hdpi (comp js/parseInt hdp))
-(def hspi (comp js/parseInt hsp))
-(def attri (comp js/parseInt attr))
+(defn pint [x] (if (nil? x) nil (js/parseInt x)))
+(def hdpi (comp pint hdp))
+(def hspi (comp pint hsp))
+(def attri (comp pint attr))
 
 (defn hide! [x] (set-attr! x :style "display:none"))
 (defn show! [x] (remove-attr! x :style))
