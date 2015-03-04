@@ -54,6 +54,11 @@
   s (hsp :step) o (attri a :data-hofs) so (+ o (- (hdpi :len) 1))]
   (set-attr! a :href (slice-href d n s o so 0))))
 
+(defn set-htag-href! [a] (let
+  [d (hdp :name) n (attr a :data-htag) s (or (hsp :step) (hdp :defstep))
+   o (or (hspi :hofs) 0) so (+ o (- (hdpi :len) 1))]
+  (set-attr! a :href (slice-href d n s o so 0))))
+
 (defn set-hgrp-href! [a]
   (set-attr! a :href (group-href (hdp :name) (attr a :data-hgrp))))
 
@@ -61,7 +66,8 @@
   (set-attr! a :href (diag-href (hdp :name))))
 
 (defn update-htable! [div] (dorun (concat
-  (->> (sel div :.hgrp) (map set-hgrp-href!))))
+  (->> (sel div :.hgrp) (map set-hgrp-href!))
+  (->> (sel div :.htag) (map set-htag-href!))))
   (identity div))
 
 (defn handle-home! [params] (dorun (concat
@@ -75,7 +81,8 @@
 (defn handle-group! [params] (dorun (concat
   (->> (sel :.hnav-active) (map hide!))
   (->> (sel :.hnav) (map set-hnav-href!) (map show!))
-  (->> (sel :.hgrp) (map set-hgrp-href!)))))
+  (->> (sel :.hgrp) (map set-hgrp-href!))
+  (->> (sel :.htag) (map set-htag-href!)))))
 
 (defn handle-slice! [params] (let
   [curn? #(= (attr % :data-hslice) (hsp :slice))
