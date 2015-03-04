@@ -32,6 +32,10 @@
   (str dev "-slice" slice "-step" step "-ofs" ofs ".html"
     (apply slice-href-local args)))
 
+(defn group-href [dev grp] (str dev "-group" grp ".html" (href :group)))
+
+(defn diag-href [dev] (str dev "-diag.html" (href :diag)))
+
 (defn set-hnav-href! [li] (let [a (sel1 li :a) n (attr li :data-hslice)
   s (or (hsp :step) (hdp :defstep)) d (hdp :name) so (- (hdpi :len) 1)]
   (set-attr! a :href (slice-href d n s 0 so 0))
@@ -50,9 +54,28 @@
   s (hsp :step) o (attri a :data-hofs) so (+ o (- (hdpi :len) 1))]
   (set-attr! a :href (slice-href d n s o so 0))))
 
+(defn set-hgrp-href! [a]
+  (set-attr! a :href (group-href (hdp :name) (attr a :data-hgrp))))
+
+(defn set-hdiag-href! [a]
+  (set-attr! a :href (diag-href (hdp :name))))
+
+(defn update-htable! [div] (dorun (concat
+  (->> (sel div :.hgrp) (map set-hgrp-href!))))
+  (identity div))
+
 (defn handle-home! [params] (dorun (concat
   (->> (sel :.hnav-active) (map hide!))
   (->> (sel :.hnav) (map set-hnav-href!) (map show!)))))
+
+(defn handle-diag! [params] (dorun (concat
+  (->> (sel :.hnav-active) (map hide!))
+  (->> (sel :.hnav) (map set-hnav-href!) (map show!)))))
+
+(defn handle-group! [params] (dorun (concat
+  (->> (sel :.hnav-active) (map hide!))
+  (->> (sel :.hnav) (map set-hnav-href!) (map show!))
+  (->> (sel :.hgrp) (map set-hgrp-href!)))))
 
 (defn handle-slice! [params] (let
   [curn? #(= (attr % :data-hslice) (hsp :slice))
@@ -61,16 +84,18 @@
                (= (attr % :data-hcateg) (params :sel-cat)))] (dorun (concat
   (->> (sel :.hnav-active) (map #((if (curn? %) show! hide!) %)))
   (->> (sel :.hnav) (map #((if(curn? %)hide! show!)%)) (map set-hnav-href!))
+  (->> (sel :.hdiag) (map set-hdiag-href!))
   (->> (sel :.hcell-active) (map #((if (curc? %) show! hide!) %)))
   (->> (sel :.hcell) (map #((if(curc? %)hide! show!)%)) (map set-hcell-href!))
-  (->> (sel :.htable) (map #((if (curc? %) show! hide!) %)))
   (->> (sel :.hstep) (map #((if(curs? %)hide! show!)%)) (map set-hstep-href!))
-  (->> (sel :.hofs) (map set-hofs-href!))))))
+  (->> (sel :.hofs) (map set-hofs-href!))
+  (->> (sel :.htable)
+       (map #((if (curc? %) (comp update-htable! show!) hide!) %)))))))
 
 (def handlers! {
   :home handle-home!
-  :diag #(js/console.log "diag")
-  :group #(js/console.log "group")
+  :diag handle-diag!
+  :group handle-group!
   :slice handle-slice!})
 
 (defn handle! [path]

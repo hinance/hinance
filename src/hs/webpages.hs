@@ -41,13 +41,13 @@ webpages = concatMap (devicepages "TODO") [
 data Device = Device {dname::String, dlen::Integer}
 
 devicepages time dev = map (\(k,v) -> (k, html $ page v time dev)) $
- [(pfx ++ "home.html", homepage), (pfx ++ "diag.html", diagpage)] ++
- [(printf "%sslice%i-step%i-ofs%i.html" pfx nslice step ofs,
-   slicepage slice nslice step ofs dev)
-  | (nslice, slice) <- zip idxs slices,
-    step <- steps $ dlen dev,
-    ofs <- offsets (dlen dev) step]
- where pfx = (dname dev) ++ "-"
+  [(pfx ++ "home.html", homepage), (pfx ++ "diag.html", diagpage)] ++
+  [(printf "%sslice%i-step%i-ofs%i.html" pfx nslice step ofs,
+    slicepage slice nslice step ofs dev)
+   | (nslice, slice) <- zip idxs slices,
+     step <- steps $ dlen dev,
+     ofs <- offsets (dlen dev) step]
+  where pfx = (dname dev) ++ "-"
 
 steps len = [stepmonth, defstep len]
 
@@ -76,7 +76,7 @@ slicepage slice nslice step ofs dev =
           "<div class=\"alert alert-warning\">" ++ 
             "<strong>Warning!</strong> There are " ++ (show diagcount) ++
             " validation errors " ++
-            "(<a href=\"" ++ pfx ++ "diag.html\">read full report</a>).</div>"
+            "(<a class=\"hdiag\">read full report</a>).</div>"
   buttons =
     "<div class=\"btn-group btn-group-lg btn-group-justified\">" ++
       olderbtn ++ stepbtns ++ newerbtn ++ "</div><br>"
@@ -98,8 +98,8 @@ slicepage slice nslice step ofs dev =
   figact = figure "Actual" chgsact slice step ofs len True
   figdiff = figure "Actual - Planned =" chgsdiff slice step ofs len False
   figplan = figure "Planned" chgsplan slice step ofs len True
-  tabact = tables "Actual" chgsact slice step ofs len
-  tabplan = tables "Planned" chgsplan slice step ofs len
+  tabact = tables "Actual" chgsact slice step ofs dev
+  tabplan = tables "Planned" chgsplan slice step ofs dev
   len = (dlen dev)
   pfx = (dname dev) ++ "-"
   prevofs | ofsidx > 0 = Just $ ofss !! (ofsidx-1) | otherwise = Nothing
@@ -114,43 +114,44 @@ htmlSafe x = (x /= '<') && (isAscii x)
 groupToIdx = fromAscList $ zip idxToGroup idxs
 idxToGroup = map head $ group $ sort $ map cgroup $ chgsact ++ chgsplan
 
-tables title allchgs slice step ofs len =
-  concat [table i c | i <- [ofs..ofs+len], c <- (scategs slice)] where
-  table icolumn categ
-    | null changes = ""
-    | otherwise =
-    "<div class=\"panel panel-default htable\" " ++ hide ++ " " ++
+tables title allchgs slice step ofs dev =
+  concat [tbl i c | i <- [ofs..ofs+(dlen dev)], c <- (scategs slice)] where
+  tbl icolumn categ | null changes = "" | otherwise =
+    "<div class=\"htable\" " ++ hide ++ " " ++
       (printf "data-hofs=\"%i\" data-hcateg=\"%i\">" icolumn icateg) ++
-      "<div class=\"panel-heading\">" ++
-        "<h3 class=\"panel-title\">" ++ title ++
-          (printf " (showing all %i)</h3></div>" (length changes)) ++
-        "<table class=\"table table-striped\">" ++
-          "<thead><tr>" ++ 
-            "<th>Date</th>" ++
-            "<th>Description</th>" ++
-            "<th>Tags</th>" ++
-            "<th>Group</th>" ++
-            "<th class=\"text-right\">Amount</th></tr></thead>" ++
-          "<tbody>"++(concatMap row changes)++"</tbody></table></div>" where
-    row change = "<tr>" ++
-      "<td>" ++ fdate ++ "</td>" ++
-      "<td>" ++ desc ++ "</td>" ++
-      "<td>" ++ tags ++ "</td>" ++
-      "<td>" ++ group ++ "</td>" ++
-      "<td class=\"text-right\">" ++ amount ++ "</td></tr>" where
-      desc | null url = label
-           | otherwise = printf "<a href=\"%s\">%s</a>" url label
-      label = filter htmlSafe $ clabel change
-      tags = "TODO"
-      group = printf "%i" $ groupToIdx ! (cgroup change)
-      amount = fmtamount (camount change) (ccur change)
-      amtq = quot (camount change) 100
-      amtr = rem (camount change) 100
-      fdate = formatTime defaultTimeLocale "%Y-%m-%d" $ time
-      time = posixSecondsToUTCTime $ fromIntegral $ (ctime change)
-      url = curl change
+      (table title changes dev) ++ "</div>" where
     icateg = fromMaybe 0 $ elemIndex categ (scategs slice)
     changes = ofschgs icolumn step $ catchgs categ $ slicechgs slice allchgs
+
+table title changes dev | null changes = "" | otherwise =
+  "<div class=\"panel panel-default\">" ++
+    "<div class=\"panel-heading\">" ++
+      "<h3 class=\"panel-title\">" ++ title ++
+        (printf " (%i total)</h3></div>" (length changes)) ++
+      "<table class=\"table table-striped\">" ++
+        "<thead><tr>" ++ 
+          "<th>Date</th>" ++
+          "<th>Description</th>" ++
+          "<th>Tags</th>" ++
+          "<th>Group</th>" ++
+          "<th class=\"text-right\">Amount</th></tr></thead>" ++
+        "<tbody>" ++ (concatMap row changes) ++ "</tbody></table></div>" where
+  row change = "<tr>" ++
+    "<td>" ++ fdate ++ "</td>" ++
+    "<td>" ++ desc ++ "</td>" ++
+    "<td>" ++ tags ++ "</td>" ++
+    "<td>" ++ group ++ "</td>" ++
+    "<td class=\"text-right\">" ++ amount ++ "</td></tr>" where
+    desc | null url = label
+         | otherwise = printf "<a href=\"%s\">%s</a>" url label
+    group = printf "<a class=\"hgrp\" data-hgrp=\"%i\">%i</a>" igroup igroup
+    label = filter htmlSafe $ clabel change
+    tags = "TODO"
+    igroup = groupToIdx ! (cgroup change)
+    amount = fmtamount (camount change) (ccur change)
+    fdate = formatTime defaultTimeLocale "%Y-%m-%d" $ time
+    time = posixSecondsToUTCTime $ fromIntegral $ (ctime change)
+    url = curl change
 
 figure title allchgs slice step ofs len posneg =
   "<div class=\"panel panel-default\">" ++ 
