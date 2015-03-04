@@ -59,10 +59,15 @@ offsets len step = sort $ past ++ future where
   endplan = div (planto-actmin+step) step
   present = div (actmax-actmin+step) step
 
+ofstime ofs step = (minimum $ map ctime chgsact) + (step * ofs)
+ofschgs ofs step = filter (\Change{ctime=t} -> t >= tmin && t < tmax)
+  where tmin = ofstime ofs step
+        tmax = tmin + step
+
 homepage = "<h1>Welcome!</h1>"
 
 slicepage slice nslice step ofs dev =
-  alert ++ buttons ++ figact ++ figdiff ++ figplan ++ params where
+  alert++buttons++figact++figdiff++figplan++tabact++tabplan++params where
   alert | diagcount == 0 = ""
         | otherwise =
           "<div class=\"alert alert-warning\">" ++ 
@@ -90,6 +95,8 @@ slicepage slice nslice step ofs dev =
   figact = figure "Actual" chgsact slice step ofs len True
   figdiff = figure "Actual - Planned =" chgsdiff slice step ofs len False
   figplan = figure "Planned" chgsplan slice step ofs len True
+  tabact = tables "Actual" chgsact slice step ofs len
+  tabplan = tables "Planned" chgsplan slice step ofs len
   len = (dlen dev)
   pfx = (dname dev) ++ "-"
   prevofs | ofsidx > 0 = Just $ ofss !! (ofsidx-1) | otherwise = Nothing
@@ -98,6 +105,13 @@ slicepage slice nslice step ofs dev =
   ofsidx = fromMaybe 0 $ elemIndex ofs ofss
   ofss = offsets len step
   rcnofs s = last $ takeWhile (\x -> x*s < actmax-actmin) $ offsets len s
+
+tables title allchgs slice step ofs len =
+  concat [table i c | i <- [ofs..ofs+len], c <- (scategs slice)] where
+  table icolumn categ
+    | null changes = ""
+    | otherwise = "<h1>" ++ title ++ "</h1>" where
+    changes = ofschgs icolumn step $ catchgs categ $ slicechgs slice allchgs
 
 figure title allchgs slice step ofs len posneg =
   "<div class=\"panel panel-default\">" ++ 
@@ -169,7 +183,7 @@ figure title allchgs slice step ofs len posneg =
     x = cfgmarginleft + ((icolumn-ofs) * cellwspace)
     marky = cfgmargintop + cellsheightpos + cfgmarkspace
     fdate = formatTime defaultTimeLocale "%y-%m" $ time
-    time = posixSecondsToUTCTime $ fromIntegral $ coltime icolumn
+    time = posixSecondsToUTCTime $ fromIntegral $ ofstime icolumn step
   icolumns = [ofs..ofs+len]
   totalwidth = cfgmarginleft + (len*cellwspace) - cfgcellspace + cfgmarginright
   totalheight = cfgmargintop + cellsheightpos +
@@ -189,10 +203,7 @@ figure title allchgs slice step ofs len posneg =
     colheight = sum . (map fcheight) . cells . colchgs
     cells = figurecells (scategs slice) scale amftr catftr
   changes = slicechgs slice allchgs
-  coltime icolumn = (minimum $ map ctime chgsact) + (step * icolumn)
-  colchgs icolumn = filter (\Change{ctime=t} -> t >= tmin && t < tmax) changes
-    where tmin = coltime icolumn
-          tmax = tmin + step
+  colchgs icolumn = ofschgs icolumn step $ changes
 
 data FigureCell = FigureCell {fccateg::SliceCateg, fcamount::Integer,
                               fcheight::Integer} deriving (Show, Read, Eq, Ord)
