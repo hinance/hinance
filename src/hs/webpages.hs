@@ -42,9 +42,9 @@ data Device = Device {dname::String, dlen::Integer}
 
 devicepages time dev = map (\(k,v) -> (k, html $ page v time dev)) $
   [(pfx ++ "home.html", homepage), (pfx ++ "diag.html", diagpage)] ++
-  [(printf "%sslice%i-step%i-ofs%i.html" pfx nslice step ofs,
-    slicepage slice nslice step ofs dev)
-   | (nslice, slice) <- zip idxs slices,
+  [(printf "%sslice%i-step%i-ofs%i.html" pfx islice step ofs,
+    slicepage slice (show islice) step ofs dev)
+   | (islice, slice) <- zip idxs slices,
      step <- steps $ dlen dev,
      ofs <- offsets (dlen dev) step] ++
   [(printf "%sgroup%i.html" pfx igrp, grouppage igrp dev)
@@ -94,7 +94,7 @@ slicepage slice nslice step ofs dev =
     "data-hstep=\"%i\" data-hofs=\"%i\"" ++ hide ++ ">%s</a>") s (rcnofs s) n
     | (s, n) <- zip (steps len) ["Months", "Actual"]])
   params = "<span id=\"hslice-params\" " ++
-    (printf "data-hslice=\"%i\" " nslice) ++
+    (printf "data-hslice=\"%s\" " nslice) ++
     (printf "data-hstep=\"%i\" " step) ++
     (printf "data-hofs=\"%i\"></span>" ofs)
   figact = figure "Actual" chgsact slice step ofs len True
@@ -151,8 +151,10 @@ table title changes dev | null changes = "" | otherwise =
     desc | null url = label
          | otherwise = printf "<a href=\"%s\">%s</a>" url label
     group = printf "<a class=\"hgrp\" data-hgrp=\"%i\">%i</a>" igroup igroup
+    tag t = "<a class=\"btn btn-default htag\" " ++
+             (printf "data-htag=\"%s\">%s</a> " t $ drop 3 t)
     label = filter htmlSafe $ clabel change
-    tags = "TODO"
+    tags = concatMap tag $ sort $ map show $ ctags change
     igroup = groupToIdx ! (cgroup change)
     amount = fmtamount (camount change) (ccur change)
     fdate = formatTime defaultTimeLocale "%Y-%m-%d" $ time
