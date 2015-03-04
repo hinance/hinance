@@ -9,6 +9,7 @@ import Data.Time.Format
 import Hinance.Changes
 import Hinance.Currency
 import Hinance.Diag
+import Hinance.User.Tag
 import Hinance.User.Data
 import Hinance.User.Type
 import System.Locale
@@ -18,6 +19,8 @@ import Text.Show.Pretty
 cfgbdrcol = "#DDD"
 cfgtxtcol = "#333"
 cfgselcol = "#000"
+cfgtagcatbg = "#777"
+cfgtagcatfg = "#FFF"
 cfgselwidth = 5
 cfgbdrround = 8 :: Integer
 cfgcellwidth = 70 :: Integer
@@ -47,6 +50,11 @@ devicepages time dev = map (\(k,v) -> (k, html $ page v time dev)) $
    | (islice, slice) <- zip idxs slices,
      step <- steps $ dlen dev,
      ofs <- offsets (dlen dev) step] ++
+  [(printf "%sslice%s-step%i-ofs%i.html" pfx (show tag) step ofs,
+    slicepage (tagslice tag) (show tag) step ofs dev)
+   | tag <- [minBound::Tag ..],
+     step <- steps $ dlen dev,
+     ofs <- offsets (dlen dev) step] ++
   [(printf "%sgroup%i.html" pfx igrp, grouppage igrp dev)
    | igrp <- [0 .. length idxToGroup - 1]]
   where pfx = (dname dev) ++ "-"
@@ -68,6 +76,10 @@ ofstime ofs step = (minimum $ map ctime chgsact) + (step * ofs)
 ofschgs ofs step = filter (\Change{ctime=t} -> t >= tmin && t < tmax)
   where tmin = ofstime ofs step
         tmax = tmin + step
+
+tagslice tag = Slice {sname="", stags=[], scategs=[SliceCateg {
+  scname = "Tagged with \"" ++ (drop 3 $ show tag) ++ "\"",
+  scbg=cfgtagcatbg, scfg=cfgtagcatfg, sctags=[tag]}]}
 
 homepage = "<h1>Welcome!</h1>"
 
