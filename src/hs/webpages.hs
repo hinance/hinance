@@ -1,6 +1,8 @@
 module Hinance.WebPages (webpages) where
+import Data.Char
 import Data.Function
 import Data.List
+import Data.Map.Strict (fromAscList, (!))
 import Data.Maybe
 import Data.Time.Clock.POSIX
 import Data.Time.Format
@@ -107,6 +109,11 @@ slicepage slice nslice step ofs dev =
   ofss = offsets len step
   rcnofs s = last $ takeWhile (\x -> x*s < actmax-actmin) $ offsets len s
 
+htmlSafe x = (x /= '<') && (isAscii x)
+
+groupToIdx = fromAscList $ zip idxToGroup idxs
+idxToGroup = map head $ group $ sort $ map cgroup $ chgsact ++ chgsplan
+
 tables title allchgs slice step ofs len =
   concat [table i c | i <- [ofs..ofs+len], c <- (scategs slice)] where
   table icolumn categ
@@ -133,9 +140,9 @@ tables title allchgs slice step ofs len =
       "<td class=\"text-right\">" ++ amount ++ "</td></tr>" where
       desc | null url = label
            | otherwise = printf "<a href=\"%s\">%s</a>" url label
-      label = show $ clabel change
+      label = filter htmlSafe $ clabel change
       tags = "TODO"
-      group = "TODO"
+      group = printf "%i" $ groupToIdx ! (cgroup change)
       amount = fmtamount (camount change) (ccur change)
       amtq = quot (camount change) 100
       amtr = rem (camount change) 100

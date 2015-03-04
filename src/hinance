@@ -40,10 +40,7 @@ set -e
 ghc -O -XFlexibleInstances -o "$DIR/tmp/hinance-hs" "$DIR"/tmp/hs/*.hs
 
 echo 'Generating report source.'
-echo -e "(ns hinance.data (:require hinance.type))\n\n\
-(def timestamp \"$(date +'%Y-%m-%d %H:%M %Z')\")" \
-  >"$DIR/tmp/cljs/hinance/data.cljs"
-"$DIR/tmp/hinance-hs" >>"$DIR/tmp/cljs/hinance/data.cljs"
+time "$DIR/tmp/hinance-hs"
 
 cd "$DIR/tmp"
 lein cljsbuild once
