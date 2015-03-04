@@ -87,6 +87,19 @@
      :asc (params :asc)}]
   (set-attr! a :href (slice-href href-args))))
 
+(defn set-slice-hsrt-href! [params a] (let
+  [hsrt (attr a :data-hsrt)
+   href-args {
+     :sel-ofs (params :sel-ofs) :sel-cat (params :sel-cat)
+     :srt hsrt :asc (if (= hsrt (params :srt)) (- 1 (pint (params :asc))) 0)}]
+  (set-attr! a :href (slice-href-local href-args))))
+
+(defn set-group-hsrt-href! [params a] (let
+  [hsrt (attr a :data-hsrt)
+   href-args {
+     :srt hsrt :asc (if (= hsrt (params :srt)) (- 1 (pint (params :asc))) 0)}]
+  (set-attr! a :href (group-href-local href-args))))
+
 (defn set-hgrp-href! [params a] (let
   [href-args {
     :dev (hdp :name) :grp (attr a :data-hgrp)
@@ -98,6 +111,7 @@
 
 (defn update-htable! [params div] (dorun (concat
   (->> (sel div :.hgrp) (map (partial set-hgrp-href! params)))
+  (->> (sel div :.hsrt) (map (partial set-slice-hsrt-href! params)))
   (->> (sel div :.htag) (map (partial set-htag-href! params)))))
   (identity div))
 
@@ -113,6 +127,7 @@
   (->> (sel :.hnav-active) (map hide!))
   (->> (sel :.hnav) (map (partial set-hnav-href! params)) (map show!))
   (->> (sel :.hgrp) (map (partial set-hgrp-href! params)))
+  (->> (sel :.hsrt) (map (partial set-group-hsrt-href! params)))
   (->> (sel :.htag) (map (partial set-htag-href! params))))))
 
 (defn handle-slice! [params] (let
