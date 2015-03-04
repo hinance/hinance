@@ -37,8 +37,11 @@
   (str (args :dev) "-slice" (args :slice) "-step"
        (args :step) "-ofs" (args :ofs) ".html" (slice-href-local args)))
 
+(defn group-href-local [args]
+  (href :group :srt (args :srt) :asc (args :asc)))
+
 (defn group-href [args]
-  (str (args :dev) "-group" (args :grp) ".html" (href :group)))
+  (str (args :dev) "-group" (args :grp) ".html" (group-href-local args)))
 
 (defn diag-href [args] (str (args :dev) "-diag.html" (href :diag)))
 
@@ -47,7 +50,8 @@
    href-args {:dev (hdp :name) :slice (attr li :data-hslice)
      :step (or (hsp :step) (hdp :defstep)) :ofs ofs
      :sel-ofs (+ ofs (- (hdpi :len) 1)) :sel-cat 0
-     :srt (or (params :srt) "date") :asc (or (params :asc) 0)}]
+     :srt (if (nil? params) "date" (params :srt))
+     :asc (if (nil? params) 0 (params :asc))}]
   (set-attr! a :href (slice-href href-args))
   (identity li)))
 
