@@ -40,7 +40,15 @@ set -e
 ghc -O -XFlexibleInstances -o "$DIR/tmp/hinance-hs" "$DIR"/tmp/hs/*.hs
 
 echo 'Generating report web pages.'
-"$DIR/tmp/hinance-hs"
+"$DIR/tmp/hinance-hs" &
+PID=$!
+
+while kill -0 $PID ; do
+  du -hd0 "$DIR/out"
+  sleep 10
+done
+
+wait $PID
 
 cd "$DIR/tmp"
 lein cljsbuild once
