@@ -4,9 +4,11 @@
                 :refer-macros [sel sel1]])
   (:import goog.History goog.history.EventType))
 
-(def routes ["" {"" :home "/" {"diag" :diag "group" :group
-  ["slice/sel-ofs." :sel-ofs "/sel-cat." :sel-cat
-   "/srt." :srt "/asc." :asc] :slice}}])
+(def routes ["" {"" :home "/"
+  {"diag" :diag
+   ["group/srt." :srt "/asc." :asc] :group
+   ["slice/sel-ofs." :sel-ofs "/sel-cat." :sel-cat
+    "/srt." :srt "/asc." :asc] :slice}}])
 
 (defn href [& args] (str "#" (apply bidi.bidi/path-for routes args)))
 
@@ -40,69 +42,74 @@
 
 (defn diag-href [args] (str (args :dev) "-diag.html" (href :diag)))
 
-(defn set-hnav-href! [li] (let
+(defn set-hnav-href! [params li] (let
   [a (sel1 li :a) ofs (or (hspi :ofs) 0)
    href-args {:dev (hdp :name) :slice (attr li :data-hslice)
      :step (or (hsp :step) (hdp :defstep)) :ofs ofs
-     :sel-ofs (+ ofs (- (hdpi :len) 1)) :sel-cat 0 :srt "date" :asc 0}]
+     :sel-ofs (+ ofs (- (hdpi :len) 1)) :sel-cat 0
+     :srt (or (params :srt) "date") :asc (or (params :asc) 0)}]
   (set-attr! a :href (slice-href href-args))
   (identity li)))
 
-(defn set-hcell-href! [rect] (let
+(defn set-hcell-href! [params rect] (let
   [a (parent rect)
    href-args {:sel-ofs (attr rect :data-hofs) :sel-cat (attr rect :data-hcateg)
-     :srt "date" :asc 0}]
+     :srt (params :srt) :asc (params :asc)}]
   (set-attr! a :xlink:href (slice-href-local href-args))
   (identity rect)))
 
-(defn set-hstep-href! [a] (let
+(defn set-hstep-href! [params a] (let
   [ofs (attri a :data-hofs)
    href-args {
      :dev (hdp :name) :slice (hsp :slice) :step (attr a :data-hstep) :ofs ofs
-     :sel-ofs (+ ofs (- (hdpi :len) 1)) :sel-cat 0 :srt "date" :asc 0}]
+     :sel-ofs (+ ofs (- (hdpi :len) 1)) :sel-cat 0 :srt (params :srt)
+     :asc (params :asc)}]
   (set-attr! a :href (slice-href href-args))))
 
-(defn set-hofs-href! [a] (let
+(defn set-hofs-href! [params a] (let
   [ofs (attri a :data-hofs)
    href-args {
      :dev (hdp :name) :slice (hsp :slice) :step (hsp :step) :ofs ofs
-     :sel-ofs (+ ofs (- (hdpi :len) 1)) :sel-cat 0 :srt "date" :asc 0}]
+     :sel-ofs (+ ofs (- (hdpi :len) 1)) :sel-cat 0 :srt (params :srt)
+     :asc (params :asc)}]
   (set-attr! a :href (slice-href href-args))))
 
-(defn set-htag-href! [a] (let
+(defn set-htag-href! [params a] (let
   [ofs (or (hspi :ofs) 0)
    href-args {
      :dev (hdp :name) :slice (attr a :data-htag)
      :step (or (hsp :step) (hdp :defstep)) :ofs ofs
-     :sel-ofs (+ ofs (- (hdpi :len) 1)) :sel-cat 0 :srt "date" :asc 0}]
+     :sel-ofs (+ ofs (- (hdpi :len) 1)) :sel-cat 0 :srt (params :srt)
+     :asc (params :asc)}]
   (set-attr! a :href (slice-href href-args))))
 
-(defn set-hgrp-href! [a] (let
+(defn set-hgrp-href! [params a] (let
   [href-args {
-    :dev (hdp :name) :grp (attr a :data-hgrp)}]
+    :dev (hdp :name) :grp (attr a :data-hgrp)
+    :srt (params :srt) :asc (params :asc)}]
   (set-attr! a :href (group-href href-args))))
 
 (defn set-hdiag-href! [a]
   (set-attr! a :href (diag-href {:dev (hdp :name)})))
 
-(defn update-htable! [div] (dorun (concat
-  (->> (sel div :.hgrp) (map set-hgrp-href!))
-  (->> (sel div :.htag) (map set-htag-href!))))
+(defn update-htable! [params div] (dorun (concat
+  (->> (sel div :.hgrp) (map (partial set-hgrp-href! params)))
+  (->> (sel div :.htag) (map (partial set-htag-href! params)))))
   (identity div))
 
 (defn handle-home! [params] (dorun (concat
   (->> (sel :.hnav-active) (map hide!))
-  (->> (sel :.hnav) (map set-hnav-href!) (map show!)))))
+  (->> (sel :.hnav) (map (partial set-hnav-href! params)) (map show!)))))
 
 (defn handle-diag! [params] (dorun (concat
   (->> (sel :.hnav-active) (map hide!))
-  (->> (sel :.hnav) (map set-hnav-href!) (map show!)))))
+  (->> (sel :.hnav) (map (partial set-hnav-href! params)) (map show!)))))
 
 (defn handle-group! [params] (dorun (concat
   (->> (sel :.hnav-active) (map hide!))
-  (->> (sel :.hnav) (map set-hnav-href!) (map show!))
-  (->> (sel :.hgrp) (map set-hgrp-href!))
-  (->> (sel :.htag) (map set-htag-href!)))))
+  (->> (sel :.hnav) (map (partial set-hnav-href! params)) (map show!))
+  (->> (sel :.hgrp) (map (partial set-hgrp-href! params)))
+  (->> (sel :.htag) (map (partial set-htag-href! params))))))
 
 (defn handle-slice! [params] (let
   [curn? #(= (attr % :data-hslice) (hsp :slice))
@@ -110,14 +117,18 @@
    curc? #(and (= (attr % :data-hofs) (params :sel-ofs))
                (= (attr % :data-hcateg) (params :sel-cat)))] (dorun (concat
   (->> (sel :.hnav-active) (map #((if (curn? %) show! hide!) %)))
-  (->> (sel :.hnav) (map #((if(curn? %)hide! show!)%)) (map set-hnav-href!))
+  (->> (sel :.hnav) (map #((if(curn? %)hide! show!)%))
+                    (map (partial set-hnav-href! params)))
   (->> (sel :.hdiag) (map set-hdiag-href!))
   (->> (sel :.hcell-active) (map #((if (curc? %) show! hide!) %)))
-  (->> (sel :.hcell) (map #((if(curc? %)hide! show!)%)) (map set-hcell-href!))
-  (->> (sel :.hstep) (map #((if(curs? %)hide! show!)%)) (map set-hstep-href!))
-  (->> (sel :.hofs) (map set-hofs-href!))
+  (->> (sel :.hcell) (map #((if(curc? %)hide! show!)%))
+                     (map (partial set-hcell-href! params)))
+  (->> (sel :.hstep) (map #((if(curs? %)hide! show!)%))
+                     (map (partial set-hstep-href! params)))
+  (->> (sel :.hofs) (map (partial set-hofs-href! params)))
   (->> (sel :.htable)
-       (map #((if (curc? %) (comp update-htable! show!) hide!) %)))))))
+       (map #((if(curc? %)(comp(partial update-htable! params)show!)hide!)%))
+  )))))
 
 (def handlers! {
   :home handle-home!
