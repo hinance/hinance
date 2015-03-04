@@ -112,7 +112,7 @@
 (defn sort-hrows! [params htable] (dorun (concat
   (->> (sel htable :.hrow)
        (sort-by #(attr % (str "data-hsrt" (params :srt)))
-                ({"0" < "1" >} (params :asc)))
+                ({"0" > "1" <} (params :asc)))
        (map #(append! (parent %) %)))))
   (identity htable))
 
@@ -135,8 +135,8 @@
   (->> (sel :.hnav) (map (partial set-hnav-href! params)) (map show!))
   (->> (sel :.hgrp) (map (partial set-hgrp-href! params)))
   (->> (sel :.hsrt) (map (partial set-group-hsrt-href! params)))
-  (->> (sel :.htag) (map (partial set-htag-href! params)))
-  (->> (sel :.htable) (map (partial sort-hrows! params))))))
+  (->> (sel :.htag) (map (partial set-htag-href! params)))))
+  (sort-hrows! params (sel1 :body)))
 
 (defn handle-slice! [params] (let
   [curn? #(= (attr % :data-hslice) (hsp :slice))
