@@ -150,11 +150,13 @@ table title changes dev | null changes = "" | otherwise =
         "<tbody>" ++ (concatMap row changes) ++ "</tbody></table></div>" where
   thead | dnarrow dev = "" | otherwise =
     "<thead><tr>" ++ 
-      "<th>Date</th>" ++
-      "<th>Description</th>" ++
-      "<th>Tags</th>" ++
-      "<th>Group</th>" ++
-      "<th class=\"text-right\">Amount</th></tr></thead>"
+      "<th>" ++ hsrtdate ++ "</th>" ++
+      "<th>" ++ hsrtdesc ++ "</th>" ++
+      "<th>" ++ hsrttags ++ "</th>" ++
+      "<th>" ++ hsrtgroup ++ "</th>" ++
+      "<th class=\"text-right\">" ++ hsrtamount ++ "</th>" ++ "</tr></thead>"
+  hsrt title field =
+    printf "<a class=\"hsrt\" data-hsrt=\"%s\">%s</a>" field title
   row change =
     "<tr class=\"hrow\" " ++
       (printf "data-hsrtdate=\"%04i\" " $ idx srtdate) ++
@@ -165,11 +167,11 @@ table title changes dev | null changes = "" | otherwise =
     ">" ++ rowcontent ++ "</tr>" where
     rowcontent
       | dnarrow dev = "<td>" ++
-      "<p><big><strong>Date:</strong> " ++ fdate ++ "</big></p>" ++
-      "<p><big><strong>Description:</strong> " ++ desc ++ "</big></p>" ++
-      "<p><big><strong>Tags:</strong> " ++ tags ++ "</big></p>" ++
-      "<p><big><strong>Group:</strong> " ++ group ++ "</big></p>" ++
-      "<p><big><strong>Amount:</strong> " ++ amount ++ "</big></p></td>"
+      "<p><big><strong>"++hsrtdate++":</strong> "++fdate++"</big></p>" ++
+      "<p><big><strong>"++hsrtdesc++":</strong> "++desc++"</big></p>" ++
+      "<p><big><strong>"++hsrttags++":</strong> "++tags++"</big></p>" ++
+      "<p><big><strong>"++hsrtgroup++":</strong> "++group++"</big></p>" ++
+      "<p><big><strong>"++hsrtamount++":</strong> "++amount++"</big></p></td>"
       | otherwise =
       "<td>" ++ fdate ++ "</td>" ++
       "<td>" ++ desc ++ "</td>" ++
@@ -194,6 +196,11 @@ table title changes dev | null changes = "" | otherwise =
   srtgroup = sortBy (compare `on` cgroup) changes
   srtamount = sortBy (compare `on` camount) changes
   srttags = sortBy (on compare$concat.sort.(map show).ctags) changes
+  hsrtdate = hsrt "Date" "date"
+  hsrtdesc = hsrt "Description" "desc"
+  hsrttags = hsrt "Tags" "tags"
+  hsrtgroup = hsrt "Group" "group"
+  hsrtamount = hsrt "Amount" "amount"
 
 figure title allchgs slice step ofs len posneg =
   "<div class=\"panel panel-default\">" ++ 
