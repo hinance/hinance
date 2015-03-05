@@ -9,18 +9,12 @@ htabupdate = function(ntab) {
   var bodyhid = document.getElementById('htabrows-hid-'+ntab);
   var rowsvis = bodyvis.childNodes;
   var d = htabdata[ntab];
-  console.log('bodyvis before: ' + rowsvis.length);
-  console.log('bodyhid before: ' + bodyhid.childNodes.length);
   while (rowsvis.length > 0) {
     bodyhid.appendChild(rowsvis[0]);}
-  console.log('bodyvis mid: ' + rowsvis.length);
-  console.log('bodyhid mid: ' + bodyhid.childNodes.length);
   for (var i = d.from; i < d.to; i++) {
     var j = d.asc ? i : d.rows - 1 - i;
     var row=bodyhid.getElementsByClassName('htab-srt'+d.srt+'-'+ntab+'-'+j)[0];
     bodyvis.appendChild(row);}
-  console.log('bodyvis after: ' + rowsvis.length);
-  console.log('bodyhid after: ' + bodyhid.childNodes.length);
   if (d.rows > hdevrows) {
     hshow(document.getElementById('htabprev-disabled-'+ntab), d.from == 0);
     hshow(document.getElementById('htabprev-'+ntab), d.from > 0);
