@@ -249,7 +249,7 @@ slicefigure time dev slice nslice step ofs nfig allchgs posneg =
     "</g>" where
     svgstack [] = ""
     svgstack (cell:cells) = "<g>" ++ justcell ++ tailcells ++ "</g>" where
-      justcell = "<a target=\"_blank\" xlink:href=\"" ++ href ++ "\">" ++
+      justcell = "<a target=\"_top\" xlink:href=\"" ++ href ++ "\">" ++
         "<rect style=\"display:none\" " ++
           (printf "class=\"hcell-act-col%i-cat%i\" " icolumn icateg) ++
           (printf "fill=\"%s\" " bgcolor) ++
