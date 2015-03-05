@@ -44,16 +44,19 @@ webpages = concatMap (devicepages "TODO") [
 data Device = Device {dname::String, dlen::Integer, drows::Integer,
                       dnarrow::Bool}
 
+devicepages :: String -> Device -> [(String, String)]
 devicepages time dev =
   [homepage time dev, diagpage time dev] ++ slicespages ++ groupspages where
-  groupspages = [grouppage time dev i | i <- [0 .. length idxToGroup - 1]]
+  groupspages = [grouppage time dev $ toInteger i
+                | i <- [0 .. length idxToGroup - 1]]
   slicespages = concat $
     [slicepages s (show i) | (i, s) <- zip idxs slices] ++
     [slicepages (tagslice t) (show t) | t <- [minBound::Tag ..]]
+  slicepages :: Slice -> String -> [(String, String)]
   slicepages slice nslice = concat
     [[slicefigure time dev slice nslice step ofs nfig chgs posneg
      | (nfig, chgs, posneg) <- [("act", chgsact, True),
-                                ("diff", chgsdiff, False)
+                                ("diff", chgsdiff, False),
                                 ("plan", chgsplan, True)]] ++
      [slicepage time dev slice nslice step ofs icol categ
      | icol <- [ofs..ofs+len], categ <- scategs slice]
@@ -61,11 +64,19 @@ devicepages time dev =
   len = dlen dev
 
 homepagename dev = printf "%s-home.html" (dname dev)
+
+diagpagename :: Device -> String
 diagpagename dev = printf "%s-diag.html" (dname dev)
+
+grouppagename :: Device -> Integer -> String
 grouppagename dev igroup = printf "%s-group%i.html" (dname dev) igroup
+
+slicepagename :: Device->String->Integer->Integer->Integer->Integer->String
 slicepagename dev nslice step ofs icol icat =
   printf "%s-slice%s-step%i-ofs%i-col%i-cat%i.html"
   (dname dev) nslice step ofs icol icat
+
+slicefigname :: Device -> String -> Integer -> Integer -> String -> String
 slicefigname dev nslice step ofs nfig =
   printf "%s-slice%s-step%i-ofs%i-nfig%s.svg" (dname dev) nslice step ofs nfig
 
@@ -84,28 +95,28 @@ diagpage time dev = (diagpagename dev, content) where
     (printf "<h3>Slices mismatch (%i):</h3>" (length diagslicesflat)) ++
     (printf "<pre>%s</pre>" (ppShow diagslices))
 
+grouppage :: String -> Device -> Integer -> (String, String)
 grouppage time dev igroup = (grouppagename dev igroup, content) where
   content = html $ basicpage time dev $ inner
-  inner = slicetable dev step ofs icol changes ("Group: " ++ group)
-  step = defstep $ dlen dev
-  ofs = 0
-  icol = (dlen dev) - 1
-  group = idxToGroup !! igrp
+  inner = slicetable dev (defstep len) 0 (len-1) changes ("Group: " ++ group)
   changes = filter (((==) group).cgroup) $ chgsact ++ chgsplan
+  group = idxToGroup !! (fromIntegral igroup)
+  len = dlen dev
 
+slicepage :: String -> Device -> Slice -> String -> Integer ->
+             Integer -> Integer -> SliceCateg -> (String, String)
 slicepage time dev slice nslice step ofs icol categ =
   (slicepagename dev nslice step ofs icol icateg, content) where
   content = html $ page time dev nslice step ofs icol $ inner
-  inner = alert++buttons++figact++figdiff++figplan++tabact++tabplan++params
+  inner = alert++buttons++figact++figdiff++figplan++tabact++tabplan
   alert | diagcount == 0 = ""
         | otherwise = printf (
           "<div class=\"alert alert-warning\">" ++ 
             "<strong>Warning!</strong> There are %i validation errors " ++
             "(<a href=\"%s\">read full report</a>).</div>")
           diagcount (diagpagename dev)
-  buttons =
-    "<div class=\"btn-group btn-group-lg btn-group-justified\">" ++
-      olderbtn ++ stepbtns ++ newerbtn ++ "</div><br>"
+  buttons = "<div class=\"btn-group btn-group-lg btn-group-justified\">" ++
+              olderbtn ++ stepbtns ++ newerbtn ++ "</div><br>"
   olderbtn = ofsbtn "Older" prevofs
   newerbtn = ofsbtn "Newer" nextofs
   ofsbtn title Nothing = printf
@@ -132,7 +143,7 @@ slicepage time dev slice nslice step ofs icol categ =
   ofsidx = fromMaybe 0 $ elemIndex ofs ofss
   ofss = offsets len step
   rcnofs s = last $ takeWhile (\x -> x*s < actmax-actmin) $ offsets len s
-  icateg = fromMaybe 0 $ elemIndex categ $ scategs slice
+  icateg = toInteger $ fromMaybe 0 $ elemIndex categ $ scategs slice
 
 figpanel dev slice nslice step ofs title nfig allchgs =
   "<div class=\"panel panel-default\">" ++ 
@@ -149,6 +160,7 @@ figpanel dev slice nslice step ofs title nfig allchgs =
     amt = sum $ map camount $ catchgs c $ changes
   changes = slicechgs slice allchgs
 
+slicetable :: Device->Integer->Integer->Integer->[Change]->String->String
 slicetable dev step ofs icolumn changes title
   | null changes = "" | otherwise =
   "<div class=\"panel panel-default\">" ++
@@ -237,14 +249,14 @@ slicefigure time dev slice nslice step ofs nfig allchgs posneg =
     svgstack (cell:cells) = "<g>" ++ justcell ++ tailcells ++ "</g>" where
       justcell = "<a xlink:href=\"" ++ href ++ "\">" ++
         "<rect style=\"display:none\" " ++
-          (printf "class=\"hcell-act-col%i-cat%i\" " icolumn icateg)
+          (printf "class=\"hcell-act-col%i-cat%i\" " icolumn icateg) ++
           (printf "fill=\"%s\"" bgcolor) ++
           (printf "stroke=\"%s\" stroke-width=\"%i\" " cfgselcol cfgselwidth)++
           (printf "width=\"%i\" height=\"%i\" " cfgcellwidth heightact) ++
           (printf "x=\"0\" y=\"%i\" " (diry+cfgselwidth)) ++
           (printf "rx=\"%i\" ry=\"%i\"/>" cfgbdrround cfgbdrround) ++
         "<rect " ++
-          (printf "class=\"hcell-col%i-cat%i\" " icolumn icateg)
+          (printf "class=\"hcell-col%i-cat%i\" " icolumn icateg) ++
           (printf "fill=\"%s\" stroke=\"%s\" " bgcolor cfgbdrcol) ++
           (printf "width=\"%i\" height=\"%i\" " cfgcellwidth height) ++
           (printf "x=\"0\" y=\"%i\" " diry) ++
@@ -266,7 +278,7 @@ slicefigure time dev slice nslice step ofs nfig allchgs posneg =
       nexty | amount > 0 = - height | otherwise = height
       texty = diry + cfgmarkofsy
       categ = fccateg cell
-      icateg = fromMaybe 0 $ elemIndex categ (scategs slice)
+      icateg = toInteger $ fromMaybe 0 $ elemIndex categ (scategs slice)
     stackpos = svgstack $ stackcells posamtftr poscatftr
     stackneg = svgstack $ stackcells negamtftr negcatftr
     stackcells amftr catftr =
@@ -297,6 +309,7 @@ slicefigure time dev slice nslice step ofs nfig allchgs posneg =
     cells = figurecells (scategs slice) scale amftr catftr
   changes = slicechgs slice allchgs
   colchgs icolumn = ofschgs icolumn step $ changes
+  len = dlen dev
 
 steps len = [stepmonth, defstep len]
 
@@ -347,7 +360,7 @@ page time dev nslice step ofs icol content =
   nav (i, Slice{sname=name})
     | show i == nslice = "<li class=\"active\"><a>%s</a></li>"
     | otherwise = printf "<li><a href=\"%s\">%s</a></li>" href name where
-    href = slicepagename dev i step ofs icol 0
+    href = slicepagename dev (show i) step ofs icol 0
 
 basicpage time dev = page time dev "" (defstep $ dlen dev) 0 ((dlen dev)-1)
 
