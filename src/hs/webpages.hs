@@ -180,9 +180,14 @@ slicetable dev step ofs icolumn changes ntab title
     "<div class=\"panel-heading\">" ++
       "<h3 class=\"panel-title\">" ++ title ++ visrange ++ "</h3></div>" ++
     pagination ++
-    "<table class=\"table table-striped\">" ++ thead ++
-      "<tbody class=\"hrows\">" ++ (concatMap row changes) ++ "</tbody>" ++
+    "<table class=\"table table-striped\">"++thead++tbodyvis++tbodyhid++
     "</table></div>" where
+  tbodyvis =
+    (printf "<tbody id=\"htabrows-%s\">" ntab) ++
+      (concatMap row $ take irows $ reverse $ srtdate) ++ "</tbody>"
+  tbodyhid = 
+    (printf "<tbody id=\"htabrows-hid-%s\" style=\"display:none\">" ntab) ++
+      (concatMap row $ drop irows $ reverse $ srtdate) ++ "</tbody>"
   thead | dnarrow dev = "" | otherwise =
     "<thead><tr>" ++ 
       "<th>" ++ hsrtdate ++ "</th>" ++
@@ -190,17 +195,17 @@ slicetable dev step ofs icolumn changes ntab title
       "<th>" ++ hsrttags ++ "</th>" ++
       "<th>" ++ hsrtgroup ++ "</th>" ++
       "<th class=\"text-right\">" ++ hsrtamount ++ "</th>" ++ "</tr></thead>"
-  visrange | lenchgs <= (drows dev) = printf " (showing all %i)" lenchgs
+  visrange | lenchgs <= irows = printf " (showing all %i)" lenchgs
            | otherwise =
     (printf " (showing <span id=\"htabfrom-%s\">0</span>" ntab) ++
-    (printf "...<span id=\"htabto-%s\">%i</span> " ntab (drows dev)) ++
+    (printf "...<span id=\"htabto-%s\">%i</span> " ntab irows) ++
     (printf "out of %i total)" lenchgs)
-  pagination | lenchgs <= (drows dev) = "" | otherwise =
+  pagination | lenchgs <= irows = "" | otherwise =
     "<div class=\"panel-body\">" ++
       "<div class=\"btn-group btn-group-lg btn-group-justified\">" ++
         btnprev ++ btnnext ++ "</div></div>"
-  btnprev = btn False "prev" $ printf "Previous %i" (drows dev)
-  btnnext = btn True "next" $ printf "Next %i" (drows dev)
+  btnprev = btn False "prev" $ printf "Previous %i" irows
+  btnnext = btn True "next" $ printf "Next %i" irows
   btn active nbtn text = 
     (printf "<div class=\"btn-group\" %s id=\"htab%s-disabled-%s\">"
             (hideif active) nbtn ntab) ++
@@ -257,7 +262,8 @@ slicetable dev step ofs icolumn changes ntab title
   hsrttags = hsrt "Tags" "tags"
   hsrtgroup = hsrt "Group" "group"
   hsrtamount = hsrt "Amount" "amount"
-  lenchgs = toInteger $ length changes
+  lenchgs = length changes
+  irows = fromIntegral $ (drows dev)
 
 slicefigure time dev slice nslice step ofs nfig allchgs posneg =
   (slicefigname dev nslice step ofs nfig, content) where
