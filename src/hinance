@@ -40,7 +40,7 @@ set -e
 ghc -O -XFlexibleInstances -o "$DIR/tmp/hinance-hs" "$DIR"/tmp/hs/*.hs
 
 echo 'Generating report web pages.'
-"$DIR/tmp/hinance-hs" &
+"$DIR/tmp/hinance-hs" "$(date)" &
 PID=$!
 
 while kill -0 $PID 2>/dev/null ; do

@@ -37,7 +37,7 @@ cfgcolumnheight = 400
 
 stepmonth = 365 * 2 * 3600
 
-webpages = concatMap (devicepages "TODO") [
+webpages time = concatMap (devicepages time) [
   Device{dname="dtp", dlen=16, drows=50, dnarrow=False},
   Device{dname="mob", dlen=5, drows=10, dnarrow=True}]
 
@@ -216,14 +216,16 @@ slicetable dev step ofs icolumn changes ntab title
       "<button class=\"btn btn-lg btn-default\" " ++
         (printf "onclick=\"htab%s('%s')\">%s</button></div>" nbtn ntab text)
   hideif x | x = "style=\"display:none\"" | otherwise = ""
-  hsrt title field = printf "<a>%s</a>" title
+  hsrt title field = printf
+    "<a href=\"#\" onclick=\"htabsrt('%s','%s');return false\">%s</a>"
+    ntab field title
   row change =
     "<tr class=\"" ++
-      (printf "hrow-srtdate-%i " $ idx srtdate) ++
-      (printf "hrow-srtdesc-%i " $ idx srtdesc) ++
-      (printf "hrow-srttags-%i " $ idx srttags) ++
-      (printf "hrow-srtgroup-%i " $ idx srtgroup) ++
-      (printf "hrow-srtamount-%i\"" $ idx srtamount) ++
+      (printf "htab-srtdate-%s-%i " ntab $ idx srtdate) ++
+      (printf "htab-srtdesc-%s-%i " ntab $ idx srtdesc) ++
+      (printf "htab-srttags-%s-%i " ntab $ idx srttags) ++
+      (printf "htab-srtgroup-%s-%i " ntab $ idx srtgroup) ++
+      (printf "htab-srtamount-%s-%i\"" ntab $ idx srtamount) ++
     ">" ++ rowcontent ++ "</tr>" where
     rowcontent
       | dnarrow dev = "<td>" ++
@@ -391,8 +393,7 @@ figurecells categs normh amftr catftr changes =
     height = maximum [cfgmarkheight, div ((abs amount)*cfgcolumnheight) normh]
 
 page time dev nslice step ofs icol content =
-  "<span id=\"hdev-params\" " ++
-    (printf "data-hrows=\"%i\"</span>" (drows dev)) ++
+  (printf "<script>hrows=%i</script>" (drows dev)) ++
   "<div class=\"container\">" ++
     "<ul class=\"nav nav-pills\">" ++ navs ++ "</ul>" ++
     "<div class=\"row\"><div class=\"col-md-12\">" ++ content ++ 
