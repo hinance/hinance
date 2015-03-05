@@ -18,11 +18,11 @@ for NAME in user_{data,tag}.hs ; do
   fi
 done
 
-mkdir -p "$DIR/"{log,out}
+mkdir -p "$DIR/"{log,out/www}
 cd "$DIR/out"
 python2 /usr/lib/hinance/scrape.py -ddv --logging-file "$DIR/log/scrape.log"
 
-cp /usr/lib/hinance/hinance.js "$DIR/out"
+cp /usr/lib/hinance/hinance.js "$DIR/out/www"
 
 mkdir -p "$DIR/tmp/hs"
 cp -t "$DIR/tmp/hs" "$DIR"/*.hs /usr/lib/hinance/hs/*
@@ -40,11 +40,12 @@ set -e
 ghc -O -XFlexibleInstances -o "$DIR/tmp/hinance-hs" "$DIR"/tmp/hs/*.hs
 
 echo 'Generating report web pages.'
+cd "$DIR/out/www"
 "$DIR/tmp/hinance-hs" "$(date)" &
 PID=$!
 
 while kill -0 $PID 2>/dev/null ; do
-  du -hd0 "$DIR/out"
+  du -hd0 "$DIR/out/www"
   sleep 10
 done
 
