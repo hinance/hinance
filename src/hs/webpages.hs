@@ -210,46 +210,12 @@ slicetable dev slice nslice step ofs icolumn categ title allchgs
   icateg = fromMaybe 0 $ elemIndex categ (scategs slice)
   changes = ofschgs icolumn step $ catchgs categ $ slicechgs slice allchgs
 
-steps len = [stepmonth, defstep len]
-
-defstep len = div (actmax - actmin + len) len
-
-actmin = minimum $ map ctime chgsact
-actmax = maximum $ map ctime chgsact
-
-offsets len step = sort $ past ++ future where
-  past = [present, present-len .. 1] ++ [0]
-  future = [present+len, present+2*len .. endplan]
-  endplan = div (planto-actmin+step) step
-  present = div (actmax-actmin+step) step
-
-ofstime ofs step = (minimum $ map ctime chgsact) + (step * ofs)
-ofschgs ofs step = filter (\Change{ctime=t} -> t >= tmin && t < tmax)
-  where tmin = ofstime ofs step
-        tmax = tmin + step
-
-tagslice tag = Slice {sname="", stags=[], scategs=[SliceCateg {
-  scname = "Tagged with \"" ++ (drop 3 $ show tag) ++ "\"",
-  scbg=cfgtagcatbg, scfg=cfgtagcatfg, sctags=[tag]}]}
-
-htmlSafe x = (x /= '<') && (isAscii x)
-
-groupToIdx = fromAscList $ zip idxToGroup idxs
-idxToGroup = map head $ group $ sort $ map cgroup $ chgsact ++ chgsplan
-
-figure title allchgs slice step ofs len posneg =
-  "<div class=\"panel panel-default\">" ++ 
-    "<div class=\"panel-heading\">" ++
-      "<h3 class=\"panel-title\">" ++ title ++ "</h3></div>"++
-    "<div class=\"panel-body text-center\">" ++ svg ++ labels ++ "</div>" ++
-  "</div>" where
-  labels="<ul class=\"list-inline\">"++(concatMap label$scategs slice)++"</ul>"
-  label c = printf (
-    "<li><span class=\"label\" style=\"color:%s;background-color:%s\"" ++
-      ">%s: %i</span></li>") (scfg c) (scbg c) (scname c) (div amt 100) where
-    amt = sum $ map camount $ catchgs c $ changes
-  svg = (printf "<svg width=\"100%%\" viewbox=\"0 0 %i %i\">%s</svg>"
-         totalwidth totalheight $ concatMap column icolumns)
+slicefigure time dev slice nslice step ofs nfig allchgs posneg =
+  (slicefigname dev nslice step ofs nfig, content) where
+  content = printf (
+    "<svg xmlns=\"http://www.w3.org/2000/svg\" " ++
+         "width=\"100%%\" viewbox=\"0 0 %i %i\">%s</svg>")
+    totalwidth totalheight $ concatMap column icolumns
   column icolumn = "<g>" ++ 
     "<g " ++
       (printf "transform=\"translate(%i,%i)\">%s</g>" x stackposy stackpos) ++
@@ -267,16 +233,16 @@ figure title allchgs slice step ofs len posneg =
     "</g>" where
     svgstack [] = ""
     svgstack (cell:cells) = "<g>" ++ justcell ++ tailcells ++ "</g>" where
-      justcell = "<a xlink:href=\"#\">" ++
-        "<rect class=\"hcell-active\" " ++ hide ++ " " ++
-          (printf "data-hofs=\"%i\" data-hcateg=\"%i\" " icolumn icateg) ++
+      justcell = "<a xlink:href=\"" ++ href ++ "\">" ++
+        "<rect style=\"display:none\" " ++
+          (printf "class=\"hcell-act-col%i-cat%i\" " icolumn icateg)
           (printf "fill=\"%s\"" bgcolor) ++
           (printf "stroke=\"%s\" stroke-width=\"%i\" " cfgselcol cfgselwidth)++
           (printf "width=\"%i\" height=\"%i\" " cfgcellwidth heightact) ++
           (printf "x=\"0\" y=\"%i\" " (diry+cfgselwidth)) ++
           (printf "rx=\"%i\" ry=\"%i\"/>" cfgbdrround cfgbdrround) ++
-        "<rect class=\"hcell\" " ++ hide ++ " " ++
-          (printf "data-hofs=\"%i\" data-hcateg=\"%i\" " icolumn icateg) ++
+        "<rect " ++
+          (printf "class=\"hcell-col%i-cat%i\" " icolumn icateg)
           (printf "fill=\"%s\" stroke=\"%s\" " bgcolor cfgbdrcol) ++
           (printf "width=\"%i\" height=\"%i\" " cfgcellwidth height) ++
           (printf "x=\"0\" y=\"%i\" " diry) ++
@@ -288,6 +254,7 @@ figure title allchgs slice step ofs len posneg =
       tailcells | null cells = ""
                 | otherwise = (printf "<g transform=\"translate(0,%i)\">%s</g>"
                                nexty (svgstack cells))
+      href = slicepagename dev nslice step ofs icolumn icateg
       bgcolor = scbg categ
       fgcolor = scfg categ
       amount = fcamount cell
@@ -329,6 +296,33 @@ figure title allchgs slice step ofs len posneg =
   changes = slicechgs slice allchgs
   colchgs icolumn = ofschgs icolumn step $ changes
 
+steps len = [stepmonth, defstep len]
+
+defstep len = div (actmax - actmin + len) len
+
+actmin = minimum $ map ctime chgsact
+actmax = maximum $ map ctime chgsact
+
+offsets len step = sort $ past ++ future where
+  past = [present, present-len .. 1] ++ [0]
+  future = [present+len, present+2*len .. endplan]
+  endplan = div (planto-actmin+step) step
+  present = div (actmax-actmin+step) step
+
+ofstime ofs step = (minimum $ map ctime chgsact) + (step * ofs)
+ofschgs ofs step = filter (\Change{ctime=t} -> t >= tmin && t < tmax)
+  where tmin = ofstime ofs step
+        tmax = tmin + step
+
+tagslice tag = Slice {sname="", stags=[], scategs=[SliceCateg {
+  scname = "Tagged with \"" ++ (drop 3 $ show tag) ++ "\"",
+  scbg=cfgtagcatbg, scfg=cfgtagcatfg, sctags=[tag]}]}
+
+htmlSafe x = (x /= '<') && (isAscii x)
+
+groupToIdx = fromAscList $ zip idxToGroup idxs
+idxToGroup = map head $ group $ sort $ map cgroup $ chgsact ++ chgsplan
+
 data FigureCell = FigureCell {fccateg::SliceCateg, fcamount::Integer,
                               fcheight::Integer} deriving (Show, Read, Eq, Ord)
 
@@ -354,8 +348,6 @@ page time dev nslice step ofs icol content =
     href = slicepagename dev i step ofs icol 0
 
 basicpage time dev = page time dev "" (defstep $ dlen dev) 0 ((dlen dev)-1)
-
-hide = "style=\"display:none\""
 
 html body =
   "<!DOCTYPE html><html lang=\"en\"><head>" ++
