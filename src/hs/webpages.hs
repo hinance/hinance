@@ -108,7 +108,7 @@ slicepage :: String -> Device -> Slice -> String -> Integer ->
 slicepage time dev slice nslice step ofs icol categ =
   (slicepagename dev nslice step ofs icol icateg, content) where
   content = html $ page time dev nslice step ofs icol $ inner
-  inner = alert++buttons++figact++figdiff++figplan++tabact++tabplan
+  inner = alert++buttons++figact++figdiff++figplan++tabact++tabplan++params
   alert | diagcount == 0 = ""
         | otherwise = printf (
           "<div class=\"alert alert-warning\">" ++ 
@@ -117,6 +117,8 @@ slicepage time dev slice nslice step ofs icol categ =
           diagcount (diagpagename dev)
   buttons = "<div class=\"btn-group btn-group-lg btn-group-justified\">" ++
               olderbtn ++ stepbtns ++ newerbtn ++ "</div><br>"
+  params = "<span id=\"hslice-params\" " ++
+             (printf "data-hcol=\"%i\" data-hcat=\"%i\"></span>" icol icateg)
   olderbtn = ofsbtn "Older" prevofs
   newerbtn = ofsbtn "Newer" nextofs
   ofsbtn title Nothing = printf

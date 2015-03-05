@@ -12,8 +12,8 @@
 (defn html-params [id params]
   (into (hash-map) (map #(vector (keyword %) (html-param id %)) params)))
 
-(def hdp (html-params :#hdev-params ["defstep" "name" "len" "rows"]))
-(def hsp (html-params :#hslice-params ["slice" "step" "ofs"]))
+(def hdp (html-params :#hdev-params ["rows"]))
+(def hsp (html-params :#hslice-params ["col" "cat"]))
 
 (defn pint [x] (if (nil? x) nil (js/parseInt x)))
 (def hdpi (comp pint hdp))
@@ -23,8 +23,14 @@
 (defn hide! [x] (set-attr! x :style "display:none"))
 (defn show! [x] (remove-attr! x :style))
 
-(def handlers! {
-  :home #(js/console.log "home")})
+(defn handle-home! [params] (let
+  [colcat (str "col" (hsp :col) "-cat" (hsp :cat))
+   cell (str ".hcell-" colcat) cell-act (str ".hcell-act-" colcat)]
+  (js/console.log (str cell))
+  (js/console.log (str cell-act))
+  (dorun (concat (map hide! (sel cell)) (map show! (sel cell-act))))))
+
+(def handlers! {:home handle-home!})
 
 (defn handle! [path]
   (let [m (bidi.bidi/match-route routes path)

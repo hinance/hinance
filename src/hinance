@@ -27,6 +27,11 @@ cp -t "$DIR/tmp/hs" "$DIR"/*.hs /usr/lib/hinance/hs/*
 cp -rt "$DIR/tmp" /usr/lib/hinance/{*.clj,cljs}
 cp "$DIR"/*.cljs "$DIR"/tmp/cljs/hinance
 
+cd "$DIR/tmp"
+lein cljsbuild once
+cp "$DIR/tmp/hinance.js" "$DIR/out" 
+cd "$DIR/out"
+
 echo -e "module Hinance.Bank.Data where\nimport Hinance.Bank.Type\n\
 import Hinance.Currency\nbanksraw = []" >"$DIR/tmp/hs/bank_data.hs"
 echo -e "module Hinance.Shop.Data where\nimport Hinance.Shop.Type\n\
@@ -49,8 +54,3 @@ while kill -0 $PID 2>/dev/null ; do
 done
 
 wait $PID
-
-cd "$DIR/tmp"
-lein cljsbuild once
-
-cp -t "$DIR/out" "$DIR/tmp/hinance.js" /usr/lib/hinance/hinance.html
