@@ -151,8 +151,9 @@ figpanel dev slice nslice step ofs title nfig allchgs =
       "<h3 class=\"panel-title\">" ++ title ++ "</h3></div>"++
     "<div class=\"panel-body text-center\">" ++ fig ++ 
       "<ul class=\"list-inline\">" ++ labels ++ "</ul></div></div>" where
-  fig = printf "<object data=\"%s\" type=\"image/svg+xml\"></object>"
-    (slicefigname dev nslice step ofs nfig)
+  fig = "<object type=\"image/svg+xml\" width=\"100%%\" " ++
+          (printf "data=\"%s\"></object>" $
+           slicefigname dev nslice step ofs nfig)
   labels = concatMap label $ scategs slice
   label c = printf (
     "<li><span class=\"label\" style=\"color:%s;background-color:%s\"" ++
@@ -248,7 +249,7 @@ slicefigure time dev slice nslice step ofs nfig allchgs posneg =
     "</g>" where
     svgstack [] = ""
     svgstack (cell:cells) = "<g>" ++ justcell ++ tailcells ++ "</g>" where
-      justcell = "<a xlink:href=\"" ++ href ++ "\">" ++
+      justcell = "<a target=\"_blank\" xlink:href=\"" ++ href ++ "\">" ++
         "<rect style=\"display:none\" " ++
           (printf "class=\"hcell-act-col%i-cat%i\" " icolumn icateg) ++
           (printf "fill=\"%s\" " bgcolor) ++
