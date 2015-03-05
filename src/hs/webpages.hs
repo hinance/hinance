@@ -98,7 +98,7 @@ diagpage time dev = (diagpagename dev, content) where
 grouppage :: String -> Device -> Integer -> (String, String)
 grouppage time dev igroup = (grouppagename dev igroup, content) where
   content = html $ basicpage time dev $ inner
-  inner = slicetable dev (defstep len) 0 (len-1) changes ("Group: " ++ group)
+  inner = slicetable dev (defstep len) 0 (len-1) changes "" ("Group: "++group)
   changes = filter (((==) group).cgroup) $ chgsact ++ chgsplan
   group = idxToGroup !! (fromIntegral igroup)
   len = dlen dev
@@ -131,8 +131,8 @@ slicepage time dev slice nslice step ofs icol categ =
   figact = fig "Actual" "act" chgsact
   figdiff = fig "Actual - Planned =" "diff" chgsdiff
   figplan = fig "Planned" "plan" chgsplan
-  tabact = tab chgsact "Actual"
-  tabplan = tab chgsplan "Planned"
+  tabact = tab chgsact "act" "Actual"
+  tabplan = tab chgsplan "plan" "Planned"
   fig = figpanel dev slice nslice step ofs icol icateg
   tab allchgs = slicetable dev step ofs icol changes where
     changes = ofschgs icol step $ catchgs categ $ slicechgs slice allchgs
@@ -172,18 +172,14 @@ figpanel dev slice nslice step ofs icol icateg title nfig allchgs =
     amt = sum $ map camount $ catchgs c $ changes
   changes = slicechgs slice allchgs
 
-slicetable :: Device->Integer->Integer->Integer->[Change]->String->String
-slicetable dev step ofs icolumn changes title
+slicetable :: Device -> Integer -> Integer -> Integer ->
+              [Change] -> String -> String -> String
+slicetable dev step ofs icolumn changes ntab title
   | null changes = "" | otherwise =
   "<div class=\"panel panel-default\">" ++
     "<div class=\"panel-heading\">" ++
       "<h3 class=\"panel-title\">" ++ title ++ visrange ++ "</h3></div>" ++
-    "<div class=\"panel-body\">" ++
-      "<div class=\"btn-group btn-group-lg btn-group-justified\">" ++
-        "<div class=\"btn-group\"><button class=\"btn btn-lg btn-default\" disabled=\"disabled\">" ++
-          "Previous 50</button></div>" ++
-        "<div class=\"btn-group\"><button class=\"btn btn-lg btn-default\">Next 50</button></div></div>" ++
-    "</div>" ++
+    pagination ++
     "<table class=\"table table-striped\">" ++ thead ++
       "<tbody class=\"hrows\">" ++ (concatMap row changes) ++ "</tbody>" ++
     "</table></div>" where
@@ -194,8 +190,27 @@ slicetable dev step ofs icolumn changes title
       "<th>" ++ hsrttags ++ "</th>" ++
       "<th>" ++ hsrtgroup ++ "</th>" ++
       "<th class=\"text-right\">" ++ hsrtamount ++ "</th>" ++ "</tr></thead>"
-  visrange = printf (" (showing <span>0</span>...<span>50</span> " ++
-                     "out of %i total)") (length changes)
+  visrange | lenchgs <= (drows dev) = printf " (showing all %i)" lenchgs
+           | otherwise =
+    (printf " (showing <span id=\"htabfrom-%s\">0</span>" ntab) ++
+    (printf "...<span id=\"htabto-%s\">%i</span> " ntab (drows dev)) ++
+    (printf "out of %i total)" lenchgs)
+  pagination | lenchgs <= (drows dev) = "" | otherwise =
+    "<div class=\"panel-body\">" ++
+      "<div class=\"btn-group btn-group-lg btn-group-justified\">" ++
+        btnprev ++ btnnext ++ "</div></div>"
+  btnprev = btn False "prev" $ printf "Previous %i" (drows dev)
+  btnnext = btn True "next" $ printf "Next %i" (drows dev)
+  btn active nbtn text = 
+    (printf "<div class=\"btn-group\" %s id=\"htab%s-disabled-%s\">"
+            (hideif active) nbtn ntab) ++
+      "<button class=\"btn btn-lg btn-default\" disabled=\"disabled\">" ++
+        text ++ "</div>" ++
+    (printf "<div class=\"btn-group\" %s id=\"htab%s-%s\">"
+            (hideif (not active)) nbtn ntab) ++
+      "<button class=\"btn btn-lg btn-default\" " ++
+        (printf "onclick=\"htab%s('%s')\">%s</button></div>" nbtn ntab text)
+  hideif x | x = "style=\"display:none\"" | otherwise = ""
   hsrt title field = printf "<a>%s</a>" title
   row change =
     "<tr class=\"" ++
@@ -242,6 +257,7 @@ slicetable dev step ofs icolumn changes title
   hsrttags = hsrt "Tags" "tags"
   hsrtgroup = hsrt "Group" "group"
   hsrtamount = hsrt "Amount" "amount"
+  lenchgs = toInteger $ length changes
 
 slicefigure time dev slice nslice step ofs nfig allchgs posneg =
   (slicefigname dev nslice step ofs nfig, content) where
