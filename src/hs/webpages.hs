@@ -127,7 +127,7 @@ slicepage time dev slice nslice step ofs icol categ =
   stepbtns = (concat [printf (
     "<a class=\"btn btn-lg btn-default\" href=\"%s\">%s</a>")
     (slicepagename dev nslice s (rcnofs s) ((rcnofs s)+len-1) 0) n
-    | (s, n) <- zip (steps len) ["Months", "Actual"]])
+    | (s, n) <- zip (steps len) ["Months", "Actual"], s /= step])
   figact = fig "Actual" "act" chgsact
   figdiff = fig "Actual - Planned =" "diff" chgsdiff
   figplan = fig "Planned" "plan" chgsplan
@@ -360,7 +360,7 @@ page time dev nslice step ofs icol content =
   "</div></div></div>" where
   navs = concatMap nav $ zip idxs slices
   nav (i, Slice{sname=name})
-    | show i == nslice = "<li class=\"active\"><a>%s</a></li>"
+    | show i == nslice = printf "<li class=\"active\"><a>%s</a></li>" name
     | otherwise = printf "<li><a href=\"%s\">%s</a></li>" href name where
     href = slicepagename dev (show i) step ofs icol 0
 
