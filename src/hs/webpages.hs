@@ -251,7 +251,7 @@ slicefigure time dev slice nslice step ofs nfig allchgs posneg =
       justcell = "<a xlink:href=\"" ++ href ++ "\">" ++
         "<rect style=\"display:none\" " ++
           (printf "class=\"hcell-act-col%i-cat%i\" " icolumn icateg) ++
-          (printf "fill=\"%s\"" bgcolor) ++
+          (printf "fill=\"%s\" " bgcolor) ++
           (printf "stroke=\"%s\" stroke-width=\"%i\" " cfgselcol cfgselwidth)++
           (printf "width=\"%i\" height=\"%i\" " cfgcellwidth heightact) ++
           (printf "x=\"0\" y=\"%i\" " (diry+cfgselwidth)) ++
