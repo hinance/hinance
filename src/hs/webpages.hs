@@ -86,7 +86,10 @@ diagpage time dev = (diagpagename dev, content) where
 
 grouppage time dev igroup = (grouppagename dev igroup, content) where
   content = html $ basicpage time dev $ inner
-  inner = table ("Group: " ++ group) changes dev
+  inner = slicetable dev step ofs icol changes ("Group: " ++ group)
+  step = defstep $ dlen dev
+  ofs = 0
+  icol = (dlen dev) - 1
   group = idxToGroup !! igrp
   changes = filter (((==) group).cgroup) $ chgsact ++ chgsplan
 
@@ -117,10 +120,11 @@ slicepage time dev slice nslice step ofs icol categ =
   figact = fig "Actual" "act" chgsact
   figdiff = fig "Actual - Planned =" "diff" chgsdiff
   figplan = fig "Planned" "plan" chgsplan
-  tabact = tab "Actual" chgsact
-  tabplan = tab "Planned" chgsplan
+  tabact = tab chgsact "Actual"
+  tabplan = tab chgsplan "Planned"
   fig = figpanel dev slice nslice step ofs
-  tab = slicetable dev slice nslice step ofs icol categ
+  tab allchgs = slicetable dev step ofs icol changes where
+    changes = ofschgs icol step $ catchgs categ $ slicechgs slice allchgs
   len = dlen dev
   prevofs | ofsidx > 0 = Just $ ofss !! (ofsidx-1) | otherwise = Nothing
   nextofs | ofsidx < ofslen-1 = Just $ ofss !! (ofsidx+1) | otherwise = Nothing
@@ -145,7 +149,7 @@ figpanel dev slice nslice step ofs title nfig allchgs =
     amt = sum $ map camount $ catchgs c $ changes
   changes = slicechgs slice allchgs
 
-slicetable dev slice nslice step ofs icolumn categ title allchgs
+slicetable dev step ofs icolumn changes title
   | null changes = "" | otherwise =
   "<div class=\"panel panel-default\">" ++
     "<div class=\"panel-heading\">" ++
@@ -207,8 +211,6 @@ slicetable dev slice nslice step ofs icolumn categ title allchgs
   hsrttags = hsrt "Tags" "tags"
   hsrtgroup = hsrt "Group" "group"
   hsrtamount = hsrt "Amount" "amount"
-  icateg = fromMaybe 0 $ elemIndex categ (scategs slice)
-  changes = ofschgs icolumn step $ catchgs categ $ slicechgs slice allchgs
 
 slicefigure time dev slice nslice step ofs nfig allchgs posneg =
   (slicefigname dev nslice step ofs nfig, content) where
