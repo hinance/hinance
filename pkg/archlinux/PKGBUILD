@@ -6,8 +6,7 @@ pkgdesc="Personal finance application for hackers."
 arch=('any')
 url="https://github.com/olegus8/hinance"
 license=('MIT')
-depends=('haskell-pretty-show' 'haskell-regex-tdfa'
-         'leiningen' 'python2' 'weboob')
+depends=('haskell-pretty-show' 'haskell-regex-tdfa' 'python2' 'weboob')
 makedepends=('git')
 source=("git+https://github.com/olegus8/hinance#tag=${pkgver}")
 md5sums=('SKIP')

@@ -160,11 +160,11 @@ figpanel dev slice nslice step ofs icol icateg title nfig allchgs =
   onload =
     (printf "var o=document.getElementById('hfig%s');" nfig) ++
     "var d=o.contentDocument;" ++
-    (printf ("var c=d.getElementsByClassName('hcell-col%i-cat%i')[0];" ++
-             "var ca=d.getElementsByClassName('hcell-act-col%i-cat%i')[0];")
+    (printf ("var c=d.getElementsByClassName('hcell-col%i-cat%i');" ++
+             "var a=d.getElementsByClassName('hcell-act-col%i-cat%i');")
              icol icateg icol icateg) ++
-    "if (c) c.setAttribute('style','display:none');" ++
-    "if (ca) ca.removeAttribute('style');"
+    "for(var i=0;i<c.length;i++)c[i].setAttribute('style','display:none');"++
+    "for(var i=0;i<a.length;i++)a[i].removeAttribute('style');"
   labels = concatMap label $ scategs slice
   label c = printf (
     "<li><span class=\"label\" style=\"color:%s;background-color:%s\"" ++

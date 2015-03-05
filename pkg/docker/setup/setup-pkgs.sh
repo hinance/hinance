@@ -71,11 +71,6 @@ patch PKGBUILD /hinance-docker/setup/weboob-git/PKGBUILD.patch
 makepkg -sc --noconfirm
 sudo pacman -U --noconfirm weboob-git-aa794ab0-1-x86_64.pkg.tar.xz
 
-# leiningen
-cd /hinance-docker/aur/leiningen
-makepkg -sc --noconfirm
-sudo pacman -U --noconfirm leiningen-1\:2.5.0-1-any.pkg.tar.xz
-
 # hinance
 # TODO: use aur package
 cd /hinance-docker/setup/hinance

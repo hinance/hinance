@@ -11,7 +11,7 @@ for NAME in tmp log out ; do
   fi
 done
 
-for NAME in user_{data,tag}.hs user.cljs ; do
+for NAME in user_{data,tag}.hs ; do
   if [[ ! -e $NAME ]] ; then
     echo "File \"$NAME\" is required to continue."
     exit 1
@@ -22,15 +22,10 @@ mkdir -p "$DIR/"{log,out}
 cd "$DIR/out"
 python2 /usr/lib/hinance/scrape.py -ddv --logging-file "$DIR/log/scrape.log"
 
+cp /usr/lib/hinance/hinance.js "$DIR/out"
+
 mkdir -p "$DIR/tmp/hs"
 cp -t "$DIR/tmp/hs" "$DIR"/*.hs /usr/lib/hinance/hs/*
-cp -rt "$DIR/tmp" /usr/lib/hinance/{*.clj,cljs}
-cp "$DIR"/*.cljs "$DIR"/tmp/cljs/hinance
-
-cd "$DIR/tmp"
-lein cljsbuild once
-cp "$DIR/tmp/hinance.js" "$DIR/out" 
-cd "$DIR/out"
 
 echo -e "module Hinance.Bank.Data where\nimport Hinance.Bank.Type\n\
 import Hinance.Currency\nbanksraw = []" >"$DIR/tmp/hs/bank_data.hs"
