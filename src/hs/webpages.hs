@@ -108,7 +108,7 @@ slicepage :: String -> Device -> Slice -> String -> Integer ->
 slicepage time dev slice nslice step ofs icol categ =
   (slicepagename dev nslice step ofs icol icateg, content) where
   content = html $ page time dev nslice step ofs icol $ inner
-  inner = alert++buttons++figact++figdiff++figplan++tabact++tabplan++params
+  inner = alert ++ buttons ++ figact ++ figdiff ++ figplan ++ tabact ++ tabplan
   alert | diagcount == 0 = ""
         | otherwise = printf (
           "<div class=\"alert alert-warning\">" ++ 
@@ -117,8 +117,6 @@ slicepage time dev slice nslice step ofs icol categ =
           diagcount (diagpagename dev)
   buttons = "<div class=\"btn-group btn-group-lg btn-group-justified\">" ++
               olderbtn ++ stepbtns ++ newerbtn ++ "</div><br>"
-  params = "<span id=\"hslice-params\" " ++
-             (printf "data-hcol=\"%i\" data-hcat=\"%i\"></span>" icol icateg)
   olderbtn = ofsbtn "Older" prevofs
   newerbtn = ofsbtn "Newer" nextofs
   ofsbtn title Nothing = printf
@@ -135,7 +133,7 @@ slicepage time dev slice nslice step ofs icol categ =
   figplan = fig "Planned" "plan" chgsplan
   tabact = tab chgsact "Actual"
   tabplan = tab chgsplan "Planned"
-  fig = figpanel dev slice nslice step ofs
+  fig = figpanel dev slice nslice step ofs icol icateg
   tab allchgs = slicetable dev step ofs icol changes where
     changes = ofschgs icol step $ catchgs categ $ slicechgs slice allchgs
   len = dlen dev
@@ -147,15 +145,26 @@ slicepage time dev slice nslice step ofs icol categ =
   rcnofs s = last $ takeWhile (\x -> x*s < actmax-actmin) $ offsets len s
   icateg = toInteger $ fromMaybe 0 $ elemIndex categ $ scategs slice
 
-figpanel dev slice nslice step ofs title nfig allchgs =
+figpanel :: Device -> Slice -> String -> Integer -> Integer ->
+            Integer -> Integer -> String -> String -> [Change] -> String
+figpanel dev slice nslice step ofs icol icateg title nfig allchgs =
   "<div class=\"panel panel-default\">" ++ 
     "<div class=\"panel-heading\">" ++
       "<h3 class=\"panel-title\">" ++ title ++ "</h3></div>"++
     "<div class=\"panel-body text-center\">" ++ fig ++ 
       "<ul class=\"list-inline\">" ++ labels ++ "</ul></div></div>" where
   fig = "<object type=\"image/svg+xml\" width=\"100%\" " ++
-          (printf "data=\"%s\"></object>" $
-           slicefigname dev nslice step ofs nfig)
+          (printf "id=\"hfig%s\" onload=\"%s\" data=\"%s\"></object>"
+           nfig onload (slicefigname dev nslice step ofs nfig))
+  onload :: String
+  onload =
+    (printf "var o=document.getElementById('hfig%s');" nfig) ++
+    "var d=o.contentDocument;" ++
+    (printf ("var c=d.getElementsByClassName('hcell-col%i-cat%i')[0];" ++
+             "var ca=d.getElementsByClassName('hcell-act-col%i-cat%i')[0];")
+             icol icateg icol icateg) ++
+    "if (c) c.setAttribute('style','display:none');" ++
+    "if (ca) ca.removeAttribute('style');"
   labels = concatMap label $ scategs slice
   label c = printf (
     "<li><span class=\"label\" style=\"color:%s;background-color:%s\"" ++

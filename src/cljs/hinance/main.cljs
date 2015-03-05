@@ -23,14 +23,7 @@
 (defn hide! [x] (set-attr! x :style "display:none"))
 (defn show! [x] (remove-attr! x :style))
 
-(defn handle-home! [params] (let
-  [colcat (str "col" (hsp :col) "-cat" (hsp :cat))
-   cell (str ".hcell-" colcat) cell-act (str ".hcell-act-" colcat)]
-  (js/console.log (str cell))
-  (js/console.log (str cell-act))
-  (dorun (concat (map hide! (sel cell)) (map show! (sel cell-act))))))
-
-(def handlers! {:home handle-home!})
+(def handlers! {:home #(js/console.log "home")})
 
 (defn handle! [path]
   (let [m (bidi.bidi/match-route routes path)
