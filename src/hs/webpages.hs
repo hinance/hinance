@@ -228,6 +228,7 @@ slicefigure time dev slice nslice step ofs nfig allchgs posneg =
   (slicefigname dev nslice step ofs nfig, content) where
   content = printf (
     "<svg xmlns=\"http://www.w3.org/2000/svg\" " ++
+         "xmlns:xlink=\"http://www.w3.org/1999/xlink\" " ++
          "width=\"100%%\" viewbox=\"0 0 %i %i\">%s</svg>")
     totalwidth totalheight $ concatMap column icolumns
   column icolumn = "<g>" ++ 

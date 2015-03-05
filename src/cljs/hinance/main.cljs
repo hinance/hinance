@@ -24,7 +24,7 @@
 (defn show! [x] (remove-attr! x :style))
 
 (def handlers! {
-  :home (js/console.log "home")})
+  :home #(js/console.log "home")})
 
 (defn handle! [path]
   (let [m (bidi.bidi/match-route routes path)
