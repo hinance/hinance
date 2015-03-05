@@ -44,21 +44,171 @@ webpages = concatMap (devicepages "TODO") [
 data Device = Device {dname::String, dlen::Integer, drows::Integer,
                       dnarrow::Bool}
 
-devicepages time dev = map (\(k,v) -> (k, html $ page v time dev)) $
-  [(pfx ++ "home.html", homepage), (pfx ++ "diag.html", diagpage)] ++
-  [(printf "%sslice%i-step%i-ofs%i.html" pfx islice step ofs,
-    slicepage slice (show islice) step ofs dev)
-   | (islice, slice) <- zip idxs slices,
-     step <- steps $ dlen dev,
-     ofs <- offsets (dlen dev) step] ++
-  [(printf "%sslice%s-step%i-ofs%i.html" pfx (show tag) step ofs,
-    slicepage (tagslice tag) (show tag) step ofs dev)
-   | tag <- [minBound::Tag ..],
-     step <- steps $ dlen dev,
-     ofs <- offsets (dlen dev) step] ++
-  [(printf "%sgroup%i.html" pfx igrp, grouppage igrp dev)
-   | igrp <- [0 .. length idxToGroup - 1]]
-  where pfx = (dname dev) ++ "-"
+devicepages time dev =
+  [homepage time dev, diagpage time dev] ++ slicespages ++ groupspages where
+  groupspages = [grouppage time dev i | i <- [0 .. length idxToGroup - 1]]
+  slicespages = concat $
+    [slicepages s (show i) | (i, s) <- zip idxs slices] ++
+    [slicepages (tagslice t) (show t) | t <- [minBound::Tag ..]]
+  slicepages slice nslice = concat
+    [[slicefigure time dev slice nslice step ofs nfig chgs posneg
+     | (nfig, chgs, posneg) <- [("act", chgsact, True),
+                                ("diff", chgsdiff, False)
+                                ("plan", chgsplan, True)]] ++
+     [slicepage time dev slice nslice step ofs icol categ
+     | icol <- [ofs..ofs+len], categ <- scategs slice]
+    | step <- steps len, ofs <- offsets len step]
+  len = dlen dev
+
+homepagename dev = printf "%s-home.html" (dname dev)
+diagpagename dev = printf "%s-diag.html" (dname dev)
+grouppagename dev igroup = printf "%s-group%i.html" (dname dev) igroup
+slicepagename dev nslice step ofs icol icat =
+  printf "%s-slice%s-step%i-ofs%i-col%i-cat%i.html"
+  (dname dev) nslice step ofs icol icat
+slicefigname dev nslice step ofs nfig =
+  printf "%s-slice%s-step%i-ofs%i-nfig%s.svg" (dname dev) nslice step ofs nfig
+
+homepage time dev = (homepagename dev, content) where
+  content = html $ basicpage time dev $ "<h1>Welcome!</h1>"
+
+diagpage time dev = (diagpagename dev, content) where
+  content = html $ basicpage time dev $ inner
+  inner = 
+    (printf "<h3>Checks (%i):</h3>" (length diagchecks)) ++
+    (printf "<pre>%s</pre>" (ppShow diagchecks)) ++
+    (printf "<h3>Changes without groups (%i):</h3>" (length diagnogrp)) ++
+    (printf "<pre>%s</pre>" (ppShow diagnogrp)) ++
+    (printf "<h3>Unbalanced groups (%i):</h3>" (length diagugrps)) ++
+    (printf "<pre>%s</pre>" (ppShow diagugrps)) ++
+    (printf "<h3>Slices mismatch (%i):</h3>" (length diagslicesflat)) ++
+    (printf "<pre>%s</pre>" (ppShow diagslices))
+
+grouppage time dev igroup = (grouppagename dev igroup, content) where
+  content = html $ basicpage time dev $ inner
+  inner = table ("Group: " ++ group) changes dev
+  group = idxToGroup !! igrp
+  changes = filter (((==) group).cgroup) $ chgsact ++ chgsplan
+
+slicepage time dev slice nslice step ofs icol categ =
+  (slicepagename dev nslice step ofs icol icateg, content) where
+  content = html $ page time dev nslice step ofs icol $ inner
+  inner = alert++buttons++figact++figdiff++figplan++tabact++tabplan++params
+  alert | diagcount == 0 = ""
+        | otherwise = printf (
+          "<div class=\"alert alert-warning\">" ++ 
+            "<strong>Warning!</strong> There are %i validation errors " ++
+            "(<a href=\"%s\">read full report</a>).</div>")
+          diagcount (diagpagename dev)
+  buttons =
+    "<div class=\"btn-group btn-group-lg btn-group-justified\">" ++
+      olderbtn ++ stepbtns ++ newerbtn ++ "</div><br>"
+  olderbtn = ofsbtn "Older" prevofs
+  newerbtn = ofsbtn "Newer" nextofs
+  ofsbtn title Nothing = printf
+    "<a class=\"btn btn-lg btn-default disabled\">%s</a>" title
+  ofsbtn title (Just newofs) = printf
+    "<a class=\"btn btn-lg btn-default\" href=\"%s\">%s</a>"
+    (slicepagename dev nslice step newofs (newofs+len-1) 0) title
+  stepbtns = (concat [printf (
+    "<a class=\"btn btn-lg btn-default\" href=\"%s\">%s</a>")
+    (slicepagename dev nslice s (rcnofs s) ((rcnofs s)+len-1) 0) n
+    | (s, n) <- zip (steps len) ["Months", "Actual"]])
+  figact = fig "Actual" "act" chgsact
+  figdiff = fig "Actual - Planned =" "diff" chgsdiff
+  figplan = fig "Planned" "plan" chgsplan
+  tabact = tab "Actual" chgsact
+  tabplan = tab "Planned" chgsplan
+  fig = figpanel dev slice nslice step ofs
+  tab = slicetable dev slice nslice step ofs icol categ
+  len = dlen dev
+  prevofs | ofsidx > 0 = Just $ ofss !! (ofsidx-1) | otherwise = Nothing
+  nextofs | ofsidx < ofslen-1 = Just $ ofss !! (ofsidx+1) | otherwise = Nothing
+  ofslen = length ofss
+  ofsidx = fromMaybe 0 $ elemIndex ofs ofss
+  ofss = offsets len step
+  rcnofs s = last $ takeWhile (\x -> x*s < actmax-actmin) $ offsets len s
+  icateg = fromMaybe 0 $ elemIndex categ $ scategs slice
+
+figpanel dev slice nslice step ofs title nfig allchgs =
+  "<div class=\"panel panel-default\">" ++ 
+    "<div class=\"panel-heading\">" ++
+      "<h3 class=\"panel-title\">" ++ title ++ "</h3></div>"++
+    "<div class=\"panel-body text-center\">" ++ fig ++ 
+      "<ul class=\"list-inline\">" ++ labels ++ "</ul></div></div>" where
+  fig = printf "<object data=\"%s\" type=\"image/svg+xml\"></object>"
+    (slicefigname dev nslice step ofs nfig)
+  labels = concatMap label $ scategs slice
+  label c = printf (
+    "<li><span class=\"label\" style=\"color:%s;background-color:%s\"" ++
+      ">%s: %i</span></li>") (scfg c) (scbg c) (scname c) (div amt 100) where
+    amt = sum $ map camount $ catchgs c $ changes
+  changes = slicechgs slice allchgs
+
+slicetable dev slice nslice step ofs icolumn categ title allchgs
+  | null changes = "" | otherwise =
+  "<div class=\"panel panel-default\">" ++
+    "<div class=\"panel-heading\">" ++
+      "<h3 class=\"panel-title\">" ++ title ++ visrange ++ "</h3></div>" ++
+      "<table class=\"table table-striped\">" ++ thead ++
+        "<tbody class=\"hrows\">" ++ (concatMap row changes) ++ "</tbody>" ++
+      "</table></div>" where
+  thead | dnarrow dev = "" | otherwise =
+    "<thead><tr>" ++ 
+      "<th>" ++ hsrtdate ++ "</th>" ++
+      "<th>" ++ hsrtdesc ++ "</th>" ++
+      "<th>" ++ hsrttags ++ "</th>" ++
+      "<th>" ++ hsrtgroup ++ "</th>" ++
+      "<th class=\"text-right\">" ++ hsrtamount ++ "</th>" ++ "</tr></thead>"
+  visrange = printf " (%i total)" (length changes)
+  hsrt title field = printf "<a>%s</a>" title
+  row change =
+    "<tr class=\"" ++
+      (printf "hrow-srtdate-%i " $ idx srtdate) ++
+      (printf "hrow-srtdesc-%i " $ idx srtdesc) ++
+      (printf "hrow-srttags-%i " $ idx srttags) ++
+      (printf "hrow-srtgroup-%i " $ idx srtgroup) ++
+      (printf "hrow-srtamount-%i\"" $ idx srtamount) ++
+    ">" ++ rowcontent ++ "</tr>" where
+    rowcontent
+      | dnarrow dev = "<td>" ++
+      "<p><big><strong>"++hsrtdate++":</strong> "++fdate++"</big></p>" ++
+      "<p><big><strong>"++hsrtdesc++":</strong> "++desc++"</big></p>" ++
+      "<p><big><strong>"++hsrttags++":</strong> "++tags++"</big></p>" ++
+      "<p><big><strong>"++hsrtgroup++":</strong> "++group++"</big></p>" ++
+      "<p><big><strong>"++hsrtamount++":</strong> "++amount++"</big></p></td>"
+      | otherwise =
+      "<td>" ++ fdate ++ "</td>" ++
+      "<td>" ++ desc ++ "</td>" ++
+      "<td>" ++ tags ++ "</td>" ++
+      "<td>" ++ group ++ "</td>" ++
+      "<td class=\"text-right\">" ++ amount ++ "</td>"
+    desc | null url = label
+         | otherwise = printf "<a href=\"%s\">%s</a>" url label
+    group = printf "<a href=\"%s\">%i</a>"
+      (grouppagename dev igroup) igroup
+    tag t = printf "<a class=\"btn btn-default\" href=\"%s\">%s</a>"
+      (slicepagename dev t step ofs icolumn 0) (drop 3 t)
+    label = filter htmlSafe $ clabel change
+    tags = concatMap tag $ sort $ map show $ ctags change
+    igroup = groupToIdx ! (cgroup change)
+    amount = fmtamount (camount change) (ccur change)
+    fdate = formatTime defaultTimeLocale "%Y-%m-%d" $ time
+    time = posixSecondsToUTCTime $ fromIntegral $ (ctime change)
+    url = curl change
+    idx xs = fromMaybe 0 $ elemIndex change xs
+  srtdate = sortBy (compare `on` ctime) changes
+  srtdesc = sortBy (compare `on` clabel) changes
+  srtgroup = sortBy (compare `on` cgroup) changes
+  srtamount = sortBy (compare `on` camount) changes
+  srttags = sortBy (on compare$concat.sort.(map show).ctags) changes
+  hsrtdate = hsrt "Date" "date"
+  hsrtdesc = hsrt "Description" "desc"
+  hsrttags = hsrt "Tags" "tags"
+  hsrtgroup = hsrt "Group" "group"
+  hsrtamount = hsrt "Amount" "amount"
+  icateg = fromMaybe 0 $ elemIndex categ (scategs slice)
+  changes = ofschgs icolumn step $ catchgs categ $ slicechgs slice allchgs
 
 steps len = [stepmonth, defstep len]
 
@@ -82,129 +232,10 @@ tagslice tag = Slice {sname="", stags=[], scategs=[SliceCateg {
   scname = "Tagged with \"" ++ (drop 3 $ show tag) ++ "\"",
   scbg=cfgtagcatbg, scfg=cfgtagcatfg, sctags=[tag]}]}
 
-homepage = "<h1>Welcome!</h1>"
-
-slicepage slice nslice step ofs dev =
-  alert++buttons++figact++figdiff++figplan++tabact++tabplan++params where
-  alert | diagcount == 0 = ""
-        | otherwise =
-          "<div class=\"alert alert-warning\">" ++ 
-            "<strong>Warning!</strong> There are " ++ (show diagcount) ++
-            " validation errors " ++
-            "(<a class=\"hdiag\">read full report</a>).</div>"
-  buttons =
-    "<div class=\"btn-group btn-group-lg btn-group-justified\">" ++
-      olderbtn ++ stepbtns ++ newerbtn ++ "</div><br>"
-  olderbtn = ofsbtn "Older" prevofs
-  newerbtn = ofsbtn "Newer" nextofs
-  ofsbtn title Nothing =
-    "<a class=\"btn btn-lg btn-default disabled\">" ++ title ++ "</a>"
-  ofsbtn title (Just newofs) = (printf
-    "<a class=\"btn btn-lg btn-default hofs\" data-hofs=\"%i\">%s</a>"
-    newofs title)
-  stepbtns = (concat [printf (
-    "<a class=\"btn btn-lg btn-default hstep\" " ++ 
-    "data-hstep=\"%i\" data-hofs=\"%i\"" ++ hide ++ ">%s</a>") s (rcnofs s) n
-    | (s, n) <- zip (steps len) ["Months", "Actual"]])
-  params = "<span id=\"hslice-params\" " ++
-    (printf "data-hslice=\"%s\" " nslice) ++
-    (printf "data-hstep=\"%i\" " step) ++
-    (printf "data-hofs=\"%i\"></span>" ofs)
-  figact = figure "Actual" chgsact slice step ofs len True
-  figdiff = figure "Actual - Planned =" chgsdiff slice step ofs len False
-  figplan = figure "Planned" chgsplan slice step ofs len True
-  tabact = tables "Actual" chgsact slice step ofs dev
-  tabplan = tables "Planned" chgsplan slice step ofs dev
-  len = (dlen dev)
-  pfx = (dname dev) ++ "-"
-  prevofs | ofsidx > 0 = Just $ ofss !! (ofsidx-1) | otherwise = Nothing
-  nextofs | ofsidx < ofslen-1 = Just $ ofss !! (ofsidx+1) | otherwise = Nothing
-  ofslen = length ofss
-  ofsidx = fromMaybe 0 $ elemIndex ofs ofss
-  ofss = offsets len step
-  rcnofs s = last $ takeWhile (\x -> x*s < actmax-actmin) $ offsets len s
-
 htmlSafe x = (x /= '<') && (isAscii x)
 
 groupToIdx = fromAscList $ zip idxToGroup idxs
 idxToGroup = map head $ group $ sort $ map cgroup $ chgsact ++ chgsplan
-
-grouppage igrp dev = table ("Group: " ++ group) changes dev where
-  group = idxToGroup !! igrp
-  changes = filter (((==) group).cgroup) $ chgsact ++ chgsplan
-
-tables title allchgs slice step ofs dev =
-  concat [tbl i c | i <- [ofs..ofs+(dlen dev)], c <- (scategs slice)] where
-  tbl icolumn categ | null changes = "" | otherwise =
-    "<div class=\"htable\" " ++ hide ++ " " ++
-      (printf "data-hofs=\"%i\" data-hcateg=\"%i\">" icolumn icateg) ++
-      (table title changes dev) ++ "</div>" where
-    icateg = fromMaybe 0 $ elemIndex categ (scategs slice)
-    changes = ofschgs icolumn step $ catchgs categ $ slicechgs slice allchgs
-
-table title changes dev | null changes = "" | otherwise =
-  "<div class=\"panel panel-default\">" ++
-    "<div class=\"panel-heading\">" ++
-      "<h3 class=\"panel-title\">" ++ title ++ visrange ++ "</h3></div>" ++
-      "<table class=\"table table-striped\">" ++ thead ++
-        "<tbody>" ++ (concatMap row changes) ++ "</tbody></table></div>" where
-  thead | dnarrow dev = "" | otherwise =
-    "<thead><tr>" ++ 
-      "<th>" ++ hsrtdate ++ "</th>" ++
-      "<th>" ++ hsrtdesc ++ "</th>" ++
-      "<th>" ++ hsrttags ++ "</th>" ++
-      "<th>" ++ hsrtgroup ++ "</th>" ++
-      "<th class=\"text-right\">" ++ hsrtamount ++ "</th>" ++ "</tr></thead>"
-  visrange
-    | lenchgs <= drows dev = printf " (showing all %i)" lenchgs
-    | otherwise = printf " (showing %i out of %i total)" (drows dev) lenchgs
-  hsrt title field =
-    printf "<a class=\"hsrt\" data-hsrt=\"%s\">%s</a>" field title
-  row change =
-    "<tr class=\"hrow\" " ++ hide ++ " " ++
-      (printf "data-hsrtdate=\"%04i\" " $ idx srtdate) ++
-      (printf "data-hsrtdesc=\"%04i\" " $ idx srtdesc) ++
-      (printf "data-hsrttags=\"%04i\" " $ idx srttags) ++
-      (printf "data-hsrtgroup=\"%04i\" " $ idx srtgroup) ++
-      (printf "data-hsrtamount=\"%04i\" " $ idx srtamount) ++
-    ">" ++ rowcontent ++ "</tr>" where
-    rowcontent
-      | dnarrow dev = "<td>" ++
-      "<p><big><strong>"++hsrtdate++":</strong> "++fdate++"</big></p>" ++
-      "<p><big><strong>"++hsrtdesc++":</strong> "++desc++"</big></p>" ++
-      "<p><big><strong>"++hsrttags++":</strong> "++tags++"</big></p>" ++
-      "<p><big><strong>"++hsrtgroup++":</strong> "++group++"</big></p>" ++
-      "<p><big><strong>"++hsrtamount++":</strong> "++amount++"</big></p></td>"
-      | otherwise =
-      "<td>" ++ fdate ++ "</td>" ++
-      "<td>" ++ desc ++ "</td>" ++
-      "<td>" ++ tags ++ "</td>" ++
-      "<td>" ++ group ++ "</td>" ++
-      "<td class=\"text-right\">" ++ amount ++ "</td>"
-    desc | null url = label
-         | otherwise = printf "<a href=\"%s\">%s</a>" url label
-    group = printf "<a class=\"hgrp\" data-hgrp=\"%i\">%i</a>" igroup igroup
-    tag t = "<a class=\"btn btn-default htag\" " ++
-             (printf "data-htag=\"%s\">%s</a> " t $ drop 3 t)
-    label = filter htmlSafe $ clabel change
-    tags = concatMap tag $ sort $ map show $ ctags change
-    igroup = groupToIdx ! (cgroup change)
-    amount = fmtamount (camount change) (ccur change)
-    fdate = formatTime defaultTimeLocale "%Y-%m-%d" $ time
-    time = posixSecondsToUTCTime $ fromIntegral $ (ctime change)
-    url = curl change
-    idx xs = fromMaybe 0 $ elemIndex change xs
-  srtdate = sortBy (compare `on` ctime) changes
-  srtdesc = sortBy (compare `on` clabel) changes
-  srtgroup = sortBy (compare `on` cgroup) changes
-  srtamount = sortBy (compare `on` camount) changes
-  srttags = sortBy (on compare$concat.sort.(map show).ctags) changes
-  hsrtdate = hsrt "Date" "date"
-  hsrtdesc = hsrt "Description" "desc"
-  hsrttags = hsrt "Tags" "tags"
-  hsrtgroup = hsrt "Group" "group"
-  hsrtamount = hsrt "Amount" "amount"
-  lenchgs = toInteger $ length changes
 
 figure title allchgs slice step ofs len posneg =
   "<div class=\"panel panel-default\">" ++ 
@@ -308,31 +339,21 @@ figurecells categs normh amftr catftr changes =
     amount = sum $ filter amftr $ map camount $ catchgs categ changes
     height = maximum [cfgmarkheight, div ((abs amount)*cfgcolumnheight) normh]
 
-diagpage =
-  (printf "<h3>Checks (%i):</h3>" (length diagchecks)) ++
-  (printf "<pre>%s</pre>" (ppShow diagchecks)) ++
-  (printf "<h3>Changes without groups (%i):</h3>" (length diagnogrp)) ++
-  (printf "<pre>%s</pre>" (ppShow diagnogrp)) ++
-  (printf "<h3>Unbalanced groups (%i):</h3>" (length diagugrps)) ++
-  (printf "<pre>%s</pre>" (ppShow diagugrps)) ++
-  (printf "<h3>Slices mismatch (%i):</h3>" (length diagslicesflat)) ++
-  (printf "<pre>%s</pre>" (ppShow diagslices))
-
-page content time dev =
+page time dev nslice step ofs icol content =
   "<span id=\"hdev-params\" " ++
-    (printf "data-hdefstep=\"%i\" " (defstep $ dlen dev)) ++
-    (printf "data-hlen=\"%i\" " (dlen dev)) ++
-    (printf "data-hrows=\"%i\" " (drows dev)) ++
-    (printf "data-hname=\"%s\"></span>" (dname dev)) ++
+    (printf "data-hrows=\"%i\"</span>" (drows dev)) ++
   "<div class=\"container\">" ++
     "<ul class=\"nav nav-pills\">" ++ navs ++ "</ul>" ++
     "<div class=\"row\"><div class=\"col-md-12\">" ++ content ++ 
       "<hr><p class=\"text-muted text-right\">Generated on "++time++"</p>"++
   "</div></div></div>" where
   navs = concatMap nav $ zip idxs slices
-  nav (i, Slice{sname=name}) = concat [
-    printf ("<li class=\"%s\" data-hslice=\"%i\" "++hide++"><a>%s</a></li>")
-    cls i name | cls <- ["hnav", "hnav-active active"]]
+  nav (i, Slice{sname=name})
+    | show i == nslice = "<li class=\"active\"><a>%s</a></li>"
+    | otherwise = printf "<li><a href=\"%s\">%s</a></li>" href name where
+    href = slicepagename dev i step ofs icol 0
+
+basicpage time dev = page time dev "" (defstep $ dlen dev) 0 ((dlen dev)-1)
 
 hide = "style=\"display:none\""
 
