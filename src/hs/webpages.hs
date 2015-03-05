@@ -220,7 +220,7 @@ slicetable dev step ofs icolumn changes ntab title
   hsrt title field = printf
     "<a href=\"#\" onclick=\"htabsrt('%s','%s',%i);return false\">%s</a>"
     ntab field lenchgs title
-  row change =
+  row (change, ichange) =
     "<tr class=\"" ++
       (printf "htab-srtdate-%s-%i " ntab $ idx srtdate) ++
       (printf "htab-srtdesc-%s-%i " ntab $ idx srtdesc) ++
@@ -254,18 +254,19 @@ slicetable dev step ofs icolumn changes ntab title
     fdate = formatTime defaultTimeLocale "%Y-%m-%d" $ time
     time = posixSecondsToUTCTime $ fromIntegral $ (ctime change)
     url = curl change
-    idx xs = fromMaybe 0 $ elemIndex change xs
-  srtdate = sortBy (compare `on` ctime) changes
-  srtdesc = sortBy (compare `on` clabel) changes
-  srtgroup = sortBy (compare `on` cgroup) changes
-  srtamount = sortBy (compare `on` camount) changes
-  srttags = sortBy (on compare$concat.sort.(map show).ctags) changes
+    idx xs = fromMaybe 0 $ elemIndex (change, ichange) xs
+  srtdate = sortBy (on compare $ ctime.fst) ichanges
+  srtdesc = sortBy (on compare $ clabel.fst) ichanges
+  srtgroup = sortBy (on compare $ cgroup.fst) ichanges
+  srtamount = sortBy (on compare $ camount.fst) ichanges
+  srttags = sortBy (on compare $ concat.sort.(map show).ctags.fst) ichanges
   hsrtdate = hsrt "Date" "date"
   hsrtdesc = hsrt "Description" "desc"
   hsrttags = hsrt "Tags" "tags"
   hsrtgroup = hsrt "Group" "group"
   hsrtamount = hsrt "Amount" "amount"
   lenchgs = length changes
+  ichanges = zip changes [0..]
   irows = fromIntegral $ (drows dev)
 
 slicefigure time dev slice nslice step ofs nfig allchgs posneg =
