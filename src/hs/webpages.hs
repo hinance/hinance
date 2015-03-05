@@ -163,8 +163,8 @@ figpanel dev slice nslice step ofs icol icateg title nfig allchgs =
     (printf ("var c=d.getElementsByClassName('hcell-col%i-cat%i');" ++
              "var a=d.getElementsByClassName('hcell-act-col%i-cat%i');")
              icol icateg icol icateg) ++
-    "for(var i=0;i<c.length;i++)c[i].setAttribute('style','display:none');"++
-    "for(var i=0;i<a.length;i++)a[i].removeAttribute('style');"
+    "for(var i=0;i<c.length;i++){c[i].setAttribute('style','display:none');}"++
+    "for(var i=0;i<a.length;i++){a[i].removeAttribute('style');}"
   labels = concatMap label $ scategs slice
   label c = printf (
     "<li><span class=\"label\" style=\"color:%s;background-color:%s\"" ++
@@ -214,11 +214,12 @@ slicetable dev step ofs icolumn changes ntab title
     (printf "<div class=\"btn-group\" %s id=\"htab%s-%s\">"
             (hideif (not active)) nbtn ntab) ++
       "<button class=\"btn btn-lg btn-default\" " ++
-        (printf "onclick=\"htab%s('%s')\">%s</button></div>" nbtn ntab text)
+        (printf "onclick=\"htab%s('%s',%i)\">%s</button></div>"
+                nbtn ntab lenchgs text)
   hideif x | x = "style=\"display:none\"" | otherwise = ""
   hsrt title field = printf
-    "<a href=\"#\" onclick=\"htabsrt('%s','%s');return false\">%s</a>"
-    ntab field title
+    "<a href=\"#\" onclick=\"htabsrt('%s','%s',%i);return false\">%s</a>"
+    ntab field lenchgs title
   row change =
     "<tr class=\"" ++
       (printf "htab-srtdate-%s-%i " ntab $ idx srtdate) ++
@@ -393,7 +394,7 @@ figurecells categs normh amftr catftr changes =
     height = maximum [cfgmarkheight, div ((abs amount)*cfgcolumnheight) normh]
 
 page time dev nslice step ofs icol content =
-  (printf "<script>hrows=%i</script>" (drows dev)) ++
+  (printf "<script>hdevrows=%i</script>" (drows dev)) ++
   "<div class=\"container\">" ++
     "<ul class=\"nav nav-pills\">" ++ navs ++ "</ul>" ++
     "<div class=\"row\"><div class=\"col-md-12\">" ++ content ++ 
