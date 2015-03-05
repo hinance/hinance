@@ -178,9 +178,15 @@ slicetable dev step ofs icolumn changes title
   "<div class=\"panel panel-default\">" ++
     "<div class=\"panel-heading\">" ++
       "<h3 class=\"panel-title\">" ++ title ++ visrange ++ "</h3></div>" ++
-      "<table class=\"table table-striped\">" ++ thead ++
-        "<tbody class=\"hrows\">" ++ (concatMap row changes) ++ "</tbody>" ++
-      "</table></div>" where
+    "<div class=\"panel-body\">" ++
+      "<div class=\"btn-group btn-group-lg btn-group-justified\">" ++
+        "<div class=\"btn-group\"><button class=\"btn btn-lg btn-default\" disabled=\"disabled\">" ++
+          "Previous 50</button></div>" ++
+        "<div class=\"btn-group\"><button class=\"btn btn-lg btn-default\">Next 50</button></div></div>" ++
+    "</div>" ++
+    "<table class=\"table table-striped\">" ++ thead ++
+      "<tbody class=\"hrows\">" ++ (concatMap row changes) ++ "</tbody>" ++
+    "</table></div>" where
   thead | dnarrow dev = "" | otherwise =
     "<thead><tr>" ++ 
       "<th>" ++ hsrtdate ++ "</th>" ++
@@ -188,7 +194,8 @@ slicetable dev step ofs icolumn changes title
       "<th>" ++ hsrttags ++ "</th>" ++
       "<th>" ++ hsrtgroup ++ "</th>" ++
       "<th class=\"text-right\">" ++ hsrtamount ++ "</th>" ++ "</tr></thead>"
-  visrange = printf " (%i total)" (length changes)
+  visrange = printf (" (showing <span>0</span>...<span>50</span> " ++
+                     "out of %i total)") (length changes)
   hsrt title field = printf "<a>%s</a>" title
   row change =
     "<tr class=\"" ++
