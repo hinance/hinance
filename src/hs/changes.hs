@@ -110,7 +110,7 @@ instance Changeable Shop where
                   ("tax", sotax o)], a /= 0]
     ++[ Change { camount= -spamount p, ctime=sptime p, ccur=scurrency s,
                  clabel=spmethod p, curl="", cgroup=g' o, ctags=tags (s,o,p) }
-      | p <- sopayments o]
+      | p <- sopayments o, spamount p /= 0]
     ++[ Change { camount=siprice i, ctime=sotime o, curl=siurl i, cgroup=g' o,
                  ccur=scurrency s, clabel=silabel i, ctags=tags (s,o,i) }
       | i <- soitems o]

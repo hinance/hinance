@@ -335,7 +335,7 @@ slicefigure time dev slice nslice step ofs nfig allchgs posneg =
     marky = cfgmargintop + cellsheightpos + cfgmarkspace
     fdate = formatTime defaultTimeLocale "%y-%m" $ time
     time = posixSecondsToUTCTime $ fromIntegral $ ofstime icolumn step
-  icolumns = [ofs..ofs+len]
+  icolumns = [ofs..ofs+len-1]
   totalwidth = cfgmarginleft + (len*cellwspace) - cfgcellspace + cfgmarginright
   totalheight = cfgmargintop + cellsheightpos +
                 cfgmarkspace + cfgmarkheight + cfgmarkspace +
