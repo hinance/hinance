@@ -197,7 +197,7 @@ slicetable dev step ofs icolumn changes ntab title
       "<th class=\"text-right\">" ++ hsrtamount ++ "</th>" ++ "</tr></thead>"
   visrange | lenchgs <= irows = printf " (showing all %i)" lenchgs
            | otherwise =
-    (printf " (showing <span id=\"htabfrom-%s\">0</span>" ntab) ++
+    (printf " (showing <span id=\"htabfrom-%s\">1</span>" ntab) ++
     (printf "...<span id=\"htabto-%s\">%i</span> " ntab irows) ++
     (printf "out of %i total)" lenchgs)
   pagination | lenchgs <= irows = "" | otherwise =
