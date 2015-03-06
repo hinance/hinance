@@ -20,7 +20,7 @@ htabupdate = function(ntab) {
     hshow(document.getElementById('htabprev-'+ntab), d.from > 0);
     hshow(document.getElementById('htabnext-disabled-'+ntab), d.to == d.rows);
     hshow(document.getElementById('htabnext-'+ntab), d.to < d.rows);
-    document.getElementById('htabfrom-'+ntab).innerHTML = d.from;
+    document.getElementById('htabfrom-'+ntab).innerHTML = d.from+1;
     document.getElementById('htabto-'+ntab).innerHTML = d.to;}}
 
 htabtouch = function(ntab, rows) {
