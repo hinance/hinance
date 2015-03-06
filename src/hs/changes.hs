@@ -1,5 +1,5 @@
-module Hinance.Changes (banks, chgsact, chgsplan,
-                        chgsdiff, grouped, groupSortBy) where
+module Hinance.Changes (banks, chgsact, chgsplan, chgsdiff,
+                        grouped, groupSortBy, shops) where
 import Data.Char
 import Data.Function
 import Data.List

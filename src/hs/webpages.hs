@@ -6,9 +6,11 @@ import Data.Map.Strict (fromAscList, (!))
 import Data.Maybe
 import Data.Time.Clock.POSIX
 import Data.Time.Format
+import Hinance.Bank.Type
 import Hinance.Changes
 import Hinance.Currency
 import Hinance.Report
+import Hinance.Shop.Type
 import Hinance.User.Tag
 import Hinance.User.Data
 import Hinance.User.Type
@@ -81,10 +83,33 @@ slicefigname dev nslice step ofs nfig =
   printf "%s-slice%s-step%i-ofs%i-nfig%s.svg" (dname dev) nslice step ofs nfig
 
 homepage time dev = (homepagename dev, content) where
-  content = html $ basicpage time dev $ "<h1>Welcome!</h1>"
+  content = html [] $ basicpage time dev $ inner
+  inner = "<h3>Welcome to Hinance Report!</h3>" ++ rows
+  rows = concatMap row [
+    ("Actual period", period actmin actmax),
+    ("Planned period", period planfrom planto),
+    ("Groups", sgroups),
+    ("Banks", sbanks),
+    ("Shops", sshops),
+    ("Tags", show $ length alltags)]
+  row (key, val) = printf "<p><big><strong>%s:</strong> %s</big></p>" key val
+  period from to = printf "%s to %s" (date from) (date to)
+  sgroups = printf "%i actual, %i planned" (ngroups chgsact) (ngroups planned)
+  sbanks = printf "%i total, %i accounts, %i transactions"
+                  (length banks) (length allbaccs) (length allbtrans)
+  sshops = printf "%i total, %i orders, %i items"
+                  (length shops) (length allsorders) (length allsitems)
+  date = fmtime "%Y-%m-%d"
+  ngroups = length . (groupSortBy cgroup)
+  allbaccs = concatMap baccs banks
+  allbtrans = concatMap batrans allbaccs
+  allsorders = concatMap sorders shops
+  allsitems = concatMap soitems allsorders
+  alltags = [minBound::Tag ..]
 
 diagpage time dev = (diagpagename dev, content) where
-  content = html $ basicpage time dev $ inner
+  content = html head $ basicpage time dev $ inner
+  head = ["Diagnostics"]
   inner = 
     (printf "<h3>Checks (%i):</h3>" (length diagchecks)) ++
     (printf "<pre>%s</pre>" (ppShow diagchecks)) ++
@@ -97,7 +122,8 @@ diagpage time dev = (diagpagename dev, content) where
 
 grouppage :: String -> Device -> Integer -> (String, String)
 grouppage time dev igroup = (grouppagename dev igroup, content) where
-  content = html $ basicpage time dev $ inner
+  content = html head $ basicpage time dev $ inner
+  head = [printf "Group %i" igroup]
   inner = slicetable dev (defstep len) 0 (len-1) changes "" ("Group: "++group)
   changes = filter (((==) group).cgroup) $ chgsact ++ chgsplan
   group = idxToGroup !! (fromIntegral igroup)
@@ -107,7 +133,8 @@ slicepage :: String -> Device -> Slice -> String -> Integer ->
              Integer -> Integer -> SliceCateg -> (String, String)
 slicepage time dev slice nslice step ofs icol categ =
   (slicepagename dev nslice step ofs icol icateg, content) where
-  content = html $ page time dev nslice step ofs icol $ inner
+  content = html head $ page time dev nslice step ofs icol $ inner
+  head = [sname slice, fdate]
   inner = alert ++ buttons ++ figact ++ figdiff ++ figplan ++ tabact ++ tabplan
   alert | diagcount == 0 = ""
         | otherwise = printf (
@@ -144,6 +171,7 @@ slicepage time dev slice nslice step ofs icol categ =
   ofss = offsets len step
   rcnofs s = last $ takeWhile (\x -> x*s < actmax-actmin) $ offsets len s
   icateg = toInteger $ fromMaybe 0 $ elemIndex categ $ scategs slice
+  fdate = fmtime "%Y-%m" $ actmin + step*icol
 
 figpanel :: Device -> Slice -> String -> Integer -> Integer ->
             Integer -> Integer -> String -> String -> [Change] -> String
@@ -251,8 +279,7 @@ slicetable dev step ofs icolumn changes ntab title
     tags = concatMap tag $ sort $ map show $ ctags change
     igroup = groupToIdx ! (cgroup change)
     amount = fmtamount (camount change) (ccur change)
-    fdate = formatTime defaultTimeLocale "%Y-%m-%d" $ time
-    time = posixSecondsToUTCTime $ fromIntegral $ (ctime change)
+    fdate = fmtime "%Y-%m-%d" $ ctime change
     url = curl change
     idx xs = fromMaybe 0 $ elemIndex (change, ichange) xs
   srtdate = sortBy (on compare $ ctime.fst) ichanges
@@ -333,8 +360,7 @@ slicefigure time dev slice nslice step ofs nfig allchgs posneg =
     stacknegy = marky + cfgmarkspace + cfgmarkheight
     x = cfgmarginleft + ((icolumn-ofs) * cellwspace)
     marky = cfgmargintop + cellsheightpos + cfgmarkspace
-    fdate = formatTime defaultTimeLocale "%y-%m" $ time
-    time = posixSecondsToUTCTime $ fromIntegral $ ofstime icolumn step
+    fdate = fmtime "%y-%m" $ ofstime icolumn step
   icolumns = [ofs..ofs+len-1]
   totalwidth = cfgmarginleft + (len*cellwspace) - cfgcellspace + cfgmarginright
   totalheight = cfgmargintop + cellsheightpos +
@@ -375,9 +401,13 @@ ofschgs ofs step = filter (\Change{ctime=t} -> t >= tmin && t < tmax)
   where tmin = ofstime ofs step
         tmax = tmin + step
 
-tagslice tag = Slice {sname="", stags=[], scategs=[SliceCateg {
-  scname = "Tagged with \"" ++ (drop 3 $ show tag) ++ "\"",
-  scbg=cfgtagcatbg, scfg=cfgtagcatfg, sctags=[tag]}]}
+tagslice tag = Slice {sname=tagname, stags=[], scategs=[SliceCateg {
+  scname = "Tagged with \"" ++ tagname ++ "\"",
+  scbg=cfgtagcatbg, scfg=cfgtagcatfg, sctags=[tag]}]} where
+  tagname = drop 3 $ show tag
+
+fmtime format =
+  (formatTime defaultTimeLocale format).posixSecondsToUTCTime.fromIntegral
 
 htmlSafe x = (x /= '<') && (isAscii x)
 
@@ -409,13 +439,13 @@ page time dev nslice step ofs icol content =
 
 basicpage time dev = page time dev "" (defstep $ dlen dev) 0 ((dlen dev)-1)
 
-html body =
+html titles body =
   "<!DOCTYPE html><html lang=\"en\"><head>" ++
     "<meta charset=\"utf-8\">" ++
     "<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">" ++
     "<meta name=\"viewport\" content=\"width=device-width, " ++ 
             "initial-scale=1\">" ++
-    "<title>Hinance</title>" ++
+    "<title>" ++ title ++ "</title>" ++
     "<link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com" ++
                                  "/bootstrap/3.3.1/css/bootstrap.min.css\">"++
     "<link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com" ++
@@ -427,6 +457,7 @@ html body =
     "<script src=\"https://maxcdn.bootstrapcdn.com" ++
                     "/bootstrap/3.3.1/js/bootstrap.min.js\"></script>" ++
     "<script type=\"text/javascript\" src=\"hinance.js\"></script>" ++
-    "</body></html>"
+    "</body></html>" where
+  title = concat $ intersperse " | " $ titles ++ ["Hinance"]
 
 idxs = [(toInteger 0)..]
