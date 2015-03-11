@@ -24,8 +24,7 @@ chgsplan = (sortBy (compare`on`ctime)) . (++ planned) . concat
   $ filter grouped chgsact
 
 chgsdiff = (sortBy (compare`on`ctime)) . (++ chgsact)
-  . (map $ \x -> x{camount = -camount x})
-  . (filter $ (< (ctime $ last chgsact)).ctime) $ chgsplan
+  . (map $ \x -> x{camount = -camount x}) $ chgsplan
 
 banks = patched $ map (mrgbacs.mrgbs) $ groupSortBy bid banksraw where
   mrgbs = foldl1 (\a x -> x{baccs = (baccs a) ++ (baccs x)})
