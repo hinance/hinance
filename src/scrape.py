@@ -107,6 +107,8 @@ class MyApp(Application):
       order_total = o.shipping + o.discount + o.tax
       assert payments_total == items_total + order_total, \
         u'%s != %s + %s' % (payments_total, items_total, order_total)
+      assert list(backend.iter_items(o))
+      assert list(backend.iter_payments(o))
 
     print u'Scraped %i orders' % len(sorders)
     stdout.flush()
