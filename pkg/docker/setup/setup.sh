@@ -1,31 +1,35 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
 
-# Arch Rollback Machine date.
-ARM_YEAR=2014
-ARM_MONTH=11
-ARM_DAY=11
+# Arch Haskell snapshot of 2015-03-01.
+HABS_TAG=02c735ed1647812fdb9a2c7c5ec4a742d277066c
 
-# Arch User Repository snapshot of 2014-11-11.
-AUR_TAG=6c79797067afd7e029461cf54ff0773cb8b7189c
+. /hinance-docker/setup/share.sh
 
-# Arch Haskell snapshot of 2014-11-11.
-HABS_TAG=6dc782392572bc3f118b7af1f81fd8a7dc395e33
+sed 's/^CheckSpace/#CheckSpace/g' -i /etc/pacman.conf
 
-echo "Server = " \
-     "http://seblu.net/a/arm/$ARM_YEAR/$ARM_MONTH/$ARM_DAY/\$repo/os/\$arch" \
-     > /etc/pacman.d/mirrorlist
+pacman-key --refresh-keys
+
+# Pacman database has changed in version 4.2 on 2014-12-29.
+# Need to upgrade it first before going any further.
+echo "Server = $AA_ROOT/repos/2014/12/28/\$repo/os/\$arch" \
+    > /etc/pacman.d/mirrorlist
+pacman -Syyuu --noconfirm
+
+echo "Server = $AA_ROOT/repos/2014/12/29/\$repo/os/\$arch" \
+    > /etc/pacman.d/mirrorlist
+pacman -Sy --noconfirm pacman
+pacman-db-upgrade
+pacman -Syyuu --noconfirm
+
+# Finish the upgrade.
+echo "Server = $AA_ROOT/repos/$AA_YEAR/$AA_MONTH/$AA_DAY/\$repo/os/\$arch" \
+    > /etc/pacman.d/mirrorlist
 pacman -Syyuu --noconfirm
 
 pacman -S --noconfirm --needed base base-devel cabal-install ghc git happy \
                                mupdf python2-prettytable sudo v8
-
-# aur
-curl -O http://pkgbuild.com/git/aur-mirror.git/snapshot/aur-mirror-$AUR_TAG.tar.xz
-tar -xJf aur-mirror-$AUR_TAG.tar.xz
-mv aur-mirror-$AUR_TAG /hinance-docker/aur
-rm aur-mirror-$AUR_TAG.tar.xz
 
 # habs
 git clone https://github.com/archhaskell/habs /hinance-docker/habs

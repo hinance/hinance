@@ -1,6 +1,8 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
+
+. /hinance-docker/setup/share.sh
 
 CBLREPO=$HOME/.cabal/bin/cblrepo
 
@@ -56,17 +58,17 @@ makepkg -sc --noconfirm
 sudo pacman -U --noconfirm haskell-regex-tdfa-1.2.0-1-x86_64.pkg.tar.xz
 
 # python2-elementtidy
-cd /hinance-docker/aur/python2-elementtidy
+fetch-aur /py python2-elementtidy
 makepkg -sc --noconfirm
 sudo pacman -U --noconfirm python2-elementtidy-1.0-1-x86_64.pkg.tar.xz
 
 # python2-html2text
-cd /hinance-docker/aur/python2-html2text
+fetch-aur /py python2-html2text
 makepkg -sc --noconfirm
-sudo pacman -U --noconfirm python2-html2text-2014.9.25-2-any.pkg.tar.xz
+sudo pacman -U --noconfirm python2-html2text-2014.12.24-1-any.pkg.tar.xz
 
 # weboob-git
-cd /hinance-docker/aur/weboob-git
+fetch-aur /we weboob-git
 patch PKGBUILD /hinance-docker/setup/weboob-git/PKGBUILD.patch
 makepkg -sc --noconfirm
 sudo pacman -U --noconfirm weboob-git-aa794ab0-1-x86_64.pkg.tar.xz
