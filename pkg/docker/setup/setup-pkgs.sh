@@ -10,6 +10,7 @@ CBLREPO=$HOME/.cabal/bin/cblrepo
 cd /hinance-docker/cblrepo
 patch -p4 < /hinance-docker/habs/patches/cblrepo.source
 cabal update
+cabal install --only-dependencies
 cabal configure --user
 cabal build
 cabal install
