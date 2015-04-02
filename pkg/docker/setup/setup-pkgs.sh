@@ -62,7 +62,7 @@ sudo pacman -U --noconfirm haskell-regex-base-0.93.2-58-x86_64.pkg.tar.xz
 # haskell-regex-tdfa
 cd /hinance-docker/habs/haskell-regex-tdfa
 makepkg -sc --noconfirm
-sudo pacman -U --noconfirm haskell-regex-tdfa-1.2.0-66-x86_64.pkg.tar.xz
+sudo pacman -U --noconfirm haskell-regex-tdfa-1.2.0-1-x86_64.pkg.tar.xz
 
 # python2-elementtidy
 fetch-aur /py python2-elementtidy
