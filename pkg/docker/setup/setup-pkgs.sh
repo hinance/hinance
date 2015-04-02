@@ -8,7 +8,7 @@ CBLREPO=$HOME/.cabal/bin/cblrepo
 
 # habs
 cabal update
-cabal install cblrepo-0.13
+cabal install cblrepo-0.14.0
 cd /hinance-docker/habs
 $CBLREPO sync
 $CBLREPO add pretty-show,1.6.8 regex-tdfa,1.2.0
@@ -20,12 +20,12 @@ sudo pacman -Rs --noconfirm cabal-install
 # ghc
 cd /hinance-docker/habs/ghc
 makepkg -sc --noconfirm
-sudo pacman -U --noconfirm ghc-7.8.3-1-x86_64.pkg.tar.xz
+sudo pacman -U --noconfirm ghc-7.8.4-1-x86_64.pkg.tar.xz
 
 # haskell-haskell-lexer
 cd /hinance-docker/habs/haskell-haskell-lexer
 makepkg -sc --noconfirm
-sudo pacman -U --noconfirm haskell-haskell-lexer-1.0-4-x86_64.pkg.tar.xz
+sudo pacman -U --noconfirm haskell-haskell-lexer-1.0-5-x86_64.pkg.tar.xz
 
 # haskell-pretty-show
 cd /hinance-docker/habs/haskell-pretty-show
@@ -35,22 +35,22 @@ sudo pacman -U --noconfirm haskell-pretty-show-1.6.8-1-x86_64.pkg.tar.xz
 # haskell-mtl
 cd /hinance-docker/habs/haskell-mtl
 makepkg -sc --noconfirm
-sudo pacman -U --noconfirm haskell-mtl-2.1.3.1-4-x86_64.pkg.tar.xz
+sudo pacman -U --noconfirm haskell-mtl-2.1.3.1-5-x86_64.pkg.tar.xz
 
 # haskell-text
 cd /hinance-docker/habs/haskell-text
 makepkg -sc --noconfirm
-sudo pacman -U --noconfirm haskell-text-1.1.1.3-2-x86_64.pkg.tar.xz
+sudo pacman -U --noconfirm haskell-text-1.2.0.4-1-x86_64.pkg.tar.xz
 
 # haskell-parsec
 cd /hinance-docker/habs/haskell-parsec
 makepkg -sc --noconfirm
-sudo pacman -U --noconfirm haskell-parsec-3.1.7-1-x86_64.pkg.tar.xz
+sudo pacman -U --noconfirm haskell-parsec-3.1.8-1-x86_64.pkg.tar.xz
 
 # haskell-regex-base
 cd /hinance-docker/habs/haskell-regex-base
 makepkg -sc --noconfirm
-sudo pacman -U --noconfirm haskell-regex-base-0.93.2-57-x86_64.pkg.tar.xz
+sudo pacman -U --noconfirm haskell-regex-base-0.93.2-58-x86_64.pkg.tar.xz
 
 # haskell-regex-tdfa
 cd /hinance-docker/habs/haskell-regex-tdfa
