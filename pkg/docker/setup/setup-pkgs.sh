@@ -74,6 +74,11 @@ fetch-aur /py python2-html2text
 makepkg -sc --noconfirm
 sudo pacman -U --noconfirm python2-html2text-2014.12.24-1-any.pkg.tar.xz
 
+# python2-pysqlite
+fetch-aur /py python2-pysqlite
+makepkg -sc --noconfirm
+sudo pacman -U --noconfirm python2-pysqlite-2.6.3-4-any.pkg.tar.xz
+
 # weboob-git
 fetch-aur /we weboob-git
 patch PKGBUILD /hinance-docker/setup/weboob-git/PKGBUILD.patch
