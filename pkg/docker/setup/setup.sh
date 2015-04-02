@@ -2,8 +2,8 @@
 
 set -e
 
-# Arch Haskell snapshot of 2015-03-01.
-HABS_TAG=02c735ed1647812fdb9a2c7c5ec4a742d277066c
+# Arch Haskell snapshot of 2015-03-12.
+HABS_TAG=913ba6202d209fa1aff57e12e2c7105ddad724d5
 
 . /hinance-docker/setup/share.sh
 

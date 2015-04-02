@@ -11,7 +11,7 @@ cabal update
 cabal install cblrepo-0.14.0
 cd /hinance-docker/habs
 $CBLREPO sync
-$CBLREPO add pretty-show,1.6.8 regex-tdfa,1.2.0
+$CBLREPO add pretty-show,1.6.8.2 regex-tdfa,1.2.0
 $CBLREPO pkgbuild haskell-lexer pretty-show mtl text parsec \
                   regex-base regex-tdfa
 rm -rf $HOME/.{cabal,ghc}
@@ -30,7 +30,7 @@ sudo pacman -U --noconfirm haskell-haskell-lexer-1.0-5-x86_64.pkg.tar.xz
 # haskell-pretty-show
 cd /hinance-docker/habs/haskell-pretty-show
 makepkg -sc --noconfirm
-sudo pacman -U --noconfirm haskell-pretty-show-1.6.8-1-x86_64.pkg.tar.xz
+sudo pacman -U --noconfirm haskell-pretty-show-1.6.8.2-1-x86_64.pkg.tar.xz
 
 # haskell-mtl
 cd /hinance-docker/habs/haskell-mtl
@@ -55,12 +55,12 @@ sudo pacman -U --noconfirm haskell-regex-base-0.93.2-58-x86_64.pkg.tar.xz
 # haskell-regex-tdfa
 cd /hinance-docker/habs/haskell-regex-tdfa
 makepkg -sc --noconfirm
-sudo pacman -U --noconfirm haskell-regex-tdfa-1.2.0-1-x86_64.pkg.tar.xz
+sudo pacman -U --noconfirm haskell-regex-tdfa-1.2.0-66-x86_64.pkg.tar.xz
 
 # python2-elementtidy
 fetch-aur /py python2-elementtidy
 makepkg -sc --noconfirm
-sudo pacman -U --noconfirm python2-elementtidy-1.0-1-x86_64.pkg.tar.xz
+sudo pacman -U --noconfirm python2-elementtidy-1.0-2-x86_64.pkg.tar.xz
 
 # python2-html2text
 fetch-aur /py python2-html2text

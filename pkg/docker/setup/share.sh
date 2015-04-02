@@ -1,7 +1,7 @@
 # Archlinux Archive date.
 AA_YEAR='2015'
 AA_MONTH='03'
-AA_DAY='01'
+AA_DAY='12'
 AA_ROOT='http://seblu.net/a/archive'
 
 fetch-aur() {
