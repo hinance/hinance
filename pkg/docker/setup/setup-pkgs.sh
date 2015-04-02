@@ -74,8 +74,8 @@ fetch-aur /py python2-html2text
 makepkg -sc --noconfirm
 sudo pacman -U --noconfirm python2-html2text-2014.12.24-1-any.pkg.tar.xz
 
-# python2-pysqlite
-fetch-aur /py python2-pysqlite
+# python-pysqlite
+fetch-aur /py python-pysqlite
 makepkg -sc --noconfirm
 sudo pacman -U --noconfirm python2-pysqlite-2.6.3-4-any.pkg.tar.xz
 
