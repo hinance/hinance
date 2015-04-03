@@ -83,7 +83,7 @@ sudo pacman -U --noconfirm python2-pysqlite-2.6.3-4-x86_64.pkg.tar.xz
 fetch-aur /we weboob-git
 patch PKGBUILD /hinance-docker/setup/weboob-git/PKGBUILD.patch
 makepkg -sc --noconfirm
-sudo pacman -U --noconfirm weboob-git-aa794ab0-1-x86_64.pkg.tar.xz
+sudo pacman -U --noconfirm weboob-git-fb8be410-1-x86_64.pkg.tar.xz
 
 # hinance
 # TODO: use aur package
