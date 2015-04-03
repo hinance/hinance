@@ -6,6 +6,7 @@ import Hinance.User.Tag
 import Hinance.User.Type
 import Hinance.Bank.Type
 import Hinance.Shop.Type
+import Hinance.Currency
 
 addtagged _ = [] :: [Tag]
 canxfer _ _ = False
@@ -29,7 +30,10 @@ instance Patchable Shop where
   patched = id
 
 instance Patchable Bank where
-  patched = id
+  patched banks = banks ++ [Bank {bid="", baccs=[
+    BankAcc {baid="", balabel="", babalance=300, bacurrency=USD, batrans=[
+      BankTrans {btlabel="", btamount=100, bttime=1, btrtime=1},
+      BankTrans {btlabel="", btamount=200, bttime=2, btrtime=2}]}]}]
 
 planfrom = 0
 planto = 0
