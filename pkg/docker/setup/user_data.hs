@@ -1,4 +1,7 @@
-module Hinance.User.Data where
+module Hinance.User.Data (
+  addtagged, canmerge, canxfer, patched,
+  planfrom, planto, planned, slices, tagged
+) where
 import Hinance.User.Tag
 import Hinance.User.Type
 import Hinance.Bank.Type
@@ -8,6 +11,7 @@ addtagged _ = [] :: [Tag]
 canxfer _ _ = False
 canmerge _ _ = False
 tagparts = []
+slices = [] :: [Slice]
 
 instance Taggable (Bank, BankAcc, BankTrans) where
   tagged _ _ = False
