@@ -77,7 +77,7 @@ sudo pacman -U --noconfirm python2-html2text-2014.12.24-1-any.pkg.tar.xz
 # python-pysqlite
 fetch-aur /py python-pysqlite
 makepkg -sc --noconfirm
-sudo pacman -U --noconfirm python2-pysqlite-2.6.3-4-any.pkg.tar.xz
+sudo pacman -U --noconfirm python2-pysqlite-2.6.3-4-x86_64.pkg.tar.xz
 
 # weboob-git
 fetch-aur /we weboob-git
