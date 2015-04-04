@@ -21,7 +21,7 @@ chgsact = (sortBy (compare`on`ctime)).(concatMap addchanges)
 
 chgsplan = (sortBy (compare`on`ctime)) . (++ planned) . concat
   . (filter$(< planfrom).ctime.head) . (groupSortBy cgroup)
-  $ filter grouped chgsact
+  . (map $ \x -> x{cgroup="planned "++(cgroup x)}) $ filter grouped chgsact
 
 chgsdiff = (sortBy (compare`on`ctime)) . (++ chgsact)
   . (map $ \x -> x{camount = -camount x}) $ chgsplan
