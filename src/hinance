@@ -41,6 +41,7 @@ ghc -O -XFlexibleInstances -o "$DIR/tmp/hinance-hs" "$DIR"/tmp/hs/*.hs
 
 echo 'Generating report web pages.'
 cd "$DIR/out/www"
+cp -r /usr/lib/hinance/www/* "$DIR/out/www"
 "$DIR/tmp/hinance-hs" "$(date)" &
 PID=$!
 
