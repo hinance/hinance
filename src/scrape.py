@@ -41,7 +41,6 @@ class MyApp(Application):
         batrans.append([
           u'BankTrans',
           u'{ bttime = %i' % totime(t.date),
-          u', btrtime = %i' % totime(t.rdate),
           u', btlabel = %s' % tostr(t.label),
           u', btamount = %i' % tocent(t.amount),
           u'}'])

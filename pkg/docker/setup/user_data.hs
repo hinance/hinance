@@ -32,8 +32,8 @@ instance Patchable Shop where
 instance Patchable Bank where
   patched banks = banks ++ [Bank {bid="", baccs=[
     BankAcc {baid="", balabel="", babalance=300, bacurrency=USD, batrans=[
-      BankTrans {btlabel="", btamount=100, bttime=1, btrtime=1},
-      BankTrans {btlabel="", btamount=200, bttime=2, btrtime=2}]}]}]
+      BankTrans {btlabel="", btamount=100, bttime=1},
+      BankTrans {btlabel="", btamount=200, bttime=2}]}]}]
 
 planfrom = 0
 planto = 0
