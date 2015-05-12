@@ -1,0 +1,60 @@
+#!/bin/sh
+
+set -e
+
+DIR="$(pwd)"
+
+for NAME in user_{data,tag}.hs backends ; do
+  if [[ ! -e in/$NAME ]] ; then
+    echo "File \"in/$NAME\" is required to continue."
+    exit 1
+  fi
+done
+
+if [ -e out/lock.pid ] ; then
+  if kill -0 $(cat out/lock.pid) &>/dev/null ; then
+    echo "hinance is already running in the current directory."
+    exit 1
+  fi
+fi
+
+mkdir -p cmd out/{log,archive,www,tmp}
+echo $$ > out/lock.pid
+
+if [ ! -e in/config.sh ] ; then cp /usr/lib/hinance/config.sh in ; fi
+. in/config.sh
+
+echo "Serving."
+
+while true ; do
+  DATE=$(date +"%Y_%m_%d_%H_%M")
+  echo "Fetching data on $DATE" >> "$DIR"/out/log/hinance.log
+
+  ARCHDIR="$DIR"/out/archive/$DATE
+  rm -rf $ARCHDIR
+  mkdir -p $ARCHDIR
+  cp "$DIR/in/*" $ARCHDIR
+  chmod 600 "$ARCHDIR"/backends
+  export WEBOOB_BACKENDS="$ARCHDIR"/backends
+  
+  sleep $((RESTART_PERIOD)) &
+  SLEEPID=$!
+
+  cd $ARCHDIR
+  if /usr/lib/hinance/hinance-once &>> "$DIR"/out/log/hinance.log ; then
+    rm -rf "$DIR"/out/www
+    mv out/www "$DIR"/out
+  fi
+  rm -rf tmp
+
+  echo "Fetching complete for $DATE" >> "$DIR"/out/log/hinance.log
+
+  while kill -0 $SLEEPID 2>/dev/null ; do
+    if [ -e "$DIR"/cmd/restart ] ; then
+      rm -f "$DIR"/cmd/restart
+      set -e; kill $SLEEPID; set +e
+      break
+    fi
+    sleep 1
+  done
+done

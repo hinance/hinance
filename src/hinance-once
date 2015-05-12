@@ -4,20 +4,6 @@ set -e
 
 DIR="$(pwd)"
 
-for NAME in tmp log out ; do
-  if [[ -e $NAME ]] ; then
-    echo "Directory \"$NAME\" must be deleted to continue."
-    exit 1
-  fi
-done
-
-for NAME in user_{data,tag}.hs ; do
-  if [[ ! -e $NAME ]] ; then
-    echo "File \"$NAME\" is required to continue."
-    exit 1
-  fi
-done
-
 mkdir -p "$DIR/"{log,out/www}
 cd "$DIR/out"
 python2 /usr/lib/hinance/scrape.py -ddv --logging-file "$DIR/log/scrape.log"
