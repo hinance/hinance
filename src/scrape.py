@@ -53,8 +53,6 @@ class MyApp(Application):
         (len(batrans), a.id)
       stdout.flush()
       maybeNum = lambda x: ('Just %i' % x) if isnum(x) else 'Nothing'
-      maybeTime = lambda x: ('Just %i' % totime(x)) \
-                    if hasattr(x, 'strftime') else 'Nothing'
       baccs.append([
         u'BankAcc',
         u'{ baid = %s' % tostr(a.id),
@@ -63,7 +61,7 @@ class MyApp(Application):
         u', bacurrency = %s' % a.currency,
         u', balimit = %s' % maybeNum(a.cardlimit),
         u', bapaymin = %s' % maybeNum(a.paymin),
-        u', bapaytime = %s' % maybeTime(a.paydate),
+        u', bapaytime = %s' % maybeNum(totime(a.paydate)),
         u', batrans ='] + [
         u'  %s' % s for s in r_list(batrans)] + [
         u'}'])
@@ -136,7 +134,10 @@ def tocent(d):
   return int(d*100)
 
 def totime(dt):
-  return int((dt - datetime(1970, 1, 1)).total_seconds())
+  try:
+    return int((dt - datetime(1970, 1, 1)).total_seconds())
+  except TypeError:
+    return None
 
 def tostr(s):
   return u'"' + s.encode('unicode_escape') \
