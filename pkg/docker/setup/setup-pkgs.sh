@@ -84,6 +84,7 @@ fetch-aur /we weboob-git
 patch PKGBUILD /hinance-docker/setup/weboob-git/PKGBUILD.patch
 makepkg -sc --noconfirm
 sudo pacman -U --noconfirm weboob-git-5d2152ac-1-x86_64.pkg.tar.xz
+weboob-config update
 
 # hinance
 git clone https://github.com/hinance/hinance /hinance-docker/hinance.git
@@ -92,6 +93,3 @@ git checkout 0.0.0
 cd /hinance-docker/hinance.git/pkg/archlinux
 makepkg -sc --noconfirm
 sudo pacman -U --noconfirm hinance-0.0.0-1-any.pkg.tar.xz
-
-cd /hinance-docker/setup
-hinance
