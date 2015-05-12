@@ -59,8 +59,8 @@ class MyApp(Application):
         u', balabel = %s' % tostr(a.label),
         u', babalance = %i' % tocent(a.balance),
         u', bacurrency = %s' % a.currency,
-        u', balimit = %s' % maybeNum(a.cardlimit),
-        u', bapaymin = %s' % maybeNum(a.paymin),
+        u', balimit = %s' % maybeNum(tocent(a.cardlimit)),
+        u', bapaymin = %s' % maybeNum(tocent(a.paymin)),
         u', bapaytime = %s' % maybeNum(totime(a.paydate)),
         u', batrans ='] + [
         u'  %s' % s for s in r_list(batrans)] + [
@@ -131,7 +131,10 @@ def r_list(xss):
   ]
 
 def tocent(d):
-  return int(d*100)
+  try:
+    return int(d*100)
+  except TypeError:
+    return None
 
 def totime(dt):
   try:
