@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
 
@@ -18,7 +18,7 @@ if [ -e out/lock.pid ] ; then
   fi
 fi
 
-mkdir -p cmd out/{log,archive,www,tmp}
+mkdir -p cmd out/{log,archive,www}
 echo $$ > out/lock.pid
 
 if [ ! -e in/config.sh ] ; then cp /usr/lib/hinance/config.sh in ; fi
