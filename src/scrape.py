@@ -52,12 +52,18 @@ class MyApp(Application):
       print u'Scraped %i transactions in account %s' % \
         (len(batrans), a.id)
       stdout.flush()
+      maybeNum = lambda x: ('Just %i' % x) if isnum(x) else 'Nothing'
+      maybeTime = lambda x: ('Just %i' % totime(x)) \
+                    if hasattr(x, 'strftime') else 'Nothing'
       baccs.append([
         u'BankAcc',
         u'{ baid = %s' % tostr(a.id),
         u', balabel = %s' % tostr(a.label),
         u', babalance = %i' % tocent(a.balance),
         u', bacurrency = %s' % a.currency,
+        u', balimit = %s' % maybeNum(a.cardlimit),
+        u', bapaymin = %s' % maybeNum(a.paymin),
+        u', bapaytime = %s' % maybeTime(a.paydate),
         u', batrans ='] + [
         u'  %s' % s for s in r_list(batrans)] + [
         u'}'])
