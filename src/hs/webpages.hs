@@ -87,19 +87,43 @@ homepage time dev = (homepagename dev, content) where
 
 accsinfo dev = "<h3>Accounts</h3>" ++ inner where
   inner | dnarrow dev = innernarrow | otherwise = innerwide
-  innerwide = "<table class=\"table table-striped\">" ++
-                "<thead><tr>" ++
-                  "<th>Bank</th>" ++
-                  "<th>Account</th>" ++
-                  "<th>Balance</th>" ++
-                  "<th>Credit Limit</th>" ++
-                  "<th>Minimum Payment</th>" ++
-                  "<th class=\"text-right\">Pay Date</th></tr></thead>" ++
-                "<tbody>" ++ rowswide ++ "</tbody></table>"
-  innernarrow = "<table class=\"table table-striped\">" ++
-                  "<tbody>" ++ rowsnarrow ++ "</tbody></table>"
-  rowswide = ""
-  rowsnarrow = ""
+  innerwide =
+    "<table class=\"table table-striped\">" ++
+      "<thead><tr>" ++
+        "<th>Bank</th>" ++
+        "<th>Account</th>" ++
+        "<th>Balance</th>" ++
+        "<th>Credit Limit</th>" ++
+        "<th>Minimum Payment</th>" ++
+        "<th class=\"text-right\">Pay Date</th></tr></thead>" ++
+        "<tbody>" ++ (concatMap rowwide allbaccs) ++ "</tbody></table>"
+  innernarrow =
+    "<table class=\"table table-striped\">" ++
+      "<tbody>" ++ (concatMap rownarrow allbaccs) ++ "</tbody></table>"
+  rowwide (b, a) =
+    "<tr><td>" ++ b ++ "</td>" ++
+        "<td>" ++ (label a) ++ "</td>" ++
+        "<td>" ++ (balance a) ++ "</td>" ++
+        "<td>" ++ (cardlim a) ++ "</td>" ++
+        "<td>" ++ (paymin a) ++ "</td>" ++
+        "<td class=\"text-right\">" ++ (paydate a) ++ "</td></tr>"
+  rownarrow (b, a) = "<tr><td>" ++
+    (printf "<p><big><strong>%s:%s</strong> %s</big></p>"
+                                  b (baid a) (label a)) ++
+    (accinfo a) ++ "</td></tr>"
+  accinfo a
+    | bacard a =
+      (printf "<p><big>Balance / Limit: <strong>%s / %s</strong></big></p>"
+                                                   (balance a) (cardlim a)) ++
+      (printf "<p><big>Minimum Payment: <strong>%s on %s</strong></big></p>"
+                                                     (paymin a) (paydate a))
+    | otherwise = "<p><big><strong>" ++ (balance a) ++ "</strong></big></p>"
+  label a = filter isAscii $ balabel a
+  balance a = fmtamount (babalance a) (bacurrency a)
+  cardlim a = ""
+  paymin a = ""
+  paydate a = ""
+  allbaccs = concatMap (\x -> zip (repeat $ bid x) (baccs x)) banks
 
 suminfo = "<h3>Summary</h3>" ++ inner where
   inner = concatMap row [
