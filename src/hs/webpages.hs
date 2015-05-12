@@ -98,6 +98,8 @@ accsinfo dev = "<h3>Accounts</h3>" ++ inner where
                 "<tbody>" ++ rowswide ++ "</tbody></table>"
   innernarrow = "<table class=\"table table-striped\">" ++
                   "<tbody>" ++ rowsnarrow ++ "</tbody></table>"
+  rowswide = ""
+  rowsnarrow = ""
 
 suminfo = "<h3>Summary</h3>" ++ inner where
   inner = concatMap row [
