@@ -83,9 +83,24 @@ slicefigname dev nslice step ofs nfig =
   printf "%s-slice%s-step%i-ofs%i-nfig%s.svg" (dname dev) nslice step ofs nfig
 
 homepage time dev = (homepagename dev, content) where
-  content = html [] $ basicpage time dev $ inner
-  inner = "<h3>Welcome to Hinance Report!</h3>" ++ rows
-  rows = concatMap row [
+  content = html [] $ basicpage time dev $ (accsinfo dev) ++ suminfo
+
+accsinfo dev = "<h3>Accounts</h3>" ++ inner where
+  inner | dnarrow dev = innernarrow | otherwise = innerwide
+  innerwide = "<table class=\"table table-striped\">" ++
+                "<thead><tr>" ++
+                  "<th>Bank</th>" ++
+                  "<th>Account</th>" ++
+                  "<th>Balance</th>" ++
+                  "<th>Credit Limit</th>" ++
+                  "<th>Minimum Payment</th>" ++
+                  "<th class=\"text-right\">Pay Date</th></tr></thead>" ++
+                "<tbody>" ++ rowswide ++ "</tbody></table>"
+  innernarrow = "<table class=\"table table-striped\">" ++
+                  "<tbody>" ++ rowsnarrow ++ "</tbody></table>"
+
+suminfo = "<h3>Summary</h3>" ++ inner where
+  inner = concatMap row [
     ("Actual period", period actmin actmax),
     ("Planned period", period planfrom planto),
     ("Groups", sgroups),
