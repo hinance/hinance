@@ -28,7 +28,8 @@ mkdir -p "$DIR/tmp/hs"
 cp -t "$DIR/tmp/hs" "$DIR"/*.hs /usr/lib/hinance/hs/*
 
 echo -e "module Hinance.Bank.Data where\nimport Hinance.Bank.Type\n\
-import Hinance.Currency\nbanksraw = []" >"$DIR/tmp/hs/bank_data.hs"
+import Hinance.Currency\nimport Data.Maybe\n\
+banksraw = []" >"$DIR/tmp/hs/bank_data.hs"
 echo -e "module Hinance.Shop.Data where\nimport Hinance.Shop.Type\n\
 import Hinance.Currency\nshopsraw = []" >"$DIR/tmp/hs/shop_data.hs"
 

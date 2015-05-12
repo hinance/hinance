@@ -1,5 +1,6 @@
 module Hinance.Bank.Type where
 import Hinance.Currency
+import Data.Maybe
 
 data Bank = Bank {baccs::[BankAcc], bid::String} deriving (Read, Show)
 data BankAcc = BankAcc {batrans::[BankTrans], balabel::String, baid::String,
