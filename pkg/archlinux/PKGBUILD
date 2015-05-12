@@ -22,7 +22,7 @@ md5sums=('SKIP'
 package() {
     cd "$srcdir/$pkgname"
     mkdir -p "${pkgdir}"/usr/{bin,lib/hinance/www}
-    ln -s /usr/lib/hinance/hinance "${pkgdir}"/usr/bin/hinance
+    ln -s /usr/lib/hinance/hinance-daemon "${pkgdir}"/usr/bin/hinance
     cp -t "${pkgdir}"/usr/lib/hinance/www "$srcdir"/{bootstrap,jquery}*
     cp -r src/* "${pkgdir}"/usr/lib/hinance
 }
