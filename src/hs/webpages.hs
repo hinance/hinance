@@ -106,7 +106,7 @@ accsinfo dev = "<h3>Accounts</h3>" ++ inner where
         "<td>" ++ (balance a) ++ "</td>" ++
         "<td>" ++ (cardlim a) ++ "</td>" ++
         "<td>" ++ (paymin a) ++ "</td>" ++
-        "<td class=\"text-right\">" ++ (paydate a) ++ "</td></tr>"
+        "<td class=\"text-right\">" ++ (paytime a) ++ "</td></tr>"
   rownarrow (b, a) = "<tr><td>" ++
     (printf "<p><big><strong>%s:%s</strong> %s</big></p>"
                                   b (baid a) (label a)) ++
@@ -116,13 +116,16 @@ accsinfo dev = "<h3>Accounts</h3>" ++ inner where
       (printf "<p><big>Balance / Limit: <strong>%s / %s</strong></big></p>"
                                                    (balance a) (cardlim a)) ++
       (printf "<p><big>Minimum Payment: <strong>%s on %s</strong></big></p>"
-                                                     (paymin a) (paydate a))
+                                                     (paymin a) (paytime a))
     | otherwise = "<p><big><strong>" ++ (balance a) ++ "</strong></big></p>"
   label a = filter isAscii $ balabel a
   balance a = fmtamount (babalance a) (bacurrency a)
-  cardlim a = ""
-  paymin a = ""
-  paydate a = ""
+  cardlim BankAcc{balimit=Nothing} = "unknown"
+  cardlim BankAcc{balimit=Just lim, bacurrency=c} = fmtamount (- lim) c
+  paymin BankAcc{bapaymin=Nothing} = "unknown"
+  paymin BankAcc{bapaymin=Just pmin, bacurrency=c} = fmtamount pmin c
+  paytime BankAcc{bapaytime=Nothing} = "unknown"
+  paytime BankAcc{bapaytime=Just ptime} = fmtime "%Y-%m-%d" ptime
   allbaccs = concatMap (\x -> zip (repeat $ bid x) (baccs x)) banks
 
 suminfo = "<h3>Summary</h3>" ++ inner where
