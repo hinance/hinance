@@ -5,6 +5,7 @@ from weboob.capabilities.shop import CapShop
 from datetime import datetime
 from time import time
 from sys import stdout
+from numbers import Number
 
 class MyApp(Application):
 
@@ -52,7 +53,7 @@ class MyApp(Application):
       print u'Scraped %i transactions in account %s' % \
         (len(batrans), a.id)
       stdout.flush()
-      maybeNum = lambda x: ('Just %i' % x) if isnum(x) else 'Nothing'
+      maybeNum = lambda x: ('Just %i'%x) if isinstance(x,Number) else 'Nothing'
       baccs.append([
         u'BankAcc',
         u'{ baid = %s' % tostr(a.id),
