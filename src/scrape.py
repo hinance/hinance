@@ -60,7 +60,7 @@ class MyApp(Application):
         u', balabel = %s' % tostr(a.label),
         u', babalance = %i' % tocent(a.balance),
         u', bacurrency = %s' % a.currency,
-        u', bacard = %s' % a.type == Account.TYPE_CARD,
+        u', bacard = %s' % (a.type == Account.TYPE_CARD),
         u', balimit = %s' % maybeNum(tocent(a.cardlimit)),
         u', bapaymin = %s' % maybeNum(tocent(a.paymin)),
         u', bapaytime = %s' % maybeNum(totime(a.paydate)),
