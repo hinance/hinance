@@ -32,7 +32,7 @@ while true ; do
   ARCDIR="$DIR"/out/arc/$DATE
   rm -rf $ARCDIR
   mkdir -p $ARCDIR
-  cp "$DIR/in/*" $ARCDIR
+  cp "$DIR"/in/* $ARCDIR
   chmod 600 "$ARCDIR"/backends
   export WEBOOB_BACKENDS="$ARCDIR"/backends
   
