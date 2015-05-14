@@ -1,2 +1,4 @@
 module Hinance.User.Tag where
-data Tag = TagDummy deriving (Read, Show, Enum, Bounded, Eq, Ord)
+data Tag = TagAsset | TagExpense | TagIncome
+  | TagDiscount | TagShipping | TagTax | TagOther
+  deriving (Read, Show, Enum, Bounded, Eq, Ord)
