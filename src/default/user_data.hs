@@ -16,7 +16,7 @@ red = "#D9534F"
 white = "#FFF"
 yellow = "#F0AD4E"
 
-addtagged _ = []
+addtagged _ = [] :: [Tag]
 canxfer _ _ = False
 canmerge _ _ = False
 
