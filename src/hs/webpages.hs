@@ -213,7 +213,7 @@ slicepage time dev slice nslice step ofs icol categ =
   ofslen = length ofss
   ofsidx = fromMaybe 0 $ elemIndex ofs ofss
   ofss = offsets len step
-  rcnofs s = last $ takeWhile (\x -> x*s < actmax-actmin) $ offsets len s
+  rcnofs s = last $ takeWhile (\x -> x*s <= actmax-actmin) $ offsets len s
   icateg = toInteger $ fromMaybe 0 $ elemIndex categ $ scategs slice
   fdate = fmtime "%Y-%m" $ actmin + step*icol
 
@@ -431,8 +431,8 @@ steps len = [stepmonth, defstep len]
 
 defstep len = div (actmax - actmin + len) len
 
-actmin = minimum $ map ctime chgsact
-actmax = maximum $ map ctime chgsact
+actmin | null chgsact = 0 | otherwise = minimum $ map ctime chgsact
+actmax | null chgsact = 0 | otherwise = maximum $ map ctime chgsact
 
 offsets len step = sort $ past ++ future where
   past = [present, present-len .. 1] ++ [0]
@@ -440,7 +440,7 @@ offsets len step = sort $ past ++ future where
   endplan = div (planto-actmin+step) step
   present = div (actmax-actmin+step) step
 
-ofstime ofs step = (minimum $ map ctime chgsact) + (step * ofs)
+ofstime ofs step = actmin + (step * ofs)
 ofschgs ofs step = filter (\Change{ctime=t} -> t >= tmin && t < tmax)
   where tmin = ofstime ofs step
         tmax = tmin + step

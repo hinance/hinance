@@ -9,7 +9,7 @@ if [ -e out/lock.pid ] ; then
   fi
 fi
 
-mkdir -p cmd out/{log,arc,www}
+mkdir -p cmd in out/{log,arc,www}
 echo $$ > out/lock.pid
 
 if [[ ! -e in/config.sh ]] ; then
