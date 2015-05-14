@@ -16,7 +16,7 @@ red = "#D9534F"
 white = "#FFF"
 yellow = "#F0AD4E"
 
-addtagged _ = False
+addtagged _ = []
 canxfer _ _ = False
 canmerge _ _ = False
 
@@ -58,13 +58,13 @@ instance Taggable (Shop, ShopOrder, String) where
     | otherwise      = False
 
 instance Taggable (Shop, ShopOrder, ShopPayment) where
-  tagged _ t =
+  tagged _ t
     | t==TagAsset = True
     | t==TagOther = True
     | otherwise = False
 
 instance Taggable (Shop, ShopOrder, ShopItem) where
-  tagged _ t =
+  tagged _ t
     | t==TagExpense = True
     | t==TagOther = True
     | otherwise = False
