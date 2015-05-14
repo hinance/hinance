@@ -2,13 +2,6 @@
 
 set -e
 
-for NAME in user_{data,tag}.hs backends ; do
-  if [[ ! -e in/$NAME ]] ; then
-    echo "File \"in/$NAME\" is required to continue."
-    exit 1
-  fi
-done
-
 if [ -e out/lock.pid ] ; then
   if kill -0 $(cat out/lock.pid) &>/dev/null ; then
     echo "hinance is already running in the current directory."
@@ -19,7 +12,14 @@ fi
 mkdir -p cmd out/{log,arc,www}
 echo $$ > out/lock.pid
 
-if [ ! -e in/config.sh ] ; then cp /usr/lib/hinance/config.sh in ; fi
+if [[ ! -e in/config.sh ]] ; then
+  cp /usr/lib/hinance/in/config.sh in
+fi
+if [[ ! -e in/user_data.hs || ! -e in/user_tag.hs ]] ; then
+  cp /usr/lib/hinance/in/user_*.hs in
+fi
+touch in/backends
+
 . in/config.sh
 
 echo "Serving."
