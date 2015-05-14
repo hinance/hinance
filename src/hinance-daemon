@@ -13,12 +13,14 @@ mkdir -p cmd out/{log,arc,www}
 echo $$ > out/lock.pid
 
 if [[ ! -e in/config.sh ]] ; then
-  cp /usr/lib/hinance/in/config.sh in
+  cp /usr/lib/hinance/default/config.sh in
 fi
 if [[ ! -e in/user_data.hs || ! -e in/user_tag.hs ]] ; then
-  cp /usr/lib/hinance/in/user_*.hs in
+  cp /usr/lib/hinance/default/user_*.hs in
 fi
-touch in/backends
+if [[ ! -e in/backends ]] ; then
+  cp /usr/lib/hinance/default/backends in
+fi
 
 . in/config.sh
 
