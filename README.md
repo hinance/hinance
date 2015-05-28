@@ -57,6 +57,8 @@ User needs to add corresponding **backends** for each website he/she wants
 to import the data from
 (please see [Weboob website](http://weboob.org/modules) for the instructions
 how to do this).
+Weboob modules usable with Hinance must support `CapBank` or `CapShop`
+capabilities.
 After backends were configured, user must copy config file to the working
 hinance directory: `cp ~/.config/weboob/backends in/backends`.
 
