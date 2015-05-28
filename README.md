@@ -73,8 +73,10 @@ journal.
 The bookkeeping journal is represented as a list of **changes**.
 Each change is a labelled **amount** of money at the specified **time**.
 Changes are labelled with **tags** and human-readable **descriptions**.
-Several related changes can be grouped together using the same **group**
-identifier.
+Related changes are grouped together using the same **group** identifier.
+Each row of the
+[example report](http://www.hinance.org/examples/max/out/www/dtp-slice0-step5605201-ofs0-col15-cat4.html)
+represents one change.
 
 # Usage
 
