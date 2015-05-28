@@ -41,7 +41,7 @@ generates the report.
 Key point here is that in contrast to other bookkeeping solutions, Hinance
 doesn't store an editable database of transactions.
 Instead, it transforms immutable set of transactions from the external
-websites (banks and shops) into human-readable report.
+websites (banks and shops) into consistent bookkeeping journal.
 
 The user controls scraping and transformation stages. On scraping stage user
 specifies from which websites does he/she wants to import the data.
