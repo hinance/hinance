@@ -34,9 +34,9 @@ Once the report is generated, hit `Ctrl-C` to stop the daemon.
 
 # How It Works
 
-Hinance uses [Weboob](http://weboob.org) to *scrape* data from websites,
-*transforms* it into a single consistent bookkeeping journal, and
-*generates* the report.
+Hinance uses [Weboob](http://weboob.org) to **scrape** data from websites,
+**transforms** it into a single consistent bookkeeping journal, and
+**generates** the report.
 
 Key point here is that in contrast to other bookkeeping solutions, Hinance
 doesn't store an editable database of transactions.
