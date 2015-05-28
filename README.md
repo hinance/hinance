@@ -43,11 +43,11 @@ doesn't store an editable database of transactions.
 Instead, it transforms immutable set of transactions from the external
 websites (banks and shops) into consistent bookkeeping journal.
 
-The user controls scraping and transformation stages.
+The user customizes scraping and transformation stages.
 On the scraping stage user specifies from which websites does he/she want to
 import the data.
-On the next stage user adjusts transformation process by adding custom
-transactions categories, patching imported data, etc.
+On the transformation stage user adds custom transactions categories,
+patches imported data, etc.
 
 # Usage
 
