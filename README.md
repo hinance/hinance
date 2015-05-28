@@ -49,6 +49,17 @@ import the data.
 On the transformation stage user adds custom transactions categories,
 patches imported data, etc.
 
+## Scraping Stage
+
+On this stage Hinance runs Weboob to scrape the data from **banks** and
+**shops** websites.
+User needs to add corresponding **backends** for each website he/she wants
+to import the data from
+(please see [Weboob website](http://weboob.org/modules) for the instructions
+how to do this).
+After backends were configured, user must copy config file to the working
+hinance directory: `cp ~/.config/weboob/backends in/backends`.
+
 # Usage
 
 Create working directory where all program files will be stored:
@@ -65,10 +76,9 @@ vim user_tag.hs
 vim user_data.hs
 ```
 
-Configure [Weboob](http://weboob.org) backends. These are the websites
-you want to import the data from. Bank modules must support `CapBank`
-capability, shop modules - `CapShop`. See [Weboob website](http://weboob.org)
-for more info.
+Configure [Weboob](http://weboob.org) backends.
+
+Copy weboob backends file: `cp ~/.config/weboob/backends in/backends`
 
 Run: `hinance`
 
