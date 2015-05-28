@@ -17,6 +17,21 @@ want to build it yourself, keep in mind that it takes about 1 hour on 4 cores,
 Feel free to use the above as a reference when installing on your target
 platform.
 
+# Getting Started
+
+Create working directory where all program files will be stored:
+```
+mkdir <<<my-work-dir>>>
+cd <<<my-work-dir>>>
+```
+
+Run: `hinance`
+
+It'll generate an empty report in `out/www` folder.
+Desktop version is `out/www/dtp-home.html`, mobile - `out/www/mob-home.html`.
+
+Once the report is generated, hit `Ctrl-C` to stop the daemon.
+
 # How It Works
 
 Hinance uses [Weboob](http://weboob.org) to scrape data from websites,
