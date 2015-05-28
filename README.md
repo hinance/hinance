@@ -40,20 +40,23 @@ Hinance uses [Weboob](http://weboob.org) to **scrape** data from websites,
 
 Key point here is that in contrast to other bookkeeping solutions, Hinance
 doesn't store an editable database of transactions.
-Instead, it transforms immutable set of transactions from the external
+Instead, it transforms immutable list of transactions from the external
 websites (banks and shops) into consistent bookkeeping journal.
 
 The user customizes scraping and transformation stages.
 On the scraping stage user specifies from which websites does he/she want to
 import the data.
-On the transformation stage user adds custom transactions categories,
+On the transformation stage user adds custom expenses categories,
 patches imported data, etc.
 
 ## Scraping Stage
 
 On this stage Hinance runs Weboob to scrape the data from **banks** and
 **shops** websites.
-User needs to add corresponding **backends** for each website he/she wants
+The output of this stage is expressed in terms of banks, shops, accounts,
+transactions, orders, items and payments.
+
+User needs to add a **Weboob backend** for each website he/she wants
 to import the data from
 (please see [Weboob website](http://weboob.org/modules) for the instructions
 how to do this).
@@ -61,6 +64,17 @@ Weboob modules usable with Hinance must support `CapBank` or `CapShop`
 capabilities.
 After backends were configured, user must copy config file to the working
 hinance directory: `cp ~/.config/weboob/backends in/backends`.
+
+## Transformation Stage
+
+On this stage Hinance transforms scraped data into the consistent bookkeeping
+journal.
+
+The bookkeeping journal is represented as a list of **changes**.
+Each change is a labelled **amount** of money at the specified **time**.
+Changes are labelled with **tags** and human-readable **descriptions**.
+Several related changes can be grouped together using the same **group**
+identifier.
 
 # Usage
 
