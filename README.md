@@ -3,26 +3,6 @@
 Automated personal bookkeeping for hackers.
 For more information please see [homepage](http://www.hinance.org).
 
-# How It Works
-
-Hinance uses [Weboob](http://weboob.org) to scrape data from websites,
-transforms it into a single consistent bookkeeping journal, and
-generates the report.
-
-Key point here is that in contrast to other bookkeeping solutions, Hinance
-doesn't store an editable database of transactions.
-Instead, it transforms immutable set of transactions from the external
-websites (banks and shops) into human-readable report.
-This approach greatly accelerates bookkeeping journal updates,
-because once the user has specified the rules for certain class of
-transactions, all individual transactions of this kind will be handled
-automatically.
-
-User controls scraping and transformation stages. On scraping stage user
-specifies from which websites does he/she wants to import the data.
-On the next stage user adjusts transformation process by adding custom
-transactions categories, patching imported data, etc.
-
 # Installation
 
 There's a [package](https://aur.archlinux.org/packages/hinance) for Arch Linux.
@@ -36,6 +16,22 @@ want to build it yourself, keep in mind that it takes about 1 hour on 4 cores,
 
 Feel free to use the above as a reference when installing on your target
 platform.
+
+# How It Works
+
+Hinance uses [Weboob](http://weboob.org) to scrape data from websites,
+transforms it into a single consistent bookkeeping journal, and
+generates the report.
+
+Key point here is that in contrast to other bookkeeping solutions, Hinance
+doesn't store an editable database of transactions.
+Instead, it transforms immutable set of transactions from the external
+websites (banks and shops) into human-readable report.
+
+The user controls scraping and transformation stages. On scraping stage user
+specifies from which websites does he/she wants to import the data.
+On the next stage user adjusts transformation process by adding custom
+transactions categories, patching imported data, etc.
 
 # Usage
 
