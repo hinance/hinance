@@ -43,11 +43,13 @@ doesn't store an editable database of transactions.
 Instead, it transforms immutable list of transactions from the external
 websites (banks and shops) into consistent bookkeeping journal.
 
-The user customizes scraping and transformation stages.
+The user customizes each stage of the process.
 On the scraping stage user specifies from which websites does he/she want to
 import the data.
-On the transformation stage user adds custom expenses categories,
-patches imported data, etc.
+On the transformation stage user patches imported data, specifies rules to
+combine banks and shops data, etc.
+On the generation stage user categorizes financial operations and
+specifies budget planning.
 
 ## Scraping Stage
 
@@ -64,6 +66,11 @@ Weboob modules usable with Hinance must support `CapBank` or `CapShop`
 capabilities.
 After backends were configured, user must copy config file to the working
 hinance directory: `cp ~/.config/weboob/backends in/backends`.
+
+TODO: merging old and new data
+TODO: diagnostics
+TODO: planning
+TODO: generation stage
 
 ## Transformation Stage
 
@@ -89,6 +96,15 @@ sequential steps:
 5. Expanding
 
 ### Patching Step
+
+In this step user can modify scraped data in terms of accounts, transactions,
+orders, etc.
+It comes in handy when some small amount of information is missing on the
+websites (like refunds, or gift cards operations), or if you want to adjust
+scraped data in some other way to assist further steps.
+
+Patching step can be customized using callback function `patched` in
+`in/user_data.hs` file.
 
 ### Converting Step
 
