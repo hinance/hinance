@@ -150,6 +150,9 @@ each change corresponding to order payment is merged with the ungrouped change
 corresponding to the banking transaction of the same amount.
 The resulting change has all tags of both input changes, and group identifier
 of the input change that has a non-empty one.
+Here's an
+[example](http://www.hinance.org/examples/max/out/www/dtp-group1062.html)
+changes group representing a shop order with merged payment transactions.
 
 User specifies which changes pairs can be combined using `canmerge` callback
 in `in/user_data.hs` file.
@@ -159,7 +162,10 @@ in `in/user_data.hs` file.
 On the grouping step a pair of changes can be grouped together.
 This is how banking transfers are handled:
 ungrouped changes with the same absolute amount, but of different sign, are
-assigned the same unique group identifier.
+being assigned the same unique group identifier.
+Here's an
+[example](http://www.hinance.org/examples/max/out/www/dtp-group769.html)
+changes group representing a payment for a credit card.
 
 User specifies which changes pairs can be grouped using `canxfer` callback
 in `in/user_data.hs` file.
