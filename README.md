@@ -176,6 +176,9 @@ On the expanding step an ungrouped change can be grouped together with a new
 change of the same absolute amount but of different sign.
 This is how Hinance handles regular banking transactions, for example
 a payment for gas, or a bill at a restaurant.
+Here's an
+[example](http://www.hinance.org/examples/max/out/www/dtp-group760.html)
+changes group representing a purchase at gas station.
 
 User specifies which changes need to be complemented and how to tag them
 using `addtagged` callback in `in/user_data.hs` file.
