@@ -1,7 +1,10 @@
 # hinance
 
 Automated personal bookkeeping for hackers.
-For more information please see [homepage](http://www.hinance.org).
+
+For the introduction please see [homepage](http://www.hinance.org).
+
+This page describes how to use Hinance.
 
 # Installation
 
@@ -178,7 +181,7 @@ Changes are categorized, the actual changes are displayed in comparison with
 the planned budget, validation is performed and validation errors are
 shown.
 
-### Categorizing Changes
+### Categorizing the Changes
 
 ### Budget Planning
 
