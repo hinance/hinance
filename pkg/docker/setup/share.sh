@@ -12,4 +12,3 @@ fetch-aur() {
     rm ${2}.tar.gz
     cd ${2}
 }
-
