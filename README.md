@@ -73,8 +73,8 @@ hinance directory: `cp ~/.config/weboob/backends in/backends`.
 
 ### Merging Old and New Scraped Data
 
-Some websites store only recent user data, and delete the data that is for
-example 1 year old.
+Some websites store only recent user data, and delete the data that is, for
+example, 1 year old.
 In this case it comes in handy to merge recently scraped data with the data
 which was scraped a while ago, when the website still had it.
 
