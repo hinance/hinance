@@ -93,7 +93,7 @@ sequential steps:
 2. Converting: converts scraped data into a list of changes.
 3. Merging: joins pairs of changes representing the same operation.
 4. Grouping: groups pairs of changes representing the same operation.
-5. Expanding
+5. Expanding: complement ungrouped singular changes to the groups.
 
 Steps are executed in the order specified above in the pipeline fashion.
 That is, the output of each step is connected to the input of the next step.
@@ -115,7 +115,7 @@ Here the patched scraped data is converted from terms of accounts, transactions
 and orders into changes.
 
 Each bank transaction is converted into a single change with empty group
-identifier.
+identifier. That is, the resulting change is **ungrouped**.
 
 Each shopping order is converted into multiple changes grouped together.
 There are changes for **discount**, **shipping** and **tax** payments.
@@ -132,8 +132,8 @@ Tags are specified in `in/user_tags.hs` file.
 
 On this step a pair of changes can be combined into a single change.
 This is how banks and shops data are integrated together:
-each change corresponding to order payment is merged with the change
-of the banking transaction of the same amount.
+each change corresponding to order payment is merged with the ungrouped change
+corresponding to the banking transaction of the same amount.
 The resulting change has all tags of both input changes, and group identifier
 of the input change that has a non-empty one.
 
@@ -144,13 +144,21 @@ in `in/user_data.hs` file.
 
 On this step a pair of changes can be grouped together.
 This is how banking transfers are handled:
-changes with the same absolute amount, but of different sign, are
+ungrouped changes with the same absolute amount, but of different sign, are
 assigned the same unique group identifier.
 
 User specifies which changes pairs can be grouped using `canxfer` callback
 in `in/user_data.hs` file.
 
 ### Expanding Step
+
+On this step an ungrouped change can be grouped together with a new change
+of the same absolute amount but of different sign.
+This is how Hinance handles regular banking transactions, for example
+a payment for gas, or a bill at a restaurant.
+
+User specifies which changes need to be complemented and how to tag them
+using `addtagged` callback in `in/user_data.hs` file.
 
 # Usage
 
