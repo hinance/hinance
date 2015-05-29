@@ -88,7 +88,7 @@ cp out/arc/2015_05_26_12_12/out/shops.hs.part in/shops_2015_05_26_12_12.hs.part
 
 ## Transformation Stage
 
-On the transformation stage Hinance transforms scraped data into the
+On the transformation stage Hinance transforms scraped data into a
 consistent bookkeeping journal.
 
 The bookkeeping journal is represented as a list of **changes**.
