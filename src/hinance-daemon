@@ -54,7 +54,7 @@ while true ; do
   cp "$DIR"/in/* $ARCDIR
   chmod 600 "$ARCDIR"/backends
   export WEBOOB_BACKENDS="$ARCDIR"/backends
-  
+ 
   cd $ARCDIR
   if /usr/lib/hinance/hinance-once &>> "$DIR"/out/log/hinance.log ; then
     rm -rf "$DIR"/out/www

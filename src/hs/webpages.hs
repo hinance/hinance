@@ -171,7 +171,7 @@ suminfo = "<h3>Summary</h3>" ++ inner where
 diagpage time dev = (diagpagename dev, content) where
   content = html head $ basicpage time dev $ inner
   head = ["Diagnostics"]
-  inner = 
+  inner =
     (printf "<h3>Checks (%i):</h3>" (length diagchecks)) ++
     (printf "<pre>%s</pre>" (ppShow diagchecks)) ++
     (printf "<h3>Changes without groups (%i):</h3>" (length diagnogrp)) ++
@@ -199,7 +199,7 @@ slicepage time dev slice nslice step ofs icol categ =
   inner = alert ++ buttons ++ figact ++ figdiff ++ figplan ++ tabact ++ tabplan
   alert | diagcount == 0 = ""
         | otherwise = printf (
-          "<div class=\"alert alert-warning\">" ++ 
+          "<div class=\"alert alert-warning\">" ++
             "<strong>Warning!</strong> There are %i validation errors " ++
             "(<a href=\"%s\">read full report</a>).</div>")
           diagcount (diagpagename dev)
@@ -237,7 +237,7 @@ slicepage time dev slice nslice step ofs icol categ =
 figpanel :: Device -> Slice -> String -> Integer -> Integer ->
             Integer -> Integer -> String -> String -> [Change] -> String
 figpanel dev slice nslice step ofs icol icateg title nfig allchgs =
-  "<div class=\"panel panel-default\">" ++ 
+  "<div class=\"panel panel-default\">" ++
     "<div class=\"panel-heading\">" ++
       "<h3 class=\"panel-title\">" ++ title ++ "</h3></div>"++
     "<div class=\"panel-body text-center\">" ++ fig ++ 
