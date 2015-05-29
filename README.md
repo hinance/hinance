@@ -53,7 +53,7 @@ specifies budget planning.
 
 ## Scraping Stage
 
-On this stage Hinance runs Weboob to scrape the data from **banks** and
+On the scraping stage Hinance runs Weboob to scrape the data from **banks** and
 **shops** websites.
 The output of this stage is expressed in terms of banks, shops, accounts,
 transactions, orders, items and payments.
@@ -82,14 +82,10 @@ cp out/arc/2015_05_26_12_12/out/banks.hs.part in/banks_2015_05_26_12_12.hs.part
 cp out/arc/2015_05_26_12_12/out/shops.hs.part in/shops_2015_05_26_12_12.hs.part
 ```
 
-TODO: diagnostics
-TODO: planning
-TODO: generation stage
-
 ## Transformation Stage
 
-On this stage Hinance transforms scraped data into the consistent bookkeeping
-journal.
+On the transformation stage Hinance transforms scraped data into the
+consistent bookkeeping journal.
 
 The bookkeeping journal is represented as a list of **changes**.
 Each change is a labelled **amount** of money at the specified **time**.
@@ -114,8 +110,8 @@ That is, the output of each step is connected to the input of the next step.
 
 ### Patching Step
 
-On this step user can modify scraped data in terms of accounts, transactions,
-orders, etc.
+On the patching step user can modify scraped data in terms of accounts,
+transactions, orders, etc.
 It comes in handy when some small amount of information is missing on the
 websites (like refunds, or gift cards operations), or if you want to adjust
 scraped data in some other way to assist further steps.
@@ -125,8 +121,8 @@ User can modify scraped data using callback function `patched` in
 
 ### Converting Step
 
-Here the patched scraped data is converted from terms of accounts, transactions
-and orders into changes.
+On the converting step the patched scraped data is converted from terms of
+accounts, transactions and orders into changes.
 
 Each bank transaction is converted into a single change with empty group
 identifier. That is, the resulting change is **ungrouped**.
@@ -144,7 +140,7 @@ Tags are specified in `in/user_tags.hs` file.
 
 ### Merging Step
 
-On this step a pair of changes can be combined into a single change.
+On the merging step a pair of changes can be combined into a single change.
 This is how banks and shops data are integrated together:
 each change corresponding to order payment is merged with the ungrouped change
 corresponding to the banking transaction of the same amount.
@@ -156,7 +152,7 @@ in `in/user_data.hs` file.
 
 ### Grouping Step
 
-On this step a pair of changes can be grouped together.
+On the grouping step a pair of changes can be grouped together.
 This is how banking transfers are handled:
 ungrouped changes with the same absolute amount, but of different sign, are
 assigned the same unique group identifier.
@@ -166,13 +162,19 @@ in `in/user_data.hs` file.
 
 ### Expanding Step
 
-On this step an ungrouped change can be grouped together with a new change
-of the same absolute amount but of different sign.
+On the expanding step an ungrouped change can be grouped together with a new
+change of the same absolute amount but of different sign.
 This is how Hinance handles regular banking transactions, for example
 a payment for gas, or a bill at a restaurant.
 
 User specifies which changes need to be complemented and how to tag them
 using `addtagged` callback in `in/user_data.hs` file.
+
+## Generation Stage
+
+TODO: generation stage
+TODO: planning
+TODO: diagnostics
 
 # Usage
 
