@@ -28,7 +28,7 @@ mkdir <<<my-work-dir>>>
 cd <<<my-work-dir>>>
 ```
 
-Run: `hinance`
+Run the daemon: `hinance`
 
 It'll generate an empty report in `out/www` folder.
 Desktop version is here: `out/www/dtp-home.html`.
@@ -253,7 +253,7 @@ Configure [Weboob](http://weboob.org) backends.
 
 Copy weboob backends file: `cp ~/.config/weboob/backends in/backends`
 
-Run: `hinance`
+Run the daemon: `hinance`
 
 It'll generate the report in `out/www` folder.
 Desktop version is here: `out/www/dtp-home.html`.
