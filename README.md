@@ -206,8 +206,9 @@ time span `planfrom` to `planto` in `in/user_data.hs` file.
 ### Validation
 
 Hinance validates the resulting bookkeeping journal to ensure its consistency.
-Validation report can be found at `out/www/dtp-home.html` after generation
-was finished.
+Validation report can be found at `out/www/dtp-diag.html` after generation
+was finished
+([example](http://www.hinance.org/examples/min/out/www/dtp-diag.html)).
 
 Validation consists of the following verifications.
 
