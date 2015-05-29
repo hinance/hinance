@@ -128,7 +128,7 @@ Each bank transaction is converted into a single change with empty group
 identifier. That is, the resulting change is **ungrouped**.
 
 Each shopping order is converted into multiple changes grouped together.
-There are changes for **discount**, **shipping** and **tax** payments.
+There are 3 special changes: **discount**, **shipping** and **tax**.
 There's a change for each **item** purchased in the order.
 There's a change for each **payment** for the order.
 Group identifier for all of these changes is based on the shop name and
