@@ -95,12 +95,12 @@ sequential steps:
 4. Grouping
 5. Expanding
 
-Steps are performed in the order specified above in pipeline-like fashion.
+Steps are executed in the order specified above in the pipeline fashion.
 That is, the output of each step is connected to the input of the next step.
 
 ### Patching Step
 
-In this step user can modify scraped data in terms of accounts, transactions,
+On this step user can modify scraped data in terms of accounts, transactions,
 orders, etc.
 It comes in handy when some small amount of information is missing on the
 websites (like refunds, or gift cards operations), or if you want to adjust
@@ -114,7 +114,8 @@ User can modify scraped data using callback function `patched` in
 Here the patched scraped data is converted from terms of accounts, transactions
 and orders into changes.
 
-Each bank transaction is converted into a single change.
+Each bank transaction is converted into a single change with empty group
+identifier.
 
 Each shopping order is converted into multiple changes grouped together.
 There are changes for **discount**, **shipping** and **tax** payments.
@@ -125,8 +126,18 @@ order number.
 
 User specifies how to assign tags to the changes using `tagged` callback in
 `in/user_data.hs` file.
+Tags are specified in `in/user_tags.hs` file.
 
 ### Merging Step
+
+On this step a pair of changes can be combined into a single change.
+This is how banks and shops data are integrated together:
+each change corresponding to order payment is merged with the change
+of the banking transaction of the same amount.
+The resulting change has all tags of both input changes.
+
+User specifies which changes pairs can be combined using `canmerge` callback
+in `in/user_data.hs` file.
 
 ### Grouping Step
 
