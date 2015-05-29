@@ -67,7 +67,21 @@ capabilities.
 After backends were configured, user must copy config file to the working
 hinance directory: `cp ~/.config/weboob/backends in/backends`.
 
-TODO: merging old and new data
+### Merging Old and New Scraped Data
+
+Some websites store only recent user data, and delete the data that is for
+example 1 year old.
+In this case it comes in handy to merge recently scraped data with the data
+which was scraped a while ago, when the website still had it.
+
+Hinance can do just that if you copy an archived scraped data into the input
+folder. For example:
+
+```
+cp out/arc/2015_05_26_12_12/out/banks.hs.part in/banks_2015_05_26_12_12.hs.part
+cp out/arc/2015_05_26_12_12/out/shops.hs.part in/shops_2015_05_26_12_12.hs.part
+```
+
 TODO: diagnostics
 TODO: planning
 TODO: generation stage
