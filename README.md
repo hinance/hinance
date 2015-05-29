@@ -89,11 +89,14 @@ Related changes are grouped together by using the same **group** identifier
 Transformation of the scraped data into a list of changes is done in several
 sequential steps:
 
-1. Patching
+1. Patching: scraped data post-processing.
 2. Converting
 3. Merging
 4. Grouping
 5. Expanding
+
+Steps are performed in the order specified above in pipeline-like fashion.
+That is, the output of each step is connected to the input of the next step.
 
 ### Patching Step
 
@@ -103,10 +106,25 @@ It comes in handy when some small amount of information is missing on the
 websites (like refunds, or gift cards operations), or if you want to adjust
 scraped data in some other way to assist further steps.
 
-Patching step can be customized using callback function `patched` in
+User can modify scraped data using callback function `patched` in
 `in/user_data.hs` file.
 
 ### Converting Step
+
+Here the patched scraped data is converted from terms of accounts, transactions
+and orders into changes.
+
+Each bank transaction is converted into a single change.
+
+Each shopping order is converted into multiple changes grouped together.
+There are changes for **discount**, **shipping** and **tax** payments.
+There's a change for each **item** purchased in the order.
+There's a change for each **payment** for the order.
+Group identifier for all of these changes is based on the shop name and
+order number.
+
+User specifies how to assign tags to the changes using `tagged` callback in
+`in/user_data.hs` file.
 
 ### Merging Step
 
