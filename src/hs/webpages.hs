@@ -240,7 +240,7 @@ figpanel dev slice nslice step ofs icol icateg title nfig allchgs =
   "<div class=\"panel panel-default\">" ++
     "<div class=\"panel-heading\">" ++
       "<h3 class=\"panel-title\">" ++ title ++ "</h3></div>"++
-    "<div class=\"panel-body text-center\">" ++ fig ++ 
+    "<div class=\"panel-body text-center\">" ++ fig ++
       "<ul class=\"list-inline\">" ++ labels ++ "</ul></div></div>" where
   fig = "<object type=\"image/svg+xml\" width=\"100%\" " ++
           (printf "id=\"hfig%s\" onload=\"%s\" data=\"%s\"></object>"
@@ -274,11 +274,11 @@ slicetable dev step ofs icolumn changes ntab title
   tbodyvis =
     (printf "<tbody id=\"htabrows-%s\">" ntab) ++
       (concatMap row $ take irows $ reverse $ srtdate) ++ "</tbody>"
-  tbodyhid = 
+  tbodyhid =
     (printf "<tbody id=\"htabrows-hid-%s\" style=\"display:none\">" ntab) ++
       (concatMap row $ drop irows $ reverse $ srtdate) ++ "</tbody>"
   thead | dnarrow dev = "" | otherwise =
-    "<thead><tr>" ++ 
+    "<thead><tr>" ++
       "<th>" ++ hsrtdate ++ "</th>" ++
       "<th>" ++ hsrtdesc ++ "</th>" ++
       "<th>" ++ hsrttags ++ "</th>" ++
