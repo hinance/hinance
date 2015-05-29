@@ -194,10 +194,18 @@ shown.
 ### Categorizing the Changes
 
 To improve report readability, changes can be organized into **slices**
-(like expenses, travel, car, hobbies, income, assets), each of which can
-be further subdivided into **categories** like recurring expenses, household,
-food, clothes, etc.
-([example](http://www.hinance.org/examples/max/out/www/dtp-slice0-step5605201-ofs0-col15-cat4.html))
+(like
+[expenses](http://www.hinance.org/examples/max/out/www/dtp-slice0-step5605201-ofs0-col15-cat0.html),
+[hobbies](http://www.hinance.org/examples/max/out/www/dtp-slice1-step5605201-ofs0-col15-cat0.html),
+[car](http://www.hinance.org/examples/max/out/www/dtp-slice2-step5605201-ofs0-col15-cat0.html),
+[travel](http://www.hinance.org/examples/max/out/www/dtp-slice3-step5605201-ofs0-col15-cat0.html),
+[income](http://www.hinance.org/examples/max/out/www/dtp-slice4-step5605201-ofs0-col15-cat0.html),
+or [assets](http://www.hinance.org/examples/max/out/www/dtp-slice5-step5605201-ofs0-col15-cat0.html)),
+each of which can be further subdivided into **categories** like
+[recurring expenses](http://www.hinance.org/examples/max/out/www/dtp-slice0-step5605201-ofs0-col15-cat0.html),
+[household and electronics](http://www.hinance.org/examples/max/out/www/dtp-slice0-step5605201-ofs0-col14-cat3.html),
+[food](http://www.hinance.org/examples/max/out/www/dtp-slice0-step5605201-ofs0-col14-cat1.html),
+etc.
 
 User can specify how to split changes into slices and categories using
 `slices` list in `in/user_data.hs` file.
