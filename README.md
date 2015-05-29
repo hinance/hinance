@@ -281,3 +281,11 @@ To exit press `Ctrl-C`.
 To view the logs: `tail -f out/log/hinance.log`
 
 To skip the waiting period between running cycles: `touch cmd/restart`
+
+# License
+
+The source code is licensed under GNU GPL v3.
+
+# Contact
+
+Oleg Plakhotniuk: contact@hinance.org
