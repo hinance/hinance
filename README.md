@@ -107,7 +107,7 @@ sequential steps:
 2. Converting: converts scraped data into a list of changes.
 3. Merging: joins pairs of changes representing the same operation.
 4. Grouping: groups pairs of changes representing the same operation.
-5. Expanding: complement ungrouped singular changes to the groups.
+5. Expanding: complements ungrouped singular changes to the groups.
 
 Steps are executed in the order specified above in the pipeline fashion.
 That is, the output of each step is connected to the input of the next step.
