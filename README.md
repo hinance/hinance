@@ -174,9 +174,9 @@ using `addtagged` callback in `in/user_data.hs` file.
 
 On the generation stage a list of changes is converted into a human-readable
 report.
-Changes are split into categories, the actual changes are displayed
-in comparison with the planned budget, validation is performed and validation
-errors are displayed.
+Changes are categorized, the actual changes are displayed in comparison with
+the planned budget, validation is performed and validation errors are
+shown.
 
 ### Categorizing Changes
 
