@@ -31,7 +31,8 @@ cd <<<my-work-dir>>>
 Run: `hinance`
 
 It'll generate an empty report in `out/www` folder.
-Desktop version is `out/www/dtp-home.html`, mobile - `out/www/mob-home.html`.
+Desktop version is here: `out/www/dtp-home.html`.
+Mobile version is here: `out/www/mob-home.html`.
 
 Once the report is generated, hit `Ctrl-C` to stop the daemon.
 
@@ -255,7 +256,8 @@ Copy weboob backends file: `cp ~/.config/weboob/backends in/backends`
 Run: `hinance`
 
 It'll generate the report in `out/www` folder.
-Desktop version is `out/www/dtp-home.html`, mobile - `out/www/mob-home.html`.
+Desktop version is here: `out/www/dtp-home.html`.
+Mobile version is here: `out/www/mob-home.html`.
 
 To exit press `Ctrl-C`.
 
