@@ -235,18 +235,18 @@ Banking account transactions must add up to the account balance declared
 by the banking website.
 This error occurs if they don't.
 Most of the time it means that the state of the banking website is
-inconsistent, and usually this error will disappear disappears after scraping
-again a few hours later.
+inconsistent, and usually this error will disappear after scraping again a few
+hours later.
 
 **Changes without groups**.
 All changes must add up to zero.
 Transformation steps are designed in such a way that changes within each
 group always add up to zero.
 This error means that there are some ungrouped changes, which usually
-indicates that more user customization is required on expanding step.
+indicates that more user customization is required in the expanding step.
 
 **Slices mismatch**.
-Each slice must consist only of non-intersecting categories.
+Each slice must consist only of non-overlapping categories.
 This error means that either there are some changes in a slice, but not in
 any of its categories, or vice versa.
 
