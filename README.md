@@ -232,7 +232,7 @@ Each slice must consist only of non-intersecting categories.
 This error means that either there are some changes in a slice, but not in
 any of its categories, or vice versa.
 
-# Usage
+# Usage Summary
 
 Create working directory where all program files will be stored:
 ```
