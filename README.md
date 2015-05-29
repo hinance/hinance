@@ -48,7 +48,7 @@ Instead, it transforms immutable list of transactions from the external
 websites (banks and shops) into consistent bookkeeping journal.
 
 The user customizes each stage of the process.
-On the scraping stage user specifies from which websites does he/she want to
+On the scraping stage user specifies from which websites he/she wants to
 import the data.
 On the transformation stage user patches imported data, specifies rules to
 combine banks and shops data, etc.
