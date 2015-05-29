@@ -395,7 +395,7 @@ slicefigure time dev slice nslice step ofs nfig allchgs posneg =
           (printf "width=\"%i\" height=\"%i\" " cfgcellwidth height) ++
           (printf "x=\"0\" y=\"%i\" " diry) ++
           (printf "rx=\"%i\" ry=\"%i\"/>" cfgbdrround cfgbdrround) ++
-        "<text " ++ 
+        "<text " ++
           (printf "text-anchor=\"middle\" fill=\"%s\" " fgcolor) ++
           (printf "x=\"%i\" y=\"%i\">" cfgmarkofsx texty) ++
           (printf "%i</text></a>" (div amount 100))
@@ -489,7 +489,7 @@ page time dev nslice step ofs icol content =
   (printf "<script>hdevrows=%i</script>" (drows dev)) ++
   "<div class=\"container\">" ++
     "<ul class=\"nav nav-pills\">" ++ navs ++ "</ul>" ++
-    "<div class=\"row\"><div class=\"col-md-12\">" ++ content ++ 
+    "<div class=\"row\"><div class=\"col-md-12\">" ++ content ++
       "<hr><p class=\"text-muted text-right\">Generated on "++time++"</p>"++
   "</div></div></div>" where
   navs = concatMap nav $ zip idxs slices
@@ -504,7 +504,7 @@ html titles body =
   "<!DOCTYPE html><html lang=\"en\"><head>" ++
     "<meta charset=\"utf-8\">" ++
     "<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">" ++
-    "<meta name=\"viewport\" content=\"width=device-width, " ++ 
+    "<meta name=\"viewport\" content=\"width=device-width, " ++
             "initial-scale=1\">" ++
     "<title>" ++ title ++ "</title>" ++
     "<link rel=\"stylesheet\" href=\"bootstrap.min.css\">"++
