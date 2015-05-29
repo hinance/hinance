@@ -121,7 +121,7 @@ User can modify scraped data using callback function `patched` in
 
 ### Converting Step
 
-On the converting step the patched scraped data is converted from terms of
+On the converting step the patched scraped data is converted from
 accounts, transactions and orders into changes.
 
 Each bank transaction is converted into a single change with empty group
