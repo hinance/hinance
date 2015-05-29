@@ -57,8 +57,8 @@ specifies budget planning.
 
 ## Scraping Stage
 
-On the scraping stage Hinance runs Weboob to scrape the data from **banks** and
-**shops** websites.
+On the scraping stage Hinance runs [Weboob](http://weboob.org) to scrape
+the data from **banks** and **shops** websites.
 The output of this stage is expressed in terms of banks, shops, accounts,
 transactions, orders, items and payments.
 
