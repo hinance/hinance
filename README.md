@@ -259,5 +259,6 @@ Desktop version is `out/www/dtp-home.html`, mobile - `out/www/mob-home.html`.
 
 To exit press `Ctrl-C`.
 
-TODO: how to view logs
-TODO: how to restart the cycle
+To view the logs: `tail -f out/log/hinance.log`
+
+To skip the waiting period between running cycles: `touch cmd/restart`
