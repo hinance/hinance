@@ -257,3 +257,6 @@ It'll generate the report in `out/www` folder.
 Desktop version is `out/www/dtp-home.html`, mobile - `out/www/mob-home.html`.
 
 To exit press `Ctrl-C`.
+
+TODO: how to view logs
+TODO: how to restart the cycle
