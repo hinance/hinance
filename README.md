@@ -205,6 +205,27 @@ time span `planfrom` to `planto` in `in/user_data.hs` file.
 
 ### Validation
 
+Hinance validates the resulting bookkeeping journal to ensure its consistency.
+Validation report can be found at `out/www/dtp-home.html` after generation
+was finished.
+
+Validation consists of the following verifications.
+
+**Banking account balance mismatch**.
+Banking account transactions must add up to the account balance declared
+by the banking website.
+This error occurs if they don't.
+Most of the time it means that the state of the banking website is
+inconsistent, and usually this error will disappear disappears after scraping
+again a few hours later.
+
+**Changes without groups**.
+All changes must add up to zero.
+Transformation steps are designed in such a way that changes within each
+group always add up to zero.
+This error means that there are some ungrouped changes, which usually
+indicates that more user customization is required on expanding step.
+
 # Usage
 
 Create working directory where all program files will be stored:
@@ -213,7 +234,7 @@ mkdir <<<my-work-dir>>>
 cd <<<my-work-dir>>>
 ```
 
-Copy and edit customization files (see next sections for details):
+Copy and edit customization files:
 ```
 cp -r /usr/lib/hinance/default in
 vim config.sh
