@@ -89,9 +89,9 @@ Related changes are grouped together by using the same **group** identifier
 Transformation of the scraped data into a list of changes is done in several
 sequential steps:
 
-1. Patching: scraped data post-processing.
-2. Converting
-3. Merging
+1. Patching: post-processes the scraped data.
+2. Converting: converts scraped data into a list of changes.
+3. Merging: joins pairs of changes representing the same operation.
 4. Grouping
 5. Expanding
 
