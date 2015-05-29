@@ -172,9 +172,17 @@ using `addtagged` callback in `in/user_data.hs` file.
 
 ## Generation Stage
 
-TODO: generation stage
-TODO: planning
-TODO: diagnostics
+On the generation stage a list of changes is converted into a human-readable
+report.
+Changes are split into categories, the actual changes are displayed
+in comparison with the planned budget, validation is performed and validation
+errors are displayed.
+
+### Categorizing Changes
+
+### Budget Planning
+
+### Validation
 
 # Usage
 
