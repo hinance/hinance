@@ -295,7 +295,7 @@ slicetable dev step ofs icolumn changes ntab title
         btnprev ++ btnnext ++ "</div></div>"
   btnprev = btn False "prev" $ printf "Previous %i" irows
   btnnext = btn True "next" $ printf "Next %i" irows
-  btn active nbtn text = 
+  btn active nbtn text =
     (printf "<div class=\"btn-group\" %s id=\"htab%s-disabled-%s\">"
             (hideif active) nbtn ntab) ++
       "<button class=\"btn btn-lg btn-default\" disabled=\"disabled\">" ++
@@ -364,7 +364,7 @@ slicefigure time dev slice nslice step ofs nfig allchgs posneg =
          "xmlns:xlink=\"http://www.w3.org/1999/xlink\" " ++
          "width=\"100%%\" height=\"100%%\" viewBox=\"0 0 %i %i\">%s</svg>")
     totalwidth totalheight $ concatMap column icolumns
-  column icolumn = "<g>" ++ 
+  column icolumn = "<g>" ++
     "<g " ++
       (printf "transform=\"translate(%i,%i)\">%s</g>" x stackposy stackpos) ++
     "<rect " ++
@@ -372,7 +372,7 @@ slicefigure time dev slice nslice step ofs nfig allchgs posneg =
       (printf "width=\"%i\" height=\"%i\" " cfgcellwidth cfgmarkheight) ++
       (printf "rx=\"%i\" ry=\"%i\" " cfgbdrround cfgbdrround) ++
       (printf "x=\"%i\" y=\"%i\"/>" x marky) ++
-    "<text " ++ 
+    "<text " ++
       (printf "text-anchor=\"middle\" fill=\"%s\" " cfgtxtcol) ++
       (printf "x=\"%i\" y=\"%i\">" (x + cfgmarkofsx) (marky + cfgmarkofsy)) ++
       (printf "%s</text>" fdate) ++
