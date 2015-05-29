@@ -76,7 +76,7 @@ Changes are labelled with **tags** and human-readable **descriptions**.
 Each row of the
 [example report](http://www.hinance.org/examples/max/out/www/dtp-slice0-step5605201-ofs0-col15-cat4.html)
 table represents one change.
-Related changes are grouped together using the same **group** identifier
+Related changes are grouped together by using the same **group** identifier
 ([example](http://www.hinance.org/examples/max/out/www/dtp-group1062.html)).
 
 Transformation of the scraped data into a list of changes is done in several
