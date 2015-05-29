@@ -92,7 +92,7 @@ sequential steps:
 1. Patching: post-processes the scraped data.
 2. Converting: converts scraped data into a list of changes.
 3. Merging: joins pairs of changes representing the same operation.
-4. Grouping
+4. Grouping: groups pairs of changes representing the same operation.
 5. Expanding
 
 Steps are executed in the order specified above in the pipeline fashion.
@@ -134,12 +134,21 @@ On this step a pair of changes can be combined into a single change.
 This is how banks and shops data are integrated together:
 each change corresponding to order payment is merged with the change
 of the banking transaction of the same amount.
-The resulting change has all tags of both input changes.
+The resulting change has all tags of both input changes, and group identifier
+of the input change that has a non-empty one.
 
 User specifies which changes pairs can be combined using `canmerge` callback
 in `in/user_data.hs` file.
 
 ### Grouping Step
+
+On this step a pair of changes can be grouped together.
+This is how banking transfers are handled:
+changes with the same absolute amount, but of different sign, are
+assigned the same unique group identifier.
+
+User specifies which changes pairs can be grouped using `canxfer` callback
+in `in/user_data.hs` file.
 
 ### Expanding Step
 
