@@ -79,6 +79,25 @@ table represents one change.
 Related changes are grouped together using the same **group** identifier
 ([example](http://www.hinance.org/examples/max/out/www/dtp-group1062.html)).
 
+Transformation of the scraped data into a list of changes is done in several
+sequential steps:
+
+1. Patching
+2. Converting
+3. Merging
+4. Grouping
+5. Expanding
+
+### Patching Step
+
+### Converting Step
+
+### Merging Step
+
+### Grouping Step
+
+### Expanding Step
+
 # Usage
 
 Create working directory where all program files will be stored:
