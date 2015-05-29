@@ -183,6 +183,15 @@ shown.
 
 ### Categorizing the Changes
 
+To improve report readability, changes can be organized into **slices**
+(like expenses, travel, car, hobbies, income, assets), each of which can
+be further subdivided into **categories** like recurring expenses, household,
+food, clothes, etc.
+([example](http://www.hinance.org/examples/max/out/www/dtp-slice0-step5605201-ofs0-col15-cat4.html))
+
+User can specify how to split changes into slices and categories using
+`slices` list in `in/user_data.hs` file.
+
 ### Budget Planning
 
 ### Validation
