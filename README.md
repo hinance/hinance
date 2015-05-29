@@ -194,6 +194,15 @@ User can specify how to split changes into slices and categories using
 
 ### Budget Planning
 
+One of the main purposes of Hinance is to allow for budget planning and
+to monitor how the actual financial operations compare with this plan.
+In order to monitor this, three figures are shown in the report:
+**actual**, **actual minus planned** and **planned**
+([example](http://www.hinance.org/examples/max/out/www/dtp-slice0-step5605201-ofs0-col15-cat4.html)).
+
+User can specify budget plan as a list of changes `planned` covering
+time span `planfrom` to `planto` in `in/user_data.hs` file.
+
 ### Validation
 
 # Usage
