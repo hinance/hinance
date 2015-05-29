@@ -12,7 +12,7 @@ There's a [package](https://aur.archlinux.org/packages/hinance) for Arch Linux.
 
 There's also a reproducible Dockerized
 [build automation](https://github.com/hinance/www) for the project homepage,
-which includes all the necessary dependencies.
+which includes all the necessary dependencies and the example.
 The Docker container is pre-built and uploaded to the repository, but if you
 want to build it yourself, keep in mind that it takes about 1 hour on 4 cores,
 8GB RAM machine.
