@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# Copyright 2015 Oleg Plakhotniuk
+#
+# This file is part of Hinance.
+#
+# Hinance is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Hinance is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Hinance.  If not, see <http://www.gnu.org/licenses/>.
+
+set -e
+
+DIR="$(pwd)"
+
+mkdir -p "$DIR/"{log,out/www}
+cd "$DIR/out"
+python2 /usr/lib/hinance/scrape.py -ddv --logging-file "$DIR/log/scrape.log"
+
+cp /usr/lib/hinance/hinance.js "$DIR/out/www"
+
+mkdir -p "$DIR/tmp/hs"
+cp -t "$DIR/tmp/hs" "$DIR"/*.hs /usr/lib/hinance/hs/*
+
+echo -e "module Hinance.Bank.Data where\nimport Hinance.Bank.Type\n\
+import Hinance.Currency\nimport Data.Maybe\n\
+banksraw = []" >"$DIR/tmp/hs/bank_data.hs"
+echo -e "module Hinance.Shop.Data where\nimport Hinance.Shop.Type\n\
+import Hinance.Currency\nshopsraw = []" >"$DIR/tmp/hs/shop_data.hs"
+
+set +e
+cat "$DIR"/{,out/}banks*.hs.part >> "$DIR/tmp/hs/bank_data.hs"
+cat "$DIR"/{,out/}shops*.hs.part >> "$DIR/tmp/hs/shop_data.hs"
+set -e
+
+ghc -O -XFlexibleInstances -o "$DIR/tmp/hinance-hs" "$DIR"/tmp/hs/*.hs
+
+echo 'Generating report web pages.'
+cd "$DIR/out/www"
+cp -r /usr/lib/hinance/www/* "$DIR/out/www"
+"$DIR/tmp/hinance-hs" "$(date)" &
+PID=$!
+
+while kill -0 $PID 2>/dev/null ; do
+  du -hd0 "$DIR/out/www"
+  sleep 10
+done
+
+wait $PID

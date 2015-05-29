@@ -1,0 +1,74 @@
+#!/bin/bash
+
+# Copyright 2015 Oleg Plakhotniuk
+#
+# This file is part of Hinance.
+#
+# Hinance is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Hinance is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Hinance.  If not, see <http://www.gnu.org/licenses/>.
+
+set -e
+
+if [ -e out/lock.pid ] ; then
+  if kill -0 $(cat out/lock.pid) &>/dev/null ; then
+    echo "hinance is already running in the current directory."
+    exit 1
+  fi
+fi
+
+mkdir -p cmd in out/{log,arc,www}
+echo $$ > out/lock.pid
+
+if [[ ! -e in/config.sh ]] ; then
+  cp /usr/lib/hinance/default/config.sh in
+fi
+if [[ ! -e in/user_data.hs || ! -e in/user_tag.hs ]] ; then
+  cp /usr/lib/hinance/default/user_*.hs in
+fi
+if [[ ! -e in/backends ]] ; then
+  cp /usr/lib/hinance/default/backends in
+fi
+
+. in/config.sh
+
+echo "Serving."
+DIR="$(pwd)"
+while true ; do
+  TIMEBEGIN=$(date +"%s")
+  DATE=$(date +"%Y_%m_%d_%H_%M")
+  echo "Cycle started for $DATE" >> "$DIR"/out/log/hinance.log
+
+  ARCDIR="$DIR"/out/arc/$DATE
+  rm -rf $ARCDIR
+  mkdir -p $ARCDIR
+  cp "$DIR"/in/* $ARCDIR
+  chmod 600 "$ARCDIR"/backends
+  export WEBOOB_BACKENDS="$ARCDIR"/backends
+ 
+  cd $ARCDIR
+  if /usr/lib/hinance/hinance-once &>> "$DIR"/out/log/hinance.log ; then
+    rm -rf "$DIR"/out/www
+    mv out/www "$DIR"/out
+  fi
+  rm -rf tmp
+
+  echo "Cycle finished for $DATE" >> "$DIR"/out/log/hinance.log
+
+  while (( $(date +"%s") < TIMEBEGIN + RESTART_PERIOD )) ; do
+    if [ -e "$DIR"/cmd/restart ] ; then
+      rm -f "$DIR"/cmd/restart
+      break
+    fi
+    sleep 1
+  done
+done
