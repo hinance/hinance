@@ -226,6 +226,11 @@ group always add up to zero.
 This error means that there are some ungrouped changes, which usually
 indicates that more user customization is required on expanding step.
 
+**Slices mismatch**.
+Each slice must consist only of non-intersecting categories.
+This error means that either there are some changes in a slice, but not in
+any of its categories, or vice versa.
+
 # Usage
 
 Create working directory where all program files will be stored:
