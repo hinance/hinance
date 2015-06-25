@@ -32,7 +32,7 @@ echo "Server = $AA_ROOT/repos/$AA_YEAR/$AA_MONTH/$AA_DAY/\$repo/os/\$arch" \
 pacman -Syyuu --noconfirm
 
 pacman -S --noconfirm --needed base base-devel cabal-install ghc git happy \
-                               mupdf python2-prettytable sudo v8
+                               mupdf phantomjs python2-prettytable sudo v8
 
 # habs
 git clone https://github.com/archhaskell/habs /hinance-docker/habs
