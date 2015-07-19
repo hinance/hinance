@@ -1,7 +1,7 @@
 5c5
 < pkgver=0.j-62-g944c5f9
 ---
-> pkgver=53f43028
+> pkgver=51ec383b
 41c41
 < source=("$pkgname"::'git://git.symlink.me/pub/weboob/devel.git')
 ---
