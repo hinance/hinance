@@ -1,0 +1,10 @@
+Hinance change log
+==================
+
+1.0.1
+  - Updated to Weboob snapshot of 2015-10-02 (01e73d80)
+  - Fixed an error which occured when trying to merge with previously
+    scraped data, if either old or new scraped data is empty.
+
+1.0.0
+  - Initial public release.

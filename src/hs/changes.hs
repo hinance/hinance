@@ -94,7 +94,7 @@ class Mergeable a where
   mtime :: a -> Integer
   meq :: a -> a -> Bool
   merge :: [[a]] -> [a]
-  merge = foldl1 merge2 . reverse . sortBy cmp where
+  merge = foldl1 merge2 . reverse . sortBy cmp . filter (not.null) where
     cmp x y = mconcat $ map (\fn -> (on compare (mtime.fn)) x y) [last, head]
     merge2 xs1 xs2 = head merges where
       merges = [h1++t1++t2 | (h1,t1)<-splits xs1, (h2,t2)<-reverse$splits xs2,
