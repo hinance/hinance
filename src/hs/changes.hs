@@ -43,13 +43,13 @@ chgsplan = (sortBy (compare`on`ctime)) . (++ planned) . concat
 chgsdiff = (sortBy (compare`on`ctime)) . (++ chgsact)
   . (map $ \x -> x{camount = -camount x}) $ chgsplan
 
-banks = patched $ map (mrgbacs.mrgbs) $ groupSortBy bid banksraw where
+banks = map (mrgbacs.mrgbs) $ groupSortBy bid $ patched banksraw where
   mrgbs = foldl1 (\a x -> x{baccs = (baccs a) ++ (baccs x)})
   mrgbacs b = b{baccs = map mrgacs $ groupSortBy baid $ baccs b}
   mrgacs acs = newest{batrans = merge $ map batrans acs} where
     newest = maximumBy (on compare (bttime.head.batrans)) acs
 
-shops = patched $ map mrgss $ groupSortBy sid $ shopsraw where
+shops = map mrgss $ groupSortBy sid $ patched shopsraw where
   mrgss (s:ss) = s{sorders = merge $ map sorders (s:ss)}
 
 tags x = filter (tagged x) [minBound::Tag ..]
