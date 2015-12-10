@@ -14,6 +14,8 @@ cabal configure --user
 cabal build --jobs=64
 cabal install --jobs=64
 
+#TODO: make it run in 64 jobs from this point on
+
 # habs
 cd /hinance-docker/habs
 $CBLREPO sync
