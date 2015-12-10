@@ -9,10 +9,10 @@ CBLREPO=$HOME/.cabal/bin/cblrepo
 # cblrepo
 cd /hinance-docker/cblrepo
 cabal update
-cabal install --jobs=64 --only-dependencies
+cabal install --jobs=36 --only-dependencies
 cabal configure --user
-cabal build --jobs=64
-cabal install --jobs=64
+cabal build --jobs=36
+cabal install --jobs=36
 
 #TODO: fix the script from this point and below
 

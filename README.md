@@ -15,7 +15,7 @@ There's also a reproducible Dockerized
 which includes all the necessary dependencies and the example.
 The Docker container is pre-built and uploaded to the repository, but if you
 want to build it yourself, keep in mind that it's designed to be built on
-32-cores machine with lots of memory, like `c4.8xlarge` Amazon EC2 instance.
+36-cores machine with lots of memory, like `c4.8xlarge` Amazon EC2 instance.
 
 Feel free to use the above as a reference when installing on your target
 platform.
