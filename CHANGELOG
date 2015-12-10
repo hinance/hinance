@@ -1,6 +1,9 @@
 Hinance change log
 ==================
 
+1.1.0
+  - Patching step is performed before merging the scraped data.
+
 1.0.1
   - Updated to Weboob snapshot of 2015-10-02 (01e73d80)
   - Fixed an error which occured when trying to merge with previously
