@@ -9,10 +9,10 @@ CBLREPO=$HOME/.cabal/bin/cblrepo
 # cblrepo
 cd /hinance-docker/cblrepo
 cabal update
-cabal install --only-dependencies
+cabal install -j 64 --only-dependencies
 cabal configure --user
-cabal build
-cabal install
+cabal build -j 64
+cabal install -j 64
 
 # habs
 cd /hinance-docker/habs
