@@ -14,7 +14,7 @@ cabal configure --user
 cabal build --jobs=64
 cabal install --jobs=64
 
-#TODO: make it run in 64 jobs from this point on
+#TODO: fix the script from this point and below
 
 # habs
 cd /hinance-docker/habs
