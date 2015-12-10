@@ -6,8 +6,6 @@ set -e
 
 CBLREPO=$HOME/.cabal/bin/cblrepo
 
-# TODO: install v8 from AUR
-
 # cblrepo
 cd /hinance-docker/cblrepo
 cabal update
@@ -79,6 +77,12 @@ sudo pacman -U --noconfirm python2-html2text-2014.12.24-1-any.pkg.tar.xz
 fetch-aur /py python-pysqlite
 makepkg -sc --noconfirm
 sudo pacman -U --noconfirm python2-pysqlite-2.6.3-4-x86_64.pkg.tar.xz
+
+# v8
+fetch-aur v8
+git apply /hinance-docker/setup/v8/the.patch
+makepkg -sc --noconfirm
+sudo pacman -U --noconfirm v8-3.30.33.16-2-x86_64.pkg.tar.xz
 
 # weboob-git
 fetch-aur /we weboob-git
