@@ -4,6 +4,10 @@ set -e
 
 . /hinance-docker/setup/share.sh
 
+LANG=en_US.UTF-8
+LC_COLLATE=en_US.UTF-8
+LC_TIME=en_US.UTF-8
+
 CBLREPO=$HOME/.cabal/bin/cblrepo
 
 # cblrepo
@@ -13,8 +17,6 @@ cabal install --jobs=36 --only-dependencies
 cabal configure --user
 cabal build --jobs=36
 cabal install --jobs=36
-
-#TODO: fix the script from this point and below
 
 # habs
 cd /hinance-docker/habs
@@ -27,8 +29,11 @@ sudo pacman -Rs --noconfirm cabal-install
 
 # ghc
 cd /hinance-docker/habs/ghc
+patch -cp1 < /hinance-docker/setup/ghc/the.patch
 makepkg -sc --noconfirm
-sudo pacman -U --noconfirm ghc-7.8.4-1-x86_64.pkg.tar.xz
+sudo pacman -U --noconfirm ghc-7.10.2-2-x86_64.pkg.tar.xz
+
+#TODO: fix the script from this point and below
 
 # haskell-haskell-lexer
 cd /hinance-docker/habs/haskell-haskell-lexer

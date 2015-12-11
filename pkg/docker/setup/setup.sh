@@ -45,6 +45,8 @@ git clone https://github.com/magthe/cblrepo /hinance-docker/cblrepo
 cd /hinance-docker/cblrepo
 git checkout $CBLREPO_TAG
 
+locale-gen
+
 # user
 useradd -m user -G wheel
 chmod +w /etc/sudoers
