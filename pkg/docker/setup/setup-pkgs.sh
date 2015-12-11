@@ -18,8 +18,8 @@ cabal install --jobs=36
 
 # habs
 cd /hinance-docker/habs
-$CBLREPO sync
-$CBLREPO add pretty-show,1.6.8.2 regex-tdfa,1.2.0
+$CBLREPO update
+$CBLREPO add pretty-show,1.6.8.2 regex-tdfa,1.2.1
 $CBLREPO pkgbuild haskell-lexer pretty-show mtl text parsec \
                   regex-base regex-tdfa
 rm -rf $HOME/.{cabal,ghc}
