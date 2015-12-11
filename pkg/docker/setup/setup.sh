@@ -38,6 +38,7 @@ pacman -S --noconfirm --needed base base-devel cabal-install ghc git happy \
 git clone https://github.com/archhaskell/habs /hinance-docker/habs
 cd /hinance-docker/habs
 git checkout $HABS_TAG
+git apply /hinance-docker/setup/habs/the.patch
 
 # cblrepo
 git clone https://github.com/magthe/cblrepo /hinance-docker/cblrepo
