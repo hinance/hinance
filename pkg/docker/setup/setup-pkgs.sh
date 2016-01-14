@@ -40,19 +40,27 @@ echo '16c16
 ---
 > depends=("ghc=7.10.2-2")' | patch PKGBUILD
 makepkg -sc --noconfirm
-sudo pacman -U --noconfirm haskell-haskell-lexer-1.0-5-x86_64.pkg.tar.xz
+sudo pacman -U --noconfirm haskell-haskell-lexer-1.0_0-78-x86_64.pkg.tar.xz
 
 #TODO: fix the script from this point and below
 
 # haskell-pretty-show
 cd /hinance-docker/habs/haskell-pretty-show
+echo '16c16
+< depends=("ghc=7.10.2-1"
+---
+> depends=("ghc=7.10.2-2"' | patch PKGBUILD
 makepkg -sc --noconfirm
-sudo pacman -U --noconfirm haskell-pretty-show-1.6.8.2-1-x86_64.pkg.tar.xz
+sudo pacman -U --noconfirm haskell-pretty-show-1.6.8.2_1-1-x86_64.pkg.tar.xz
 
 # haskell-mtl
 cd /hinance-docker/habs/haskell-mtl
+echo '16c16
+< depends=("ghc=7.10.2-1")
+---
+> depends=("ghc=7.10.2-2")' | patch PKGBUILD
 makepkg -sc --noconfirm
-sudo pacman -U --noconfirm haskell-mtl-2.1.3.1-5-x86_64.pkg.tar.xz
+sudo pacman -U --noconfirm haskell-mtl-2.2.1_1-78-x86_64.pkg.tar.xz
 
 # haskell-text
 cd /hinance-docker/habs/haskell-text
