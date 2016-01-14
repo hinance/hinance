@@ -33,12 +33,16 @@ patch -cp1 < /hinance-docker/setup/ghc/the.patch
 makepkg -sc --noconfirm
 sudo pacman -U --noconfirm ghc-7.10.2-2-x86_64.pkg.tar.xz
 
-#TODO: fix the script from this point and below
-
 # haskell-haskell-lexer
 cd /hinance-docker/habs/haskell-haskell-lexer
+echo '16c16
+< depends=("ghc=7.10.2-1")
+---
+> depends=("ghc=7.10.2-2")' | patch PKGBUILD
 makepkg -sc --noconfirm
 sudo pacman -U --noconfirm haskell-haskell-lexer-1.0-5-x86_64.pkg.tar.xz
+
+#TODO: fix the script from this point and below
 
 # haskell-pretty-show
 cd /hinance-docker/habs/haskell-pretty-show
