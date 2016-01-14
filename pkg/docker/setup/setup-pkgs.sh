@@ -125,8 +125,6 @@ git apply /hinance-docker/setup/v8/the.patch
 makepkg -sc --noconfirm
 sudo pacman -U --noconfirm v8-3.30.33.16-2-x86_64.pkg.tar.xz
 
-#TODO: fix the script from this point and below
-
 # weboob-git
 fetch-aur weboob-git
 git apply /hinance-docker/setup/weboob-git/the.patch
@@ -134,10 +132,12 @@ makepkg -sc --noconfirm
 sudo pacman -U --noconfirm weboob-git-55fa318c-1-x86_64.pkg.tar.xz
 weboob-config update
 
+#TODO: fix the script from this point and below
+
 # hinance
 git clone https://github.com/hinance/hinance /hinance-docker/hinance.git
 cd /hinance-docker/hinance.git
 git checkout 1.1.0-draft
 cd /hinance-docker/hinance.git/pkg/archlinux
 makepkg -sc --noconfirm
-sudo pacman -U --noconfirm hinance-1.1.0-draft-1-any.pkg.tar.xz
+sudo pacman -U --noconfirm hinance-1.1.0draft-1-any.pkg.tar.xz
