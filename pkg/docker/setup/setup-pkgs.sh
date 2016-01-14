@@ -104,12 +104,12 @@ echo '16,17c16,17
 makepkg -sc --noconfirm
 sudo pacman -U --noconfirm haskell-regex-tdfa-1.2.1_0-1-x86_64.pkg.tar.xz
 
-#TODO: fix the script from this point and below
-
 # python2-elementtidy
 fetch-aur /py python2-elementtidy
 makepkg -sc --noconfirm
-sudo pacman -U --noconfirm python2-elementtidy-1.0-2-x86_64.pkg.tar.xz
+sudo pacman -U --noconfirm python2-elementtidy-1.0-3-x86_64.pkg.tar.xz
+
+#TODO: fix the script from this point and below
 
 # python2-html2text
 fetch-aur /py python2-html2text
