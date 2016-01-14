@@ -105,7 +105,7 @@ makepkg -sc --noconfirm
 sudo pacman -U --noconfirm haskell-regex-tdfa-1.2.1_0-1-x86_64.pkg.tar.xz
 
 # python2-elementtidy
-fetch-aur /py python2-elementtidy
+fetch-aur python2-elementtidy
 makepkg -sc --noconfirm
 sudo pacman -U --noconfirm python2-elementtidy-1.0-3-x86_64.pkg.tar.xz
 
