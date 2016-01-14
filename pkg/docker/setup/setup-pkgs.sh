@@ -93,12 +93,18 @@ echo '16,17c16,17
 makepkg -sc --noconfirm
 sudo pacman -U --noconfirm haskell-regex-base-0.93.2_0-78-x86_64.pkg.tar.xz
 
-#TODO: fix the script from this point and below
-
 # haskell-regex-tdfa
 cd /hinance-docker/habs/haskell-regex-tdfa
+echo '16,17c16,17
+< depends=("ghc=7.10.2-1"
+<          "haskell-mtl=2.2.1_0-78"
+---
+> depends=("ghc=7.10.2-2"
+>          "haskell-mtl=2.2.1_1-78"' | patch PKGBUILD
 makepkg -sc --noconfirm
-sudo pacman -U --noconfirm haskell-regex-tdfa-1.2.0-1-x86_64.pkg.tar.xz
+sudo pacman -U --noconfirm haskell-regex-tdfa-1.2.1_0-1-x86_64.pkg.tar.xz
+
+#TODO: fix the script from this point and below
 
 # python2-elementtidy
 fetch-aur /py python2-elementtidy
