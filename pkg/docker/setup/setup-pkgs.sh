@@ -119,13 +119,13 @@ fetch-aur python-pysqlite
 makepkg -sc --noconfirm
 sudo pacman -U --noconfirm python2-pysqlite-2.6.3-5-any.pkg.tar.xz
 
-#TODO: fix the script from this point and below
-
 # v8
 fetch-aur v8
 git apply /hinance-docker/setup/v8/the.patch
 makepkg -sc --noconfirm
 sudo pacman -U --noconfirm v8-3.30.33.16-2-x86_64.pkg.tar.xz
+
+#TODO: fix the script from this point and below
 
 # weboob-git
 fetch-aur /we weboob-git
