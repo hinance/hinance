@@ -69,12 +69,20 @@ echo '16c16
 makepkg -sc --noconfirm
 sudo pacman -U --noconfirm haskell-text-1.2.1.3_1-2-x86_64.pkg.tar.xz
 
-#TODO: fix the script from this point and below
-
 # haskell-parsec
 cd /hinance-docker/habs/haskell-parsec
+echo '16,18c16,18
+< depends=("ghc=7.10.2-1"
+<          "haskell-mtl=2.2.1_0-78"
+<          "haskell-text=1.2.1.3_0-2")
+---
+> depends=("ghc=7.10.2-2"
+>          "haskell-mtl=2.2.1_1-78"
+>          "haskell-text=1.2.1.3_1-2")' | patch PKGBUILD
 makepkg -sc --noconfirm
-sudo pacman -U --noconfirm haskell-parsec-3.1.8-1-x86_64.pkg.tar.xz
+sudo pacman -U --noconfirm haskell-parsec-3.1.9_0-83-x86_64.pkg.tar.xz
+
+#TODO: fix the script from this point and below
 
 # haskell-regex-base
 cd /hinance-docker/habs/haskell-regex-base
