@@ -82,12 +82,18 @@ echo '16,18c16,18
 makepkg -sc --noconfirm
 sudo pacman -U --noconfirm haskell-parsec-3.1.9_0-83-x86_64.pkg.tar.xz
 
-#TODO: fix the script from this point and below
-
 # haskell-regex-base
 cd /hinance-docker/habs/haskell-regex-base
+echo '16,17c16,17
+< depends=("ghc=7.10.2-1"
+<          "haskell-mtl=2.2.1_0-78")
+---
+> depends=("ghc=7.10.2-2"
+>          "haskell-mtl=2.2.1_1-78")' | patch PKGBUILD
 makepkg -sc --noconfirm
-sudo pacman -U --noconfirm haskell-regex-base-0.93.2-58-x86_64.pkg.tar.xz
+sudo pacman -U --noconfirm haskell-regex-base-0.93.2_0-78-x86_64.pkg.tar.xz
+
+#TODO: fix the script from this point and below
 
 # haskell-regex-tdfa
 cd /hinance-docker/habs/haskell-regex-tdfa
