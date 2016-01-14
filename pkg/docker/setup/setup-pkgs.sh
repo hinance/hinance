@@ -60,12 +60,16 @@ echo '16c16
 makepkg -sc --noconfirm
 sudo pacman -U --noconfirm haskell-mtl-2.2.1_1-78-x86_64.pkg.tar.xz
 
-#TODO: fix the script from this point and below
-
 # haskell-text
 cd /hinance-docker/habs/haskell-text
+echo '16c16
+< depends=("ghc=7.10.2-1")
+---
+> depends=("ghc=7.10.2-2")' | patch PKGBUILD
 makepkg -sc --noconfirm
-sudo pacman -U --noconfirm haskell-text-1.2.0.4-1-x86_64.pkg.tar.xz
+sudo pacman -U --noconfirm haskell-text-1.2.1.3_1-2-x86_64.pkg.tar.xz
+
+#TODO: fix the script from this point and below
 
 # haskell-parsec
 cd /hinance-docker/habs/haskell-parsec
