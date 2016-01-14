@@ -109,12 +109,12 @@ fetch-aur python2-elementtidy
 makepkg -sc --noconfirm
 sudo pacman -U --noconfirm python2-elementtidy-1.0-3-x86_64.pkg.tar.xz
 
-#TODO: fix the script from this point and below
-
 # python2-html2text
-fetch-aur /py python2-html2text
+fetch-aur python2-html2text
 makepkg -sc --noconfirm
-sudo pacman -U --noconfirm python2-html2text-2014.12.24-1-any.pkg.tar.xz
+sudo pacman -U --noconfirm python2-html2text-2015.4.14-1-any.pkg.tar.xz
+
+#TODO: fix the script from this point and below
 
 # python-pysqlite
 fetch-aur /py python-pysqlite
