@@ -114,12 +114,12 @@ fetch-aur python2-html2text
 makepkg -sc --noconfirm
 sudo pacman -U --noconfirm python2-html2text-2015.4.14-1-any.pkg.tar.xz
 
-#TODO: fix the script from this point and below
-
 # python-pysqlite
-fetch-aur /py python-pysqlite
+fetch-aur python-pysqlite
 makepkg -sc --noconfirm
-sudo pacman -U --noconfirm python2-pysqlite-2.6.3-4-x86_64.pkg.tar.xz
+sudo pacman -U --noconfirm python2-pysqlite-2.6.3-5-any.pkg.tar.xz
+
+#TODO: fix the script from this point and below
 
 # v8
 fetch-aur v8
