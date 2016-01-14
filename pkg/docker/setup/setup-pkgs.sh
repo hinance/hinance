@@ -42,8 +42,6 @@ echo '16c16
 makepkg -sc --noconfirm
 sudo pacman -U --noconfirm haskell-haskell-lexer-1.0_0-78-x86_64.pkg.tar.xz
 
-#TODO: fix the script from this point and below
-
 # haskell-pretty-show
 cd /hinance-docker/habs/haskell-pretty-show
 echo '16c16
@@ -61,6 +59,8 @@ echo '16c16
 > depends=("ghc=7.10.2-2")' | patch PKGBUILD
 makepkg -sc --noconfirm
 sudo pacman -U --noconfirm haskell-mtl-2.2.1_1-78-x86_64.pkg.tar.xz
+
+#TODO: fix the script from this point and below
 
 # haskell-text
 cd /hinance-docker/habs/haskell-text
