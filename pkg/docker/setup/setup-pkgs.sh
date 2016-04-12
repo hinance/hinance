@@ -138,7 +138,7 @@ sudo pacman -U --noconfirm v8-3.30.33.16-2-x86_64.pkg.tar.xz
 fetch-aur weboob-git
 git apply /hinance-docker/setup/weboob-git/the.patch
 makepkg -sc --noconfirm
-sudo pacman -U --noconfirm weboob-git-55fa318c-1-x86_64.pkg.tar.xz
+sudo pacman -U --noconfirm weboob-git-6fdb0946-1-x86_64.pkg.tar.xz
 weboob-config update
 
 # hinance

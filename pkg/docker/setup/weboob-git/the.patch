@@ -7,7 +7,7 @@ index 59a1010..9a6fd15 100644
 
  pkgname=weboob-git
 -pkgver=1.0-819-g925beee
-+pkgver=55fa318c
++pkgver=6fdb0946
  pkgrel=1
  pkgdesc="Weboob (Web Out Of Browsers) provides several applications to interact with a lot of websites."
  url="http://weboob.org"
