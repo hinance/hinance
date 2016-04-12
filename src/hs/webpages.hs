@@ -31,7 +31,6 @@ import Hinance.Shop.Type
 import Hinance.User.Tag
 import Hinance.User.Data
 import Hinance.User.Type
-import System.Locale
 import Text.Printf
 import Text.Show.Pretty
 
