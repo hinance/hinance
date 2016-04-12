@@ -21,9 +21,9 @@ cabal install --jobs=36
 # habs
 cd /hinance-docker/habs
 $CBLREPO update
-$CBLREPO add pretty-show,1.6.8.2 regex-tdfa,1.2.1
+$CBLREPO add pretty-show,1.6.8.2 regex-tdfa,1.2.1 old-locale,1.0.0.6
 $CBLREPO pkgbuild haskell-lexer pretty-show mtl text parsec \
-                  regex-base regex-tdfa
+                  regex-base regex-tdfa old-locale
 rm -rf $HOME/.{cabal,ghc}
 sudo pacman -Rs --noconfirm cabal-install
 
@@ -32,6 +32,15 @@ cd /hinance-docker/habs/ghc
 patch -cp1 < /hinance-docker/setup/ghc/the.patch
 makepkg -sc --noconfirm
 sudo pacman -U --noconfirm ghc-7.10.2-2-x86_64.pkg.tar.xz
+
+# haskell-old-locale
+cd /hinance-docker/habs/haskell-old-locale
+echo '16c16
+< depends=("ghc=7.10.2-1")
+---
+> depends=("ghc=7.10.2-2")' | patch PKGBUILD
+makepkg -sc --noconfirm
+sudo pacman -U --noconfirm haskell-old-locale-1.0.0.6_1-1-x86_64.pkg.tar.xz
 
 # haskell-haskell-lexer
 cd /hinance-docker/habs/haskell-haskell-lexer
