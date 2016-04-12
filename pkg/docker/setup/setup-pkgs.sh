@@ -40,7 +40,7 @@ echo '16c16
 ---
 > depends=("ghc=7.10.2-2")' | patch PKGBUILD
 makepkg -sc --noconfirm
-sudo pacman -U --noconfirm haskell-old-locale-1.0.0.6_1-1-x86_64.pkg.tar.xz
+sudo pacman -U --noconfirm haskell-old-locale-1.0.0.7_1-78-x86_64.pkg.tar.xz
 
 # haskell-haskell-lexer
 cd /hinance-docker/habs/haskell-haskell-lexer
