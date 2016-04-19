@@ -177,6 +177,9 @@ diagpage time dev = (diagpagename dev, content) where
   content = html head $ basicpage time dev $ inner
   head = ["Diagnostics"]
   inner =
+    (printf ("<h3>Raw data:</h3>" ++
+      "<a href=\"%s\">shops</a>, <a href=\"%s\">banks</a>")
+      (shopspagename dev) (bankspagename dev)) ++
     (printf "<h3>Checks (%i):</h3>" (length diagchecks)) ++
     (printf "<pre>%s</pre>" (ppShow diagchecks)) ++
     (printf "<h3>Changes without groups (%i):</h3>" (length diagnogrp)) ++
