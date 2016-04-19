@@ -63,8 +63,8 @@ data Device = Device {dname::String, dlen::Integer, drows::Integer,
                       dnarrow::Bool}
 
 devicepages :: String -> Device -> [(String, String)]
-devicepages time dev =
-  [homepage time dev, diagpage time dev] ++ slicespages ++ groupspages where
+devicepages time dev = [homepage time dev, diagpage time dev,
+  bankspage time dev, shopspage time dev] ++ slicespages ++ groupspages where
   groupspages = [grouppage time dev $ toInteger i
                 | i <- [0 .. length idxToGroup - 1]]
   slicespages = concat $
@@ -85,6 +85,12 @@ homepagename dev = printf "%s-home.html" (dname dev)
 
 diagpagename :: Device -> String
 diagpagename dev = printf "%s-diag.html" (dname dev)
+
+bankspagename :: Device -> String
+bankspagename dev = printf "%s-banks.html" (dname dev)
+
+shopspagename :: Device -> String
+shopspagename dev = printf "%s-shops.html" (dname dev)
 
 grouppagename :: Device -> Integer -> String
 grouppagename dev igroup = printf "%s-group%i.html" (dname dev) igroup
@@ -179,6 +185,16 @@ diagpage time dev = (diagpagename dev, content) where
     (printf "<pre>%s</pre>" (ppShow diagugrps)) ++
     (printf "<h3>Slices mismatch (%i):</h3>" (length diagslicesflat)) ++
     (printf "<pre>%s</pre>" (ppShow diagslices))
+
+bankspage time dev = (bankspagename dev, content) where
+  content = html head $ basicpage time dev $ inner
+  head = ["Banks"]
+  inner = "<h3>Banks Raw Data</h3>"
+
+shopspage time dev = (shopspagename dev, content) where
+  content = html head $ basicpage time dev $ inner
+  head = ["Shops"]
+  inner = "<h3>Shops Raw Data</h3>"
 
 grouppage :: String -> Device -> Integer -> (String, String)
 grouppage time dev igroup = (grouppagename dev igroup, content) where
