@@ -42,6 +42,8 @@ diagchecks = concatMap (concatMap chkbalance.baccs) banks where
                | otherwise = [] :: [String]
   baldiff a = (-) (babalance a) $ foldl (+) 0 $ map btamount $ batrans a
 
+diagtrans ts = ts
+
 diffslices chgs = map (\s -> (sname s, diff s)) slices where
   diff slice = (srt $ whole \\ parts, srt $ parts \\ whole) where
     srt = reverse.(sortBy (compare `on` ctime))

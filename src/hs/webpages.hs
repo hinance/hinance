@@ -192,12 +192,15 @@ diagpage time dev = (diagpagename dev, content) where
 bankspage time dev = (bankspagename dev, content) where
   content = html head $ basicpage time dev $ inner
   head = ["Banks"]
-  inner = "<h3>Banks Raw Data</h3>"
+  inner = concatMap (\b -> concatMap (showacc b) $ baccs b) banks
+  showacc b a = (printf "<h3>Bank %s, account %s</h3>" (bid b) (baid a)) ++
+    (printf "<pre>%s</pre>" $ ppShow.diagtrans $ batrans a)
 
 shopspage time dev = (shopspagename dev, content) where
   content = html head $ basicpage time dev $ inner
   head = ["Shops"]
-  inner = "<h3>Shops Raw Data</h3>"
+  inner = "<h3>Shops</h3>" ++
+    (printf "<pre>%s</pre>" (ppShow shops))
 
 grouppage :: String -> Device -> Integer -> (String, String)
 grouppage time dev igroup = (grouppagename dev igroup, content) where
