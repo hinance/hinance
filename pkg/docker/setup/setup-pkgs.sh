@@ -135,7 +135,7 @@ weboob-config update
 # hinance
 git clone https://github.com/hinance/hinance /hinance-docker/hinance.git
 cd /hinance-docker/hinance.git
-git checkout 1.1.0draft
+git checkout 1.1.0
 cd /hinance-docker/hinance.git/pkg/archlinux
 makepkg -sc --noconfirm
-sudo pacman -U --noconfirm hinance-1.1.0draft-1-any.pkg.tar.xz
+sudo pacman -U --noconfirm hinance-1.1.0-1-any.pkg.tar.xz
