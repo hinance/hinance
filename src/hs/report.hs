@@ -24,6 +24,9 @@ import Hinance.User.Data
 import Hinance.User.Type
 import Text.Printf
 
+data DiagTrans = DiagTrans {dtbalance::Integer, dttrans::BankTrans}
+  deriving (Read, Show)
+
 diagcount = (length diagchecks) + (length diagnogrp) + (length diagugrps) +
             (length diagslicesflat)
 
@@ -41,6 +44,11 @@ diagchecks = concatMap (concatMap chkbalance.baccs) banks where
                                    (baid a) (baldiff a)]
                | otherwise = [] :: [String]
   baldiff a = (-) (babalance a) $ foldl (+) 0 $ map btamount $ batrans a
+
+diagtrans [] = []
+diagtrans (t:ts) = diaghead : diagtrans ts where
+  diaghead = DiagTrans{dtbalance=balance, dttrans=t}
+  balance = foldl (+) 0 $ map btamount $ t:ts
 
 diffslices chgs = map (\s -> (sname s, diff s)) slices where
   diff slice = (srt $ whole \\ parts, srt $ parts \\ whole) where

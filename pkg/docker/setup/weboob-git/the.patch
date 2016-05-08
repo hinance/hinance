@@ -1,0 +1,39 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 59a1010..cf9ab74 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -2,7 +2,7 @@
+ # Contributor: ianux <ianux@free.fr>
+ 
+ pkgname=weboob-git
+-pkgver=1.0-819-g925beee
++pkgver=6fdb0946
+ pkgrel=1
+ pkgdesc="Weboob (Web Out Of Browsers) provides several applications to interact with a lot of websites."
+ url="http://weboob.org"
+@@ -20,7 +20,7 @@ depends=(
+     python2-lxml
+     python2-mechanize
+     python2-prettytable
+-    python2-pyqt
++    python2-pyqt5
+     python2-pysqlite
+     python2-requests
+     python2-simplejson
+@@ -38,15 +38,9 @@ optdepends=('gnupg: check for repository authenticity'
+             'python2-nose: test suite')
+ conflicts=('weboob')
+ provides=('weboob')
+-source=("$pkgname"::'git://git.symlink.me/pub/weboob/devel.git')
++source=("$pkgname"::"git://git.symlink.me/pub/weboob/devel.git#commit=$pkgver")
+ sha256sums=('SKIP')
+ 
+-pkgver() {
+-    cd ${srcdir}/${pkgname}
+-    local ver="$(git describe --long)"
+-    printf "%s" "${ver//-/.}"
+-}
+-
+ package() {
+    cd ${srcdir}/${pkgname}
+    python2 setup.py install --qt --xdg --prefix=/usr --root="$pkgdir"

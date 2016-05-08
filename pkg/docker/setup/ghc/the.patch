@@ -1,0 +1,70 @@
+diff -c orig/build.mk patched/build.mk
+*** orig/build.mk       2015-12-11 19:55:47.366842025 +0000
+--- patched/build.mk    2015-12-11 19:55:38.142815888 +0000
+***************
+*** 63,69 ****
+
+  # perf matches the default settings, repeated here for comparison:
+
+! SRC_HC_OPTS     = -O -H64m
+  GhcStage1HcOpts = -O -fasm
+  GhcStage2HcOpts = -O2 -fasm
+  GhcHcOpts       = -Rghc-timing
+--- 63,69 ----
+
+  # perf matches the default settings, repeated here for comparison:
+
+! SRC_HC_OPTS     = -O -H64m -j36
+  GhcStage1HcOpts = -O -fasm
+  GhcStage2HcOpts = -O2 -fasm
+  GhcHcOpts       = -Rghc-timing
+diff -c orig/PKGBUILD patched/PKGBUILD
+*** orig/PKGBUILD       2015-12-11 19:55:55.150864356 +0000
+--- patched/PKGBUILD    2015-12-11 19:55:41.162824410 +0000
+***************
+*** 82,88 ****
+      cd "${srcdir}/${pkgname}-${pkgver}"
+
+      ./configure --prefix=/usr
+!     make -j 5
+  }
+
+  check() {
+--- 82,88 ----
+      cd "${srcdir}/${pkgname}-${pkgver}"
+
+      ./configure --prefix=/usr
+!     make -j36
+  }
+
+  check() {
+***************
+*** 92,98 ****
+      sed -e 's_#!/usr/bin/env python_&2_' -i testsuite/timeout/calibrate testsuite/timeout/timeout.py
+
+      #make test
+!     make THREADS=9 test
+
+      # zero unexpected failures on all tier 1 platforms - http://hackage.haskell.org/trac/ghc/ticket/5757
+      # enable this when upstream has 0 test failures from a simple 'make test'
+--- 92,98 ----
+      sed -e 's_#!/usr/bin/env python_&2_' -i testsuite/timeout/calibrate testsuite/timeout/timeout.py
+
+      #make test
+!     make THREADS=36 test
+
+      # zero unexpected failures on all tier 1 platforms - http://hackage.haskell.org/trac/ghc/ticket/5757
+      # enable this when upstream has 0 test failures from a simple 'make test'
+***************
+*** 121,125 ****
+
+  sha256sums=('54cd73755b784d78e2f13d5eb161bfa38d3efee9e8a56f7eb6cd9f2d6e2615f5'
+              '8b4885d376ca635935b49d4e36e2fa6f07164563ea496eac5fffa0ac926ae962'
+!             'f6f08c0fd1098396beba515db06d6c5f3aac633b56e2d35cbcefaf76272ee9af'
+              'f800cd0de93ae9926bb65c6324d6ce3e1ee814dae9c70c7a7bce28e5deb8245c')
+--- 121,125 ----
+
+  sha256sums=('54cd73755b784d78e2f13d5eb161bfa38d3efee9e8a56f7eb6cd9f2d6e2615f5'
+              '8b4885d376ca635935b49d4e36e2fa6f07164563ea496eac5fffa0ac926ae962'
+!             '1e81cad64e41d1092e17385f44d0971fc78634eb367f3c0338c5b39de38c7e30'
+              'f800cd0de93ae9926bb65c6324d6ce3e1ee814dae9c70c7a7bce28e5deb8245c')

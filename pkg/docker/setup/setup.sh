@@ -2,11 +2,11 @@
 
 set -e
 
-# Arch Haskell snapshot of 2015-03-12.
-HABS_TAG=913ba6202d209fa1aff57e12e2c7105ddad724d5
+# Arch Haskell snapshot of 2015-09-01
+HABS_TAG=31fcead2f623b2509fc57027268660d340245a2f
 
-# cblrepo snapshot of 2015-03-12.
-CBLREPO_TAG=eefac7ced65fca3758478b97a5256433da52c57a
+# cblrepo snapshot of 2015-09-01
+CBLREPO_TAG=779bb0ed3a1f9545beea0de16e88616cac1292a5
 
 . /hinance-docker/setup/share.sh
 
@@ -32,17 +32,20 @@ echo "Server = $AA_ROOT/repos/$AA_YEAR/$AA_MONTH/$AA_DAY/\$repo/os/\$arch" \
 pacman -Syyuu --noconfirm
 
 pacman -S --noconfirm --needed base base-devel cabal-install ghc git happy \
-                               mupdf phantomjs python2-prettytable sudo v8
+                               mupdf phantomjs python2-prettytable sudo
 
 # habs
 git clone https://github.com/archhaskell/habs /hinance-docker/habs
 cd /hinance-docker/habs
 git checkout $HABS_TAG
+git apply /hinance-docker/setup/habs/the.patch
 
 # cblrepo
 git clone https://github.com/magthe/cblrepo /hinance-docker/cblrepo
 cd /hinance-docker/cblrepo
 git checkout $CBLREPO_TAG
+
+locale-gen
 
 # user
 useradd -m user -G wheel

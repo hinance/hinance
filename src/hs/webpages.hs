@@ -31,7 +31,6 @@ import Hinance.Shop.Type
 import Hinance.User.Tag
 import Hinance.User.Data
 import Hinance.User.Type
-import System.Locale
 import Text.Printf
 import Text.Show.Pretty
 
@@ -64,8 +63,8 @@ data Device = Device {dname::String, dlen::Integer, drows::Integer,
                       dnarrow::Bool}
 
 devicepages :: String -> Device -> [(String, String)]
-devicepages time dev =
-  [homepage time dev, diagpage time dev] ++ slicespages ++ groupspages where
+devicepages time dev = [homepage time dev, diagpage time dev,
+  bankspage time dev, shopspage time dev] ++ slicespages ++ groupspages where
   groupspages = [grouppage time dev $ toInteger i
                 | i <- [0 .. length idxToGroup - 1]]
   slicespages = concat $
@@ -86,6 +85,12 @@ homepagename dev = printf "%s-home.html" (dname dev)
 
 diagpagename :: Device -> String
 diagpagename dev = printf "%s-diag.html" (dname dev)
+
+bankspagename :: Device -> String
+bankspagename dev = printf "%s-banks.html" (dname dev)
+
+shopspagename :: Device -> String
+shopspagename dev = printf "%s-shops.html" (dname dev)
 
 grouppagename :: Device -> Integer -> String
 grouppagename dev igroup = printf "%s-group%i.html" (dname dev) igroup
@@ -172,6 +177,9 @@ diagpage time dev = (diagpagename dev, content) where
   content = html head $ basicpage time dev $ inner
   head = ["Diagnostics"]
   inner =
+    (printf ("<h3>Raw data:</h3>" ++
+      "<a href=\"%s\">shops</a>, <a href=\"%s\">banks</a>")
+      (shopspagename dev) (bankspagename dev)) ++
     (printf "<h3>Checks (%i):</h3>" (length diagchecks)) ++
     (printf "<pre>%s</pre>" (ppShow diagchecks)) ++
     (printf "<h3>Changes without groups (%i):</h3>" (length diagnogrp)) ++
@@ -180,6 +188,19 @@ diagpage time dev = (diagpagename dev, content) where
     (printf "<pre>%s</pre>" (ppShow diagugrps)) ++
     (printf "<h3>Slices mismatch (%i):</h3>" (length diagslicesflat)) ++
     (printf "<pre>%s</pre>" (ppShow diagslices))
+
+bankspage time dev = (bankspagename dev, content) where
+  content = html head $ basicpage time dev $ inner
+  head = ["Banks"]
+  inner = concatMap (\b -> concatMap (showacc b) $ baccs b) banks
+  showacc b a = (printf "<h3>Bank %s, account %s</h3>" (bid b) (baid a)) ++
+    (printf "<pre>%s</pre>" $ ppShow.diagtrans $ batrans a)
+
+shopspage time dev = (shopspagename dev, content) where
+  content = html head $ basicpage time dev $ inner
+  head = ["Shops"]
+  inner = "<h3>Shops</h3>" ++
+    (printf "<pre>%s</pre>" (ppShow shops))
 
 grouppage :: String -> Device -> Integer -> (String, String)
 grouppage time dev igroup = (grouppagename dev igroup, content) where

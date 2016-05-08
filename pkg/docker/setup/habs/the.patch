@@ -1,0 +1,19 @@
+diff --git a/patches/pretty-show.pkgbuild b/patches/pretty-show.pkgbuild
+deleted file mode 100644
+index 84e0f68..0000000
+--- a/patches/pretty-show.pkgbuild
++++ /dev/null
+@@ -1,13 +0,0 @@
+-Index: habs/haskell-pretty-show/PKGBUILD
+-===================================================================
+---- habs.orig/haskell-pretty-show/PKGBUILD
+-+++ habs/haskell-pretty-show/PKGBUILD
+-@@ -11,7 +11,7 @@ inspection of values."
+- url="http://wiki.github.com/yav/pretty-show"
+- license=("MIT")
+- arch=('i686' 'x86_64')
+--makedepends=()
+-+makedepends=("happy")
+- depends=("ghc=7.10.2-2"
+-          "haskell-haskell-lexer=1.0-78")
+- options=('strip' 'staticlibs')

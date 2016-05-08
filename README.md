@@ -14,8 +14,8 @@ There's also a reproducible Dockerized
 [build automation](https://github.com/hinance/www) for the project homepage,
 which includes all the necessary dependencies and the example.
 The Docker container is pre-built and uploaded to the repository, but if you
-want to build it yourself, keep in mind that it takes about 1 hour on 4 cores,
-8GB RAM machine.
+want to build it yourself, keep in mind that it's designed to be built on
+36-cores machine with lots of memory, like `c4.8xlarge` Amazon EC2 instance.
 
 Feel free to use the above as a reference when installing on your target
 platform.
@@ -119,6 +119,13 @@ transactions, orders, etc.
 It comes in handy when some small amount of information is missing on the
 websites (like refunds, or gift cards operations), or if you want to adjust
 scraped data in some other way to assist further steps.
+
+If the scraped data is being merged from several parts
+(see "Merging Old and New Scraped Data"), then patching step is called
+for each part of scraped data **before** merging occurs.
+It can be used in rare cases when website changed history format and you
+need to strip a few transactions here and there for the merging to be done
+properly.
 
 User can modify scraped data using callback function `patched` in
 `in/user_data.hs` file.

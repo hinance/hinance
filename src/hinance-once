@@ -41,6 +41,8 @@ cat "$DIR"/{,out/}banks*.hs.part >> "$DIR/tmp/hs/bank_data.hs"
 cat "$DIR"/{,out/}shops*.hs.part >> "$DIR/tmp/hs/shop_data.hs"
 set -e
 
+cp -t "$DIR"/out "$DIR"/tmp/hs/{bank,shop}_data.hs
+
 ghc -O -XFlexibleInstances -o "$DIR/tmp/hinance-hs" "$DIR"/tmp/hs/*.hs
 
 echo 'Generating report web pages.'

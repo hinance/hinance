@@ -1,0 +1,13 @@
+diff --git a/PKGBUILD b/PKGBUILD
+index 38cd8ec..92a7544 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -42,7 +42,7 @@ build() {
+ 
+   build/gyp_v8 -Dv8_enable_i18n_support=1 -Duse_system_icu=1 -Dconsole=readline -Dcomponent=shared_library -Dv8_target_arch=$V8_ARCH -Dwerror= -f ninja
+ 
+-  ninja -C out/Release all # or target 'v8 d8' if you do not need tests
++  ninja -j 64 -C out/Release all # or target 'v8 d8' if you do not need tests
+ }
+ 
+ check() {
