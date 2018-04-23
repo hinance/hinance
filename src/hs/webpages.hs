@@ -186,6 +186,8 @@ diagpage time dev = (diagpagename dev, content) where
     (printf "<pre>%s</pre>" (ppShow diagnogrp)) ++
     (printf "<h3>Unbalanced groups (%i):</h3>" (length diagugrps)) ++
     (printf "<pre>%s</pre>" (ppShow diagugrps)) ++
+    (printf "<h3>Unmerged shop payments (%i):</h3>" (length diagumgpays)) ++
+    (printf "<pre>%s</pre>" (ppShow diagumgpays)) ++
     (printf "<h3>Slices mismatch (%i):</h3>" (length diagslicesflat)) ++
     (printf "<pre>%s</pre>" (ppShow diagslices))
 
