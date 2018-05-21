@@ -28,15 +28,13 @@ data DiagTrans = DiagTrans {dtbalance::Integer, dttrans::BankTrans}
   deriving (Read, Show)
 
 diagcount = (length diagchecks) + (length diagnogrp) + (length diagugrps) +
-            (length diagumgpays) + (length diagslicesflat)
+            (length diagslicesflat)
 
 diagslices = concatMap diffslices [chgsact, chgsplan]
 
 diagslicesflat = concatMap (\(_, (a,b)) -> a++b) diagslices
 
 diagnogrp = filter (not.grouped) (chgsact++chgsplan)
-
-diagumgpays = filter unmergedpayment (chgsact++chgsplan)
 
 diagugrps = unbalgrps $ filter grouped (chgsact++chgsplan) where
   unbalgrps = filter (((/=) 0).sum.map camount) . groupSortBy cgroup
