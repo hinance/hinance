@@ -49,7 +49,7 @@ ghc -prof -fprof-auto -fprof-cafs -O -XFlexibleInstances \
 echo 'Generating report web pages.'
 cd "$DIR/out/www"
 cp -r /usr/lib/hinance/www/* "$DIR/out/www"
-"$DIR/tmp/hinance-hs" +RTS -xc "$(date)" &
+"$DIR/tmp/hinance-hs" "$(date)" +RTS -xc &
 PID=$!
 
 while kill -0 $PID 2>/dev/null ; do
