@@ -43,12 +43,13 @@ set -e
 
 cp -t "$DIR"/out "$DIR"/tmp/hs/{bank,shop}_data.hs
 
-ghc -O -XFlexibleInstances -o "$DIR/tmp/hinance-hs" "$DIR"/tmp/hs/*.hs
+ghc -prof -fprof-auto -fprof-cafs -O -XFlexibleInstances \
+  -o "$DIR/tmp/hinance-hs" "$DIR"/tmp/hs/*.hs
 
 echo 'Generating report web pages.'
 cd "$DIR/out/www"
 cp -r /usr/lib/hinance/www/* "$DIR/out/www"
-"$DIR/tmp/hinance-hs" "$(date)" &
+"$DIR/tmp/hinance-hs" +RTS -xc "$(date)" &
 PID=$!
 
 while kill -0 $PID 2>/dev/null ; do
