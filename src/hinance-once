@@ -19,6 +19,11 @@
 
 set -e
 
+# Uncomment these to enable stack traces.
+# This slows things down though, so use only when debugging.
+#GHC_DEBUG_FLAGS=-prof -fprof-auto -fprof-cafs
+#RTS_DEBUG_FLAGS=+RTS -xc
+
 DIR="$(pwd)"
 
 mkdir -p "$DIR/"{log,out/www}
@@ -43,13 +48,13 @@ set -e
 
 cp -t "$DIR"/out "$DIR"/tmp/hs/{bank,shop}_data.hs
 
-ghc -prof -fprof-auto -fprof-cafs -O -XFlexibleInstances \
+ghc $GHC_DEBUG_FLAGS -O -XFlexibleInstances \
   -o "$DIR/tmp/hinance-hs" "$DIR"/tmp/hs/*.hs
 
 echo 'Generating report web pages.'
 cd "$DIR/out/www"
 cp -r /usr/lib/hinance/www/* "$DIR/out/www"
-"$DIR/tmp/hinance-hs" "$(date)" +RTS -xc &
+"$DIR/tmp/hinance-hs" "$(date)" $RTS_DEBUG_FLAGS &
 PID=$!
 
 while kill -0 $PID 2>/dev/null ; do
