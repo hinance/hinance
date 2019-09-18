@@ -60,7 +60,7 @@ while true ; do
     rm -rf "$DIR"/out/www
     mv out/www "$DIR"/out
   fi
-  rm -rf tmp
+  #rm -rf tmp
 
   echo "Cycle finished for $DATE" >> "$DIR"/out/log/hinance.log
 
