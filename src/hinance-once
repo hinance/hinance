@@ -24,6 +24,8 @@ set -e
 #GHC_DEBUG_FLAGS=-prof -fprof-auto -fprof-cafs
 #RTS_DEBUG_FLAGS=+RTS -xc
 
+: {HINANCE_DATE:=$(date)}
+
 DIR="$(pwd)"
 
 mkdir -p "$DIR/"{log,out/www}
@@ -54,7 +56,7 @@ ghc $GHC_DEBUG_FLAGS -O -XFlexibleInstances \
 echo 'Generating report web pages.'
 cd "$DIR/out/www"
 cp -r /usr/lib/hinance/www/* "$DIR/out/www"
-"$DIR/tmp/hinance-hs" "$(date)" $RTS_DEBUG_FLAGS &
+"$DIR/tmp/hinance-hs" "$HINANCE_DATE" $RTS_DEBUG_FLAGS &
 PID=$!
 
 while kill -0 $PID 2>/dev/null ; do
