@@ -26,6 +26,8 @@ set -e
 
 : {HINANCE_DATE:=$(date)}
 
+echo Using date $HINANCE_DATE
+
 DIR="$(pwd)"
 
 mkdir -p "$DIR/"{log,out/www}
