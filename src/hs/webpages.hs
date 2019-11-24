@@ -64,7 +64,7 @@ data Device = Device {dname::String, dlen::Integer, drows::Integer,
 
 devicepages :: String -> Device -> [(String, String)]
 devicepages time dev = [homepage time dev, diagpage time dev,
-  bankspage time dev, shopspage time dev] ++ slicespages ++ groupspages where
+  bankspage time dev, shopspage time dev, changespage time dev] ++ slicespages ++ groupspages where
   groupspages = [grouppage time dev $ toInteger i
                 | i <- [0 .. length idxToGroup - 1]]
   slicespages = concat $
@@ -91,6 +91,9 @@ bankspagename dev = printf "%s-banks.html" (dname dev)
 
 shopspagename :: Device -> String
 shopspagename dev = printf "%s-shops.html" (dname dev)
+
+changespagename :: Device -> String
+changespagename dev = printf "%s-changes.html" (dname dev)
 
 grouppagename :: Device -> Integer -> String
 grouppagename dev igroup = printf "%s-group%i.html" (dname dev) igroup
@@ -178,8 +181,8 @@ diagpage time dev = (diagpagename dev, content) where
   head = ["Diagnostics"]
   inner =
     (printf ("<h3>Raw data:</h3>" ++
-      "<a href=\"%s\">shops</a>, <a href=\"%s\">banks</a>")
-      (shopspagename dev) (bankspagename dev)) ++
+      "<a href=\"%s\">shops</a>, <a href=\"%s\">banks</a>, <a href=\"%s\">changes</a>")
+      (shopspagename dev) (bankspagename dev) (changespagename dev)) ++
     (printf "<h3>Checks (%i):</h3>" (length diagchecks)) ++
     (printf "<pre>%s</pre>" (ppShow diagchecks)) ++
     (printf "<h3>Changes without groups (%i):</h3>" (length diagnogrp)) ++
@@ -201,6 +204,12 @@ shopspage time dev = (shopspagename dev, content) where
   head = ["Shops"]
   inner = "<h3>Shops</h3>" ++
     (printf "<pre>%s</pre>" (ppShow shops))
+
+changespage time dev = (changespagename dev, content) where
+  content = html head $ basicpage time dev $ inner
+  head = ["Changes"]
+  inner = "<h3>Changes</h3>" ++
+    (printf "<pre>%s</pre>" (ppShow (chgsact++chgsplan)))
 
 grouppage :: String -> Device -> Integer -> (String, String)
 grouppage time dev igroup = (grouppagename dev igroup, content) where
