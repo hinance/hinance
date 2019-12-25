@@ -71,25 +71,26 @@ class MyApp(Application):
         (len(batrans), a.id)
       stdout.flush()
       maybeNum = lambda x: ('Just %i'%x) if isinstance(x,Number) else 'Nothing'
-      baccs.append([
-        u'BankAcc',
-        u'{ baid = %s' % tostr(a.id),
-        u', balabel = %s' % tostr(a.label),
-        u', babalance = %i' % tocent(a.balance),
-        u', bacurrency = %s' % a.currency,
-        u', bacard = %s' % (a.type == Account.TYPE_CARD),
-        u', balimit = %s' % maybeNum(tocent(a.cardlimit)),
-        u', bapaymin = %s' % maybeNum(tocent(a.paymin)),
-        u', bapaytime = %s' % maybeNum(totime(a.paydate)),
-        u', batrans ='] + [
-        u'  %s' % s for s in r_list(batrans)] + [
-        u'}'])
+      if batrans:
+        baccs.append([
+          u'BankAcc',
+          u'{ baid = %s' % tostr(a.id),
+          u', balabel = %s' % tostr(a.label),
+          u', babalance = %i' % tocent(a.balance),
+          u', bacurrency = %s' % a.currency,
+          u', bacard = %s' % (a.type == Account.TYPE_CARD),
+          u', balimit = %s' % maybeNum(tocent(a.cardlimit)),
+          u', bapaymin = %s' % maybeNum(tocent(a.paymin)),
+          u', bapaytime = %s' % maybeNum(totime(a.paydate)),
+          u', batrans ='] + [
+          u'  %s' % s for s in r_list(batrans)] + [
+          u'}'])
     return [
       u'Bank',
       u'{ bid = %s' % tostr(backend.name),
       u', baccs ='] + [
       u'  %s' % s for s in r_list(baccs)] + [
-      u'}']
+      u'}'] if baccs else []
 
   def get_shop_data(self, backend):
     lastReport = time()
